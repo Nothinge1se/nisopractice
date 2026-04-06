@@ -567,10 +567,10 @@
   button { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; }
   button:active:not(:disabled) { transform: scale(0.93) !important; transition: transform 0.1s ease-out; }
 
-  /* ══ UPLOAD SCREEN ══ */
-  #upload-screen { display: flex; flex-direction: row; align-items: center; justify-content: center; height: 100vh; gap: 60px; z-index: 10; padding: 40px; }
+/* ══ UPLOAD SCREEN ══ */
+  #upload-screen { display: grid; grid-template-columns: 1fr 500px 1fr; align-items: center; height: 100vh; z-index: 10; padding: 40px; }
   
-  .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 500px; }
+  .upload-left-col { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; }
   
   .logo { font-family: var(--font-head); font-size: 64px; font-weight: 800; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
   .tagline { font-size: 15px; color: var(--text2); letter-spacing: 0.07em; font-family: var(--font-num); margin-top: -8px; font-weight: 600; text-transform: uppercase;}
@@ -604,8 +604,8 @@
   .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; }
 
   /* RECENT PANEL (RIGHT SIDE) */
-  .recent-panel { display: none; flex-direction: column; width: 440px; max-height: 75vh; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-  .recent-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); flex-shrink: 0; }
+/* RECENT PANEL (RIGHT SIDE) */
+  .recent-panel { grid-column: 3; justify-self: start; margin-left: 60px; display: none; flex-direction: column; width: 440px; max-height: 75vh; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }  .recent-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); flex-shrink: 0; }
   .recent-header span { font-family: var(--font-num); font-size: 13px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; }
   .clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
   .clear-sessions-btn:hover { opacity: 1; }
@@ -865,10 +865,10 @@
   
   <div class="upload-left-col">
     <div class="logo">NISOPRACTICE</div>
-    <div class="tagline">// NEXT-GEN JEE ENGINE</div>
+    <div class="tagline">// Shinchanzz, get some bitches</div>
 
     <div class="online-mocks">
-      <div class="online-mocks-label">Load Online Sample Tests</div>
+      <div class="online-mocks-label"></div>
       <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
         🚀 1D Module - NEET
       </button>
