@@ -568,11 +568,14 @@
   button:active:not(:disabled) { transform: scale(0.93) !important; transition: transform 0.1s ease-out; }
 
   /* ══ UPLOAD SCREEN ══ */
-  #upload-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; z-index: 10; }
+  #upload-screen { display: flex; flex-direction: row; align-items: center; justify-content: center; height: 100vh; gap: 60px; z-index: 10; padding: 40px; }
+  
+  .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 500px; }
+  
   .logo { font-family: var(--font-head); font-size: 64px; font-weight: 800; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
   .tagline { font-size: 15px; color: var(--text2); letter-spacing: 0.07em; font-family: var(--font-num); margin-top: -8px; font-weight: 600; text-transform: uppercase;}
   
-  .upload-zone { width: 500px; border: 2px dashed var(--border); border-radius: 24px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .upload-zone { width: 100%; border: 2px dashed var(--border); border-radius: 24px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .upload-zone:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
   .upload-icon { font-size: 52px; margin-bottom: 14px; display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .upload-zone:hover .upload-icon { transform: scale(1.15) rotate(8deg); }
@@ -580,22 +583,33 @@
   .upload-zone p { font-size: 14px; color: var(--text2); }
   #file-input { display: none; }
   
-  /* Menu Credits - Updated */
-  .menu-credits { margin-top: 10px; text-align: center; font-family: var(--font-num); font-size: 13px; color: var(--text2); display: flex; flex-direction: column; gap: 6px; background: var(--surface); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
+  /* ONLINE MOCKS SECTION */
+  .online-mocks { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
+  .online-mocks-label { width: 100%; text-align: center; font-family: var(--font-num); color: var(--text2); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .online-mocks .modal-btn { flex: 1; padding: 14px; font-size: 15px; background: var(--surface); backdrop-filter: blur(10px); }
+  .online-mocks .modal-btn:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+  /* THE "OR" DIVIDER */
+  .upload-or-divider { display: flex; align-items: center; width: 100%; font-family: var(--font-num); font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin: 5px 0; }
+  .upload-or-divider::before, .upload-or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); margin: 0 15px; }
+
+  /* Menu Credits */
+  .menu-credits { width: 100%; text-align: center; font-family: var(--font-num); font-size: 13px; color: var(--text2); display: flex; flex-direction: column; gap: 6px; background: var(--surface); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
   .menu-credits a { color: var(--accent2); text-decoration: none; font-weight: 700; transition: color 0.2s; }
   .menu-credits a:hover { color: var(--text); text-decoration: underline; }
 
-  .progress-bar-wrap { width: 500px; background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; display: none; backdrop-filter: blur(10px); }
+  .progress-bar-wrap { width: 100%; background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; display: none; backdrop-filter: blur(10px); }
   .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
   .loading-text { font-family: var(--font-num); font-size: 14px; color: var(--text2); display: none; font-weight: 500; }
   .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; }
 
-  .recent-panel { display: none; width: 500px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-top: 10px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-  .recent-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); }
+  /* RECENT PANEL (RIGHT SIDE) */
+  .recent-panel { display: none; flex-direction: column; width: 440px; max-height: 75vh; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .recent-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); flex-shrink: 0; }
   .recent-header span { font-family: var(--font-num); font-size: 13px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; }
   .clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
   .clear-sessions-btn:hover { opacity: 1; }
-  .recent-list { max-height: 200px; overflow-y: auto; }
+  .recent-list { overflow-y: auto; flex: 1; }
   .recent-list::-webkit-scrollbar { width: 6px; }
   .recent-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   .recent-item { display: flex; align-items: center; padding: 16px 20px; gap: 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -848,28 +862,41 @@
 <div id="bg-anim-layer"></div>
 
 <div id="upload-screen">
-  <div class="logo">NISOPRACTICE</div>
-  <div class="tagline">// NEXT-GEN JEE ENGINE</div>
-<div class="online-mocks" style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-  <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
-    🚀 1D Module - NEET
-  </button>
-  <button class="modal-btn primary" onclick="loadOnlineTest('Top 200 PYQ - 2021.niso')">
-    🚀 2021 Top 200 PYQ - EDUNITI
-  </button>
-</div>
-  <div class="upload-zone" id="upload-zone">
-    <div class="upload-icon">📦</div>
-    <h3>Drop your ZIP file here</h3>
-    <p>Upload any compatible CBT zip (data.json + images)</p>
-    <input type="file" id="file-input" accept=".zip" autocomplete="off">
-  </div>
+  
+  <div class="upload-left-col">
+    <div class="logo">NISOPRACTICE</div>
+    <div class="tagline">// NEXT-GEN JEE ENGINE</div>
 
-  <div class="progress-bar-wrap" id="progress-wrap">
-    <div class="progress-bar" id="progress-bar"></div>
+    <div class="online-mocks">
+      <div class="online-mocks-label">Load Online Sample Tests</div>
+      <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
+        🚀 1D Module - NEET
+      </button>
+      <button class="modal-btn primary" onclick="loadOnlineTest('Top 200 PYQ - 2021.niso')">
+        🚀 2021 Top 200 PYQ - EDUNITI
+      </button>
+    </div>
+
+    <div class="upload-or-divider">Or load your own tests</div>
+
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-icon">📦</div>
+      <h3>Drop your .niso or .zip file here</h3>
+      <p>Upload any compatible CBT zip (data.json + images)</p>
+      <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
+    </div>
+
+    <div class="progress-bar-wrap" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="loading-text" id="loading-text"></div>
+    <div class="error-msg" id="error-msg"></div>
+    
+    <div class="menu-credits">
+        <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
+        <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
+    </div>
   </div>
-  <div class="loading-text" id="loading-text"></div>
-  <div class="error-msg" id="error-msg"></div>
 
   <div class="recent-panel" id="recent-panel">
     <div class="recent-header">
@@ -878,11 +905,7 @@
     </div>
     <div class="recent-list" id="recent-list"></div>
   </div>
-  
-  <div class="menu-credits">
-      <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
-      <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
-  </div>
+
 </div>
 
 <div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
@@ -1086,7 +1109,6 @@ function toggleMode() {
     localStorage.setItem('practiq_mode', isDarkMode ? 'dark' : 'light');
 }
 
-// -- LOCAL 
 // ── SMART ONLINE FETCH LOGIC ───────────────────────────
 async function loadOnlineTest(fileName) {
   document.getElementById('upload-screen').style.display = 'flex';
@@ -1237,7 +1259,8 @@ function renderRecentSessions() {
       return;
   }
   
-  document.getElementById('recent-panel').style.display = 'block';
+  // FIX: Swapped to 'flex' for our new row/column layout
+  document.getElementById('recent-panel').style.display = 'flex';
   list.innerHTML = '';
   
   fileKeys.sort((a, b) => {
@@ -1297,7 +1320,7 @@ uploadZone.addEventListener('dragleave', () => { uploadZone.style.transform = 'n
 uploadZone.addEventListener('drop', (e) => {
   e.preventDefault(); uploadZone.style.transform = 'none';
   const f = e.dataTransfer.files[0];
-  if (f && f.name.toLowerCase().endsWith('.zip')) { handleZipFile(f); } else if (f) { showError('Please upload a .zip file'); }
+  if (f && f.name.toLowerCase().match(/\.(zip|niso)$/i)) { handleZipFile(f); } else if (f) { showError('Please upload a .zip or .niso file'); }
 });
 
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) { handleZipFile(fileInput.files[0]); } });
