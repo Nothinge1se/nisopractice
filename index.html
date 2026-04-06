@@ -1087,25 +1087,42 @@ function toggleMode() {
 }
 
 // -- LOCAL 
-   async function loadOnlineTest(zipName) {
-  // 1. Show UI loading state
+// ── SMART ONLINE FETCH LOGIC ───────────────────────────
+async function loadOnlineTest(fileName) {
   document.getElementById('upload-screen').style.display = 'flex';
-  showProgress(10, `Fetching ${zipName} from GitHub...`);
+  document.getElementById('error-msg').style.display = 'none';
+
+  // FIX 1: Safely encode spaces (Turns "Top 200" into "Top%20200")
+  let safeUrl = encodeURI(fileName);
+
+  showProgress(10, `Locating file on server...`);
   
   try {
-    // 2. Fetch the file from your GitHub server
-    const response = await fetch(zipName); 
-    if (!response.ok) throw new Error("File not found on server");
+    // Try fetching the exact name first
+    let response = await fetch(safeUrl); 
     
+    // FIX 2: If it fails, try the other extension automatically
+    if (!response.ok) {
+        let altUrl = safeUrl.endsWith('.niso') ? safeUrl.replace('.niso', '.zip') : safeUrl + '.niso';
+        response = await fetch(altUrl);
+        if (!response.ok) throw new Error("File not found! Check if it's uploaded correctly.");
+        fileName = decodeURI(altUrl); // Update name if the fallback worked
+    }
+    
+    showProgress(30, `Downloading test data...`);
     const blob = await response.blob();
     
-    // 3. Convert blob to a File object for your existing loadZip function
-    const file = new File([blob], zipName);
+    // Convert blob to a File object 
+    const file = new File([blob], fileName);
     
-    // 4. BOOM! Launch the test
-    await loadZip(file, null); 
+    // Hide our fetch progress 
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('loading-text').style.display = 'none';
+    
+    // Pass it into your existing flow
+    handleZipFile(file); 
   } catch (err) {
-    showError("Failed to load online test: " + err.message);
+    showError("Failed to load: " + err.message);
   }
 }
 
@@ -1209,6 +1226,7 @@ function clearAllSessions() {
     renderRecentSessions(); 
 }
 
+// ── RECENT SESSIONS FIX ───────────────────────────
 function renderRecentSessions() {
   const sessions = getSessions();
   const list = document.getElementById('recent-list');
@@ -1255,7 +1273,14 @@ function renderRecentSessions() {
       <div class="recent-score ${net > 0 ? 'pos' : net < 0 ? 'neg' : 'zero'}">${net >= 0 ? '+' : ''}${net}</div>
       <button class="recent-del" title="Delete all sessions for this file" onclick="event.stopPropagation(); deleteSessionRecord('${filename.replace(/'/g,"\\'")}'); renderRecentSessions();">✕</button>
     `;
-    item.addEventListener('click', (e) => { if(e.target.tagName !== 'BUTTON') { alert(`To resume "${filename}", upload that ZIP file again!`); } });
+    
+    // FIX 3: Actually trigger the fetch when you click a recent session!
+    item.addEventListener('click', (e) => { 
+        if(e.target.tagName !== 'BUTTON') { 
+            loadOnlineTest(filename + '.niso'); 
+        } 
+    });
+    
     list.appendChild(item);
   }
 }
@@ -1309,14 +1334,24 @@ const name = file.name.replace(/\.(zip|niso)$/i, '');
   }
 }
 
+// ── SESSION RESUME LOGIC ───────────────────────────
 function resumeSession() { 
     document.getElementById('resume-modal').classList.remove('show'); 
-    const name = pendingZipFile.name.replace('.zip', ''); 
-    const existing = getSessions()[name];
-    const selectedId = parseInt(document.getElementById('session-select-dropdown').value);
     
-    const sessionToLoad = existing.list.find(s => s.id === selectedId);
-    currentSessionId = selectedId;
+    // FIX: Strips BOTH .zip and .niso correctly so it finds your database entry
+    const name = pendingZipFile.name.replace(/\.(zip|niso)$/i, ''); 
+    const existing = getSessions()[name];
+    
+    // Grabs the ID from the dropdown safely as a string
+    const selectedIdStr = document.getElementById('session-select-dropdown').value.toString();
+    
+    // Matches the ID and provides a safe fallback just in case
+    let sessionToLoad = existing.list.find(s => s.id.toString() === selectedIdStr);
+    if (!sessionToLoad) {
+        sessionToLoad = existing.list.sort((a,b) => b.savedAt - a.savedAt)[0];
+    }
+    
+    currentSessionId = sessionToLoad.id;
     loadZip(pendingZipFile, sessionToLoad); 
 }
 
