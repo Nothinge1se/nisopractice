@@ -1151,34 +1151,65 @@
 
 <script>
 // ── INIT ───────────────────────────────────────────────
-// ── PDF VIEWER LOGIC ───────────────────────────────────────────
+// ── SMART FALLBACK PDF DATABASE ───────────────────────────────
+const fallbackPDFs = {
+    "Top 200 PYQ - 2021": "https://drive.google.com/file/d/1ZqTjThwlUdC7DKFkTXza2ptZ_mo7yBb2/preview",
+    "1D": "https://your-link-for-1d-here/preview"
+    // Add more here: "Test Name": "Direct Link"
+};
+
 // ── SMART PDF SIDEBAR LOGIC ───────────────────────────────────────────
 async function openPDF() {
     const modal = document.getElementById('pdf-modal');
     modal.classList.add('show');
-    document.body.classList.add('pdf-open'); // Optional: squeezes the app
+    document.body.classList.add('pdf-open');
 
-    // Only try to auto-fetch if the iframe is currently empty
+    // Only fetch if nothing is currently loaded
     if (!document.getElementById('pdf-iframe').src) {
-        // Look for a PDF with the same name as the current mock test
         const autoPdfUrl = currentFileName + ".pdf";
-        
-        showToast('info', '🔍 Checking for server solutions...');
+        showToast('info', '🔍 Locating solutions...');
         
         try {
+            // 1. First, check if the PDF exists on your server/GitHub
             const check = await fetch(autoPdfUrl, { method: 'HEAD' });
             if (check.ok) {
                 document.getElementById('pdf-iframe').src = autoPdfUrl;
                 showToast('correct', '✅ Solutions loaded from server');
             } else {
-                showToast('info', '💡 No server PDF found. Paste a link manually.');
+                throw new Error("Not on server");
             }
         } catch (e) {
-            console.log("Auto-PDF fetch failed or CORS blocked.");
+            // 2. Second, check if we have a fallback link in our database
+            if (fallbackPDFs[currentFileName]) {
+                let link = fallbackPDFs[currentFileName];
+                // Ensure Google Drive links are in /preview mode for the iframe
+                if (link.includes('drive.google.com') && link.includes('/view')) {
+                    link = link.replace('/view', '/preview');
+                }
+                document.getElementById('pdf-iframe').src = link;
+                showToast('correct', '⚡ Loaded from Fallback Database');
+            } else {
+                showToast('info', '💡 No PDF found. Paste a link manually.');
+            }
         }
     }
 }
 
+function closePDF() {
+    document.getElementById('pdf-modal').classList.remove('show');
+    document.body.classList.remove('pdf-open');
+}
+
+function loadPDFIframe() {
+    let url = document.getElementById('pdf-url-input').value;
+    if (!url) return;
+    
+    if (url.includes('drive.google.com') && url.includes('/view')) {
+        url = url.replace('/view', '/preview');
+    }
+    
+    document.getElementById('pdf-iframe').src = url;
+}
 function closePDF() {
     document.getElementById('pdf-modal').classList.remove('show');
     document.body.classList.remove('pdf-open');
