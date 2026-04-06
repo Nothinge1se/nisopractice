@@ -857,6 +857,53 @@
   .feedback-toast.wrong { background: var(--wrong); color: #fff; }
   .feedback-toast.cleared { background: var(--unattempted); color: #fff; }
   .feedback-toast.info { background: var(--accent); color: #fff; }
+  
+  /* ══ SLIDING PDF SIDEBAR ══ */
+  #pdf-modal {
+    position: fixed;
+    top: 0;
+    right: -50%; /* Start hidden off-screen */
+    width: 50%;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 2px solid var(--border);
+    z-index: 2000;
+    transition: right 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+  }
+
+  #pdf-modal.show {
+    right: 0; /* Slide in */
+  }
+
+  /* Shrink the main app when PDF is open (Optional desktop effect) */
+  body.pdf-open #app {
+    width: 50%;
+    margin-left: 0;
+  }
+
+  .pdf-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #pdf-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #fff;
+  }
+
+  @media (max-width: 1000px) {
+    #pdf-modal { width: 100%; right: -100%; }
+  }
 </style>
 </head>
 <body>
@@ -929,6 +976,16 @@
       <button class="modal-btn cancel" onclick="document.getElementById('resume-modal').classList.remove('show')">✕ Cancel</button>
     </div>
   </div>
+</div>
+
+<div id="pdf-modal">
+  <div class="pdf-toolbar">
+    <div class="modal-title" style="font-size: 16px;">📄 Solution Viewer</div>
+    <input type="text" id="pdf-url-input" class="session-select-dropdown" placeholder="Paste link if auto-load fails..." style="margin: 0; font-size: 12px; height: 34px;">
+    <button class="modal-btn primary" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="loadPDFIframe()">Load</button>
+    <button class="modal-btn danger" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="closePDF()">✕</button>
+  </div>
+  <iframe id="pdf-iframe" src=""></iframe>
 </div>
 
 <div id="app">
@@ -1027,6 +1084,9 @@
           <button class="hdr-btn ai-btn" onclick="generateAIPrompt()">
             🤖 Ask AI Prompt
           </button>
+		  <button class="hdr-btn" style="border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.1);" onclick="openPDF()">
+            📄 Solutions PDF
+          </button>
         </div>
       </div>
 
@@ -1091,6 +1151,49 @@
 
 <script>
 // ── INIT ───────────────────────────────────────────────
+// ── PDF VIEWER LOGIC ───────────────────────────────────────────
+// ── SMART PDF SIDEBAR LOGIC ───────────────────────────────────────────
+async function openPDF() {
+    const modal = document.getElementById('pdf-modal');
+    modal.classList.add('show');
+    document.body.classList.add('pdf-open'); // Optional: squeezes the app
+
+    // Only try to auto-fetch if the iframe is currently empty
+    if (!document.getElementById('pdf-iframe').src) {
+        // Look for a PDF with the same name as the current mock test
+        const autoPdfUrl = currentFileName + ".pdf";
+        
+        showToast('info', '🔍 Checking for server solutions...');
+        
+        try {
+            const check = await fetch(autoPdfUrl, { method: 'HEAD' });
+            if (check.ok) {
+                document.getElementById('pdf-iframe').src = autoPdfUrl;
+                showToast('correct', '✅ Solutions loaded from server');
+            } else {
+                showToast('info', '💡 No server PDF found. Paste a link manually.');
+            }
+        } catch (e) {
+            console.log("Auto-PDF fetch failed or CORS blocked.");
+        }
+    }
+}
+
+function closePDF() {
+    document.getElementById('pdf-modal').classList.remove('show');
+    document.body.classList.remove('pdf-open');
+}
+
+function loadPDFIframe() {
+    let url = document.getElementById('pdf-url-input').value;
+    if (!url) return;
+    
+    if (url.includes('drive.google.com') && url.includes('/view')) {
+        url = url.replace('/view', '/preview');
+    }
+    
+    document.getElementById('pdf-iframe').src = url;
+}
 // ── INIT ───────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('file-input');
@@ -1137,39 +1240,48 @@ function toggleMode() {
     localStorage.setItem('practiq_mode', isDarkMode ? 'dark' : 'light');
 }
 
-// ── SMART ONLINE FETCH LOGIC ───────────────────────────
+// ── SMART ONLINE FETCH & CACHE LOGIC ───────────────────────────
 async function loadOnlineTest(fileName) {
   document.getElementById('upload-screen').style.display = 'flex';
   document.getElementById('error-msg').style.display = 'none';
 
-  // FIX 1: Safely encode spaces (Turns "Top 200" into "Top%20200")
   let safeUrl = encodeURI(fileName);
-
-  showProgress(10, `Locating file on server...`);
+  showProgress(10, `Checking local cache for ${fileName}...`);
   
   try {
-    // Try fetching the exact name first
-    let response = await fetch(safeUrl); 
+    // 1. Open our dedicated NISOPRACTICE storage vault
+    const cache = await caches.open('nisopractice-tests-v1');
     
-    // FIX 2: If it fails, try the other extension automatically
-    if (!response.ok) {
-        let altUrl = safeUrl.endsWith('.niso') ? safeUrl.replace('.niso', '.zip') : safeUrl + '.niso';
-        response = await fetch(altUrl);
-        if (!response.ok) throw new Error("File not found! Check if it's uploaded correctly.");
-        fileName = decodeURI(altUrl); // Update name if the fallback worked
+    // 2. Check if we already downloaded this exact file before
+    let response = await cache.match(safeUrl); 
+    
+    if (!response) {
+        // 3. Not in cache? Download it from GitHub/Server
+        showProgress(20, `Downloading from server (First time only)...`);
+        response = await fetch(safeUrl);
+        
+        // Fallback to .zip if .niso fails
+        if (!response.ok) {
+            let altUrl = safeUrl.endsWith('.niso') ? safeUrl.replace('.niso', '.zip') : safeUrl + '.niso';
+            response = await fetch(altUrl);
+            if (!response.ok) throw new Error("File not found on server.");
+            fileName = decodeURI(altUrl);
+            safeUrl = altUrl; // update url for the cache
+        }
+        
+        // 4. SAVE IT TO CACHE! Next time, this skips the download entirely.
+        cache.put(safeUrl, response.clone());
+    } else {
+        showProgress(30, `Loaded instantly from local cache! ⚡`);
     }
     
-    showProgress(30, `Downloading test data...`);
+    showProgress(60, `Unpacking test data...`);
     const blob = await response.blob();
-    
-    // Convert blob to a File object 
     const file = new File([blob], fileName);
     
-    // Hide our fetch progress 
     document.getElementById('progress-wrap').style.display = 'none';
     document.getElementById('loading-text').style.display = 'none';
     
-    // Pass it into your existing flow
     handleZipFile(file); 
   } catch (err) {
     showError("Failed to load: " + err.message);
