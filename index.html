@@ -568,12 +568,17 @@
   button:active:not(:disabled) { transform: scale(0.93) !important; transition: transform 0.1s ease-out; }
 
 /* ══ UPLOAD SCREEN ══ */
-  #upload-screen { display: grid; grid-template-columns: 1fr 500px 1fr; align-items: center; height: 100vh; z-index: 10; padding: 40px; }
+  #upload-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; z-index: 10; padding: 40px; }
   
-  .upload-left-col { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; }
+  /* NEW HEADER: Stays dead center */
+  .upload-header { text-align: center; margin-bottom: 40px; }
+  .logo { font-family: var(--font-head); font-size: 64px; font-weight: 800; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; line-height: 1.1; }
+  .tagline { font-size: 15px; color: var(--text2); letter-spacing: 0.07em; font-family: var(--font-num); font-weight: 600; text-transform: uppercase;}
   
-  .logo { font-family: var(--font-head); font-size: 64px; font-weight: 800; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
-  .tagline { font-size: 15px; color: var(--text2); letter-spacing: 0.07em; font-family: var(--font-num); margin-top: -8px; font-weight: 600; text-transform: uppercase;}
+  /* NEW BODY: Holds the Left & Right columns */
+  .upload-body { display: flex; flex-direction: row; gap: 60px; align-items: flex-start; justify-content: center; }
+  
+  .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 500px; }
   
   .upload-zone { width: 100%; border: 2px dashed var(--border); border-radius: 24px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .upload-zone:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
@@ -604,10 +609,7 @@
   .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; }
 
   /* RECENT PANEL (RIGHT SIDE) */
-/* RECENT PANEL (RIGHT SIDE) */
-  .recent-panel { grid-column: 3; justify-self: start; margin-left: 60px; display: none; flex-direction: column; width: 440px; max-height: 75vh; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }  .recent-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); flex-shrink: 0; }
-  .recent-header span { font-family: var(--font-num); font-size: 13px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; }
-  .clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
+  .recent-panel { grid-column: 3; justify-self: center; display: none; flex-direction: column; width: 100%; max-width: 400px; max-height: 550px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }.clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
   .clear-sessions-btn:hover { opacity: 1; }
   .recent-list { overflow-y: auto; flex: 1; }
   .recent-list::-webkit-scrollbar { width: 6px; }
@@ -863,52 +865,57 @@
 
 <div id="upload-screen">
   
-  <div class="upload-left-col">
+  <div class="upload-header">
     <div class="logo">NISOPRACTICE</div>
-    <div class="tagline">// Shinchanzz, get some bitches</div>
+  <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
+  </div>
 
-    <div class="online-mocks">
-      <div class="online-mocks-label"></div>
-      <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
-        🚀 1D Module - NEET
-      </button>
-      <button class="modal-btn primary" onclick="loadOnlineTest('Top 200 PYQ - 2021.niso')">
-        🚀 2021 Top 200 PYQ - EDUNITI
-      </button>
-    </div>
-
-    <div class="upload-or-divider">Or load your own tests</div>
-
-    <div class="upload-zone" id="upload-zone">
-      <div class="upload-icon">📦</div>
-      <h3>Drop your .niso or .zip file here</h3>
-      <p>Upload any compatible CBT zip (data.json + images)</p>
-      <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
-    </div>
-
-    <div class="progress-bar-wrap" id="progress-wrap">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-    <div class="loading-text" id="loading-text"></div>
-    <div class="error-msg" id="error-msg"></div>
+  <div class="upload-body">
     
-    <div class="menu-credits">
-        <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
-        <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
-    </div>
-  </div>
+    <div class="upload-left-col">
+      <div class="online-mocks">
+        <div class="online-mocks-label">Load Online Sample Tests</div>
+        <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
+          🚀 1D Module - NEET
+        </button>
+        <button class="modal-btn primary" onclick="loadOnlineTest('Top 200 PYQ - 2021.niso')">
+          🚀 2021 Top 200 PYQ - EDUNITI
+        </button>
+      </div>
 
-  <div class="recent-panel" id="recent-panel">
-    <div class="recent-header">
-      <span>Recent Sessions</span>
-      <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
-    </div>
-    <div class="recent-list" id="recent-list"></div>
-  </div>
+      <div class="upload-or-divider">Or load your own tests</div>
 
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon">📦</div>
+        <h3>Drop your .niso or .zip file here</h3>
+        <p>Upload any compatible CBT zip (data.json + images)</p>
+        <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
+      </div>
+
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="loading-text" id="loading-text"></div>
+      <div class="error-msg" id="error-msg"></div>
+      
+      <div class="menu-credits">
+          <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
+          <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
+      </div>
+    </div>
+
+    <div class="recent-panel" id="recent-panel">
+      <div class="recent-header">
+        <span>,. Recent Sessions</span>
+        <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
+      </div>
+      <div class="recent-list" id="recent-list"></div>
+    </div>
+    
+  </div>
 </div>
 
-<div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
+</div> <div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
   <div class="modal-box">
     <div class="modal-title">📋 Session Found</div>
     <div class="modal-sub" id="resume-modal-sub">A previous session exists. Resume or start fresh?</div>
@@ -1084,9 +1091,30 @@
 
 <script>
 // ── INIT ───────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('file-input');
     if(input) input.value = ''; // Wipe ghost file selections on reload
+    
+    // --- RANDOM TAGLINE GENERATOR ---
+    const taglines = [
+        "// Did that chain just saw a man?",
+        "// Lets Larp, just for one last time",
+        "// NEXT-GEN JEE ENGINE",
+        "// NEXT-GEN NEET ENGINE",
+        "// I use arch btw",
+        "// Any suggestions are welcome",
+        "// NTA is watching you",
+        "// Padhle Ladle",
+        "// YOOOOOOOOOOOOOOOOOOOOO",
+        "// Because normal mock tests are boring"
+    ];
+    
+    const taglineEl = document.getElementById('dynamic-tagline');
+    if (taglineEl) {
+        const randomIndex = Math.floor(Math.random() * taglines.length);
+        taglineEl.textContent = taglines[randomIndex];
+    }
 });
 
 const savedTheme = localStorage.getItem('practiq_theme') || 'default';
