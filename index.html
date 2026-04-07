@@ -1364,7 +1364,7 @@
 // ── INIT ───────────────────────────────────────────────
 // ── SMART FALLBACK PDF DATABASE ───────────────────────────────
 const fallbackPDFs = {
-    "TOP_200_PYQ_2021_JEE": "https://drive.google.com/file/d/1ZqTjThwlUdC7DKFkTXza2ptZ_mo7yBb2/view?usp=sharing"
+    "TOP_200_PYQ_2021_JEE": "https://drive.google.com/file/d/1ZqTjThwlUdC7DKFkTXza2ptZ_mo7yBb2/view?usp=sharing",
     // Add more here: "Test Name": "Direct Link"
 };
 
@@ -1381,6 +1381,9 @@ async function openPDF() {
         // 1. Check Fallback Database First (Faster for known links)
         if (fallbackPDFs[currentFileName]) {
             let link = fallbackPDFs[currentFileName];
+            if (link.includes('drive.google.com') && link.includes('/view')) {
+                link = link.replace('/view', '/preview');
+            }
             iframe.src = link;
             showToast('correct', '⚡ Auto Loaded via Link');
             return;
@@ -1412,6 +1415,9 @@ function loadPDFIframe() {
     if (!url) return;
     
     // Auto-convert Drive links
+    if (url.includes('drive.google.com') && url.includes('/view')) {
+        url = url.replace('/view', '/preview');
+    }
     
     document.getElementById('pdf-iframe').src = url;
 }
