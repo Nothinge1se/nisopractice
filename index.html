@@ -1381,9 +1381,6 @@ async function openPDF() {
         // 1. Check Fallback Database First (Faster for known links)
         if (fallbackPDFs[currentFileName]) {
             let link = fallbackPDFs[currentFileName];
-            if (link.includes('drive.google.com') && link.includes('/view')) {
-                link = link.replace('/view', '/preview');
-            }
             iframe.src = link;
             showToast('correct', '⚡ Auto Loaded via Link');
             return;
@@ -1415,9 +1412,6 @@ function loadPDFIframe() {
     if (!url) return;
     
     // Auto-convert Drive links
-    if (url.includes('drive.google.com') && url.includes('/view')) {
-        url = url.replace('/view', '/preview');
-    }
     
     document.getElementById('pdf-iframe').src = url;
 }
