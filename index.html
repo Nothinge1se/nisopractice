@@ -904,6 +904,169 @@
   @media (max-width: 1000px) {
     #pdf-modal { width: 100%; right: -100%; }
   }
+
+  /* ══════════════════════════════════════════
+     MOBILE RESPONSIVE  (≤ 768px)
+  ══════════════════════════════════════════ */
+
+  /* Mob drawer backdrop */
+  .mob-nav-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 400;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px); opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .mob-nav-backdrop.open { opacity: 1; }
+
+  /* Drawer panel */
+  .mob-drawer {
+    position: fixed; top: 0; right: 0;
+    width: min(340px, 88vw); height: 100dvh;
+    background: var(--surface); border-left: 1px solid var(--border);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    z-index: 500; display: flex; flex-direction: column;
+    transform: translateX(110%);
+    transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: -10px 0 40px rgba(0,0,0,0.4);
+  }
+  .mob-drawer.open { transform: translateX(0); }
+
+  .mob-drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .mob-drawer-title { font-family: var(--font-head); font-size: 15px; font-weight: 800; color: var(--text); }
+  .mob-drawer-close {
+    font-size: 18px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text2); cursor: pointer;
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Hamburger button in topbar */
+  .mob-nav-btn {
+    display: none; font-size: 20px; background: var(--surface2);
+    border: 1.5px solid var(--border); border-radius: 10px; color: var(--text);
+    cursor: pointer; width: 40px; height: 40px;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  /* Tap-to-reveal score (no hover on mobile) */
+  .secret-score-box.revealed .score-box-val { opacity: 1 !important; filter: blur(0) !important; transform: scale(1) translateX(0) !important; }
+  .secret-score-box.revealed .secret-overlay { opacity: 0 !important; }
+
+  @media (max-width: 768px) {
+
+    /* ── Upload screen ── */
+    #upload-screen { padding: 16px; justify-content: flex-start; overflow-y: auto; height: 100dvh; }
+    .upload-header { margin-bottom: 20px; margin-top: 12px; }
+    .logo { font-size: 40px; }
+    .tagline { font-size: 11px; }
+    .upload-body { flex-direction: column; gap: 16px; align-items: stretch; }
+    .upload-left-col { width: 100%; }
+    .online-mocks { flex-direction: column; }
+    .online-mocks .modal-btn { flex: none; width: 100%; }
+    .recent-panel { grid-column: unset; max-width: 100%; max-height: 260px; width: 100% !important; display: flex !important; }
+    .menu-credits { font-size: 11px; padding: 10px 14px; }
+
+    /* ── Modal ── */
+    .modal-box { width: calc(100vw - 32px); padding: 20px; }
+    .modal-btn { font-size: 13px; padding: 10px; }
+
+    /* ── App ── */
+    #app { height: 100dvh; }
+
+    /* ── Topbar ── */
+    .topbar { height: 52px; padding: 0 10px; gap: 6px; }
+    .topbar-logo { font-size: 16px; }
+    .topbar-section-wrap,
+    .file-name-display,
+    .overall-stats { display: none; }
+    .timer-pill.main-time { font-size: 11px; padding: 4px 8px; }
+    .top-right-controls { gap: 6px; }
+    select.theme-sel { display: none; }
+    .tb-btn { font-size: 11px; padding: 5px 9px; }
+    .mode-btn { font-size: 16px; padding: 4px 8px; }
+    .mob-nav-btn { display: flex; }
+
+    /* ── Content ── */
+    .content-area { flex-direction: column; }
+    .sidebar { display: none !important; }
+
+    /* ── Question header ── */
+    .q-header { height: auto; min-height: 46px; padding: 7px 12px; flex-wrap: wrap; gap: 6px; }
+    .q-header-left { gap: 7px; flex-wrap: wrap; }
+    .q-num-badge { font-size: 13px; padding: 0 10px; height: 32px; }
+    .q-type-badge { font-size: 11px; padding: 0 9px; height: 32px; }
+    .marks-info { font-size: 12px; }
+    .timer-pill.q-time { font-size: 12px; }
+    .header-right { display: none; }
+
+    /* ── Mobile stat bar ── */
+    .mob-stat-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 12px; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+      font-family: var(--font-num); font-size: 11px; font-weight: 700; gap: 8px;
+    }
+    .mob-stat-bar .stat-hl { font-size: 11px; gap: 2px; }
+
+    /* ── Image area ── */
+    .q-image-area { padding: 12px 10px; }
+    .question-img { border-radius: 8px; }
+
+    /* ── Answer area ── */
+    .answer-area { padding: 10px 12px; }
+    .answer-label { font-size: 11px; margin-bottom: 9px; }
+    .mcq-options { grid-template-columns: 1fr 1fr; gap: 7px; }
+    .option-btn { padding: 9px 11px; font-size: 14px; gap: 9px; border-radius: 10px; }
+    .option-key { width: 28px; height: 28px; font-size: 13px; border-radius: 7px; }
+    .nat-input { font-size: 20px; padding: 9px 14px; width: 170px; }
+    .nat-answer-reveal { font-size: 13px; padding: 10px 14px; }
+
+    /* ── Bottom nav ── */
+    .q-nav { height: 56px; padding: 7px 10px; gap: 6px; }
+    .nav-btn { font-size: 12px !important; padding: 0 10px; border-radius: 9px; }
+    .nav-btn.primary { font-size: 13px !important; }
+    .nav-btn.check-btn { font-size: 13px !important; }
+    .nav-btn.mark-next { display: none; }
+
+    /* ── Drawer internals ── */
+    .mob-drawer-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .mob-drawer-section-row { padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .mob-drawer-section-row select {
+      width: 100%; font-family: var(--font-head); font-size: 14px; font-weight: 700;
+      background: var(--surface2); border: 2px solid var(--border); border-radius: 10px;
+      color: var(--text); padding: 9px 34px 9px 12px; outline: none; cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ba3b8' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .mob-drawer-stats { padding: 7px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+    .mob-drawer-grid-wrap { flex: 1; overflow-y: auto; padding: 10px 14px 14px; }
+    .mob-drawer-grid { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+    .mob-drawer-score { padding: 10px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .mob-drawer-legend { padding: 8px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+    .mob-drawer-legend .legend-item { font-size: 10px; }
+
+    /* ── Toast ── */
+    .feedback-toast { bottom: 72px; font-size: 13px; padding: 10px 20px; border-radius: 12px; }
+
+    /* PDF full screen */
+    #pdf-modal { width: 100%; right: -100%; }
+    body.pdf-open #app { width: 100%; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    .mcq-options { grid-template-columns: 1fr; }
+    .nav-btn { font-size: 11px !important; padding: 0 7px; }
+  }
+
+  /* Desktop — hide mobile-only elements */
+  @media (min-width: 769px) {
+    .mob-nav-backdrop, .mob-drawer, .mob-stat-bar { display: none !important; }
+    .mob-nav-btn { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -962,7 +1125,7 @@
   </div>
 </div>
 
-</div> <div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
+<div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
   <div class="modal-box">
     <div class="modal-title">📋 Session Found</div>
     <div class="modal-sub" id="resume-modal-sub">A previous session exists. Resume or start fresh?</div>
@@ -1053,6 +1216,7 @@
       </select>
       
       <button class="tb-btn" onclick="resetApp()">↑ New ZIP</button>
+      <button class="mob-nav-btn" onclick="openMobDrawer()" title="Question Navigator">☰</button>
     </div>
   </div>
 
@@ -1090,6 +1254,18 @@
         </div>
       </div>
 
+      <!-- Mobile stat bar — only shown on phones -->
+      <div class="mob-stat-bar" id="mob-stat-bar">
+        <span id="mob-q-pos" style="color:var(--text2);font-size:11px;">Q1 · 1/200</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="stat-hl c">✓<span id="mob-sc">0</span></span>
+          <span class="stat-hl w">✗<span id="mob-sw">0</span></span>
+          <span class="stat-hl a" style="color:var(--accent2);">A:<span id="mob-sa">0</span></span>
+          <span class="stat-hl s">○<span id="mob-ss">0</span></span>
+        </div>
+        <span id="mob-score" style="font-weight:800;">+0</span>
+      </div>
+
       <div class="q-image-area" id="main-img-area">
         <div class="q-image-container" id="q-image-container"></div>
       </div>
@@ -1108,6 +1284,7 @@
         <button class="nav-btn clear-nav-btn" id="clear-response-btn" onclick="clearCurrentResponse()" disabled>
           ✕ Clear
         </button>
+        <button class="nav-btn" onclick="navigate(-1)">← Prev</button>
         <button class="nav-btn mark-next" onclick="markAndNext()">🔖 Mark &amp; Next</button>
         
         <button class="nav-btn check-btn" id="check-ans-btn" onclick="checkCurrentAnswer()" disabled>
@@ -1149,11 +1326,45 @@
   </div>
 </div>
 
+<!-- ══ MOBILE NAVIGATOR DRAWER ══ -->
+<div class="mob-nav-backdrop" id="mob-backdrop" onclick="closeMobDrawer()"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <div class="mob-drawer-header">
+    <div class="mob-drawer-title">Question Navigator</div>
+    <button class="mob-drawer-close" onclick="closeMobDrawer()">✕</button>
+  </div>
+  <div class="mob-drawer-body">
+    <div class="mob-drawer-section-row">
+      <select id="mob-section-select" onchange="mobChangeSection()">
+        <option value="ALL">All Sections</option>
+      </select>
+    </div>
+    <div class="mob-drawer-stats" id="mob-drawer-stats"></div>
+    <div class="mob-drawer-grid-wrap">
+      <div class="mob-drawer-grid" id="mob-q-grid"></div>
+    </div>
+    <div class="mob-drawer-score">
+      <div class="secret-score-box" onclick="this.classList.toggle('revealed')" style="padding:12px 16px;">
+        <div class="score-box-label" style="font-size:13px;">Net Score</div>
+        <div class="secret-overlay" style="font-size:11px;">Tap to reveal</div>
+        <div class="score-box-val" id="mob-score-total" style="font-size:20px;">0</div>
+      </div>
+    </div>
+    <div class="mob-drawer-legend">
+      <div class="legend-item"><div class="legend-box c"></div>Correct</div>
+      <div class="legend-item"><div class="legend-box w"></div>Wrong</div>
+      <div class="legend-item"><div class="legend-box a"></div>Attempted</div>
+      <div class="legend-item"><div class="legend-box s"></div>Skip</div>
+      <div class="legend-item"><div class="legend-box m"></div>Marked</div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── INIT ───────────────────────────────────────────────
 // ── SMART FALLBACK PDF DATABASE ───────────────────────────────
 const fallbackPDFs = {
-    "Top 200 PYQ - 2021": "https://drive.google.com/file/d/1ZqTjThwlUdC7DKFkTXza2ptZ_mo7yBb2/preview",
+    "Top 200 PYQ - 2021": "https://drive.google.com/file/d/1ZqTjThwlUdC7DKFkTXza2ptZ_mo7yBb2/view?usp=sharing",
     "1D": "https://your-link-for-1d-here/preview"
     // Add more here: "Test Name": "Direct Link"
 };
@@ -1195,21 +1406,6 @@ async function openPDF() {
     }
 }
 
-function closePDF() {
-    document.getElementById('pdf-modal').classList.remove('show');
-    document.body.classList.remove('pdf-open');
-}
-
-function loadPDFIframe() {
-    let url = document.getElementById('pdf-url-input').value;
-    if (!url) return;
-    
-    if (url.includes('drive.google.com') && url.includes('/view')) {
-        url = url.replace('/view', '/preview');
-    }
-    
-    document.getElementById('pdf-iframe').src = url;
-}
 function closePDF() {
     document.getElementById('pdf-modal').classList.remove('show');
     document.body.classList.remove('pdf-open');
@@ -1631,6 +1827,9 @@ function launchApp() {
   
   const sel = document.getElementById('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
   for (const key of Object.keys(sectionMap)) { const opt = document.createElement('option'); opt.value = key; opt.textContent = key; sel.appendChild(opt); }
+  // sync mobile drawer section select
+  const ms = document.getElementById('mob-section-select');
+  if(ms){ ms.innerHTML='<option value="ALL">All Sections</option>'; for(const key of Object.keys(sectionMap)){const o=document.createElement('option');o.value=key;o.textContent=key;ms.appendChild(o);} }
   
   document.getElementById('file-name-display').textContent = currentFileName;
   document.getElementById('topbar-section-wrap').title = currentFileName;
@@ -1844,6 +2043,7 @@ function renderQuestion() {
   if (!hasImg) { imgArea.innerHTML = `<div class="q-img-placeholder">📷 Image not found: <code>${q.images[0]}</code></div>`; }
 
   renderAnswerArea(q, true); updateScores(); updateFluidBars();
+  if(typeof updateMobStats==='function') updateMobStats();
 }
 
 function renderAnswerArea(q, animate = true) {
@@ -1948,6 +2148,7 @@ function renderSidebar() {
       <div class="sec-stat u" title="Skipped">○ ${ss}</div>
       <div class="sec-stat" style="color:var(--marked); border-color:var(--marked);" title="Marked">🔖 ${sm}</div>
   `;
+  if(document.getElementById('mob-drawer')?.classList.contains('open')) renderMobDrawer();
 }
 
 // ── SCORES ─────────────────────────────────────────────
@@ -1971,6 +2172,7 @@ function updateScores() {
     <span class="stat-hl s" title="Skipped">○${s}</span>
     <span class="stat-hl m" title="Marked">🔖${m}</span>
   `;
+  if(typeof updateMobStats==='function') updateMobStats();
 }
 
 // ── TOAST ──────────────────────────────────────────────
@@ -1993,6 +2195,109 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Backspace' || e.key === 'Delete') { if (!document.getElementById('clear-response-btn').disabled) clearCurrentResponse(); }
   if (e.key === 'Enter') { const checkBtn = document.getElementById('check-ans-btn'); if(checkBtn && !checkBtn.disabled) checkCurrentAnswer(); }
 });
+
+// ── MOBILE DRAWER & STATS ──────────────────────────────
+function openMobDrawer() {
+  const backdrop = document.getElementById('mob-backdrop');
+  const drawer   = document.getElementById('mob-drawer');
+  backdrop.style.display = 'block';
+  requestAnimationFrame(() => { backdrop.classList.add('open'); drawer.classList.add('open'); });
+  renderMobDrawer();
+}
+
+function closeMobDrawer() {
+  const backdrop = document.getElementById('mob-backdrop');
+  const drawer   = document.getElementById('mob-drawer');
+  backdrop.classList.remove('open');
+  drawer.classList.remove('open');
+  setTimeout(() => { backdrop.style.display = 'none'; }, 360);
+}
+
+function mobChangeSection() {
+  const sel = document.getElementById('mob-section-select');
+  currentSection = sel.value;
+  const d = document.getElementById('section-select');
+  if (d) d.value = currentSection;
+  document.getElementById('topbar-section').textContent =
+    currentSection === 'ALL' ? 'All Sections' : currentSection.split(' › ')[1] || currentSection;
+  currentQIdx = getSectionQuestions()[0] ?? 0;
+  renderSidebar(); renderMobDrawer(); renderQuestion();
+}
+
+function renderMobDrawer() {
+  const grid = document.getElementById('mob-q-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const indices = getSectionQuestions();
+  let sc=0, sw=0, sa=0, ss=0, sm=0;
+
+  for (const idx of indices) {
+    const q = allQuestions[idx];
+    const dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.style.cssText = 'width:40px;height:40px;font-size:14px;border-radius:10px;cursor:pointer;';
+    if (idx === currentQIdx) dot.classList.add('active');
+    const ans = answers[q.id];
+    if (ans) {
+      if (ans.isChecked) { dot.classList.add(ans.correct ? 'correct' : 'wrong'); ans.correct ? sc++ : sw++; }
+      else { dot.classList.add('attempted'); sa++; }
+    } else { ss++; }
+    if (marked[q.id]) { dot.classList.add('marked'); sm++; }
+    dot.textContent = q.globalNum;
+    dot.addEventListener('click', () => { goToQuestion(idx); closeMobDrawer(); });
+    grid.appendChild(dot);
+  }
+
+  const st = document.getElementById('mob-drawer-stats');
+  if (st) st.innerHTML = `
+    <div class="sec-stat c">✓ ${sc}</div>
+    <div class="sec-stat w">✗ ${sw}</div>
+    <div class="sec-stat a">A: ${sa}</div>
+    <div class="sec-stat u">○ ${ss}</div>
+    <div class="sec-stat" style="color:var(--marked);border-color:var(--marked);">🔖 ${sm}</div>`;
+
+  // sync section select options lazily
+  const ms = document.getElementById('mob-section-select');
+  if (ms && ms.options.length <= 1 && Object.keys(sectionMap).length > 0) {
+    for (const key of Object.keys(sectionMap)) {
+      const o = document.createElement('option'); o.value = key; o.textContent = key; ms.appendChild(o);
+    }
+  }
+  if (ms) ms.value = currentSection;
+}
+
+function updateMobStats() {
+  const indices = getSectionQuestions();
+  const pos = indices.indexOf(currentQIdx);
+  const q = allQuestions[currentQIdx];
+  const qp = document.getElementById('mob-q-pos');
+  if (qp) qp.textContent = `Q${q?.globalNum||''} · ${pos+1}/${indices.length}`;
+
+  let c=0, w=0, a=0, s=0, net=0;
+  for (const qq of allQuestions) {
+    const ans = answers[qq.id];
+    if (ans) { if (ans.isChecked) { if (ans.correct){c++;net+=(qq.marks.cm||4);} else {w++;net-=Math.abs(qq.marks.im||1);} } else a++; } else s++;
+  }
+  const el = (id) => document.getElementById(id);
+  if(el('mob-sc')) el('mob-sc').textContent = c;
+  if(el('mob-sw')) el('mob-sw').textContent = w;
+  if(el('mob-sa')) el('mob-sa').textContent = a;
+  if(el('mob-ss')) el('mob-ss').textContent = s;
+  const ms = el('mob-score');
+  if(ms){ ms.textContent=(net>=0?'+':'')+net; ms.style.color=net>0?'var(--correct)':net<0?'var(--wrong)':'var(--accent2)'; }
+  const mst = el('mob-score-total');
+  if(mst){ mst.textContent=(net>=0?'+':'')+net; mst.style.color=net>0?'var(--correct)':net<0?'var(--wrong)':'var(--text)'; }
+}
+
+// Swipe-right to close drawer
+(function(){
+  let sx=0;
+  document.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    const drawer=document.getElementById('mob-drawer');
+    if(drawer?.classList.contains('open') && e.changedTouches[0].clientX-sx > 60) closeMobDrawer();
+  }, {passive:true});
+})();
 
 // ── INIT ───────────────────────────────────────────────
 renderRecentSessions();
