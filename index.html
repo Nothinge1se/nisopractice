@@ -1372,49 +1372,50 @@ const fallbackPDFs = {
 // ── SMART PDF SIDEBAR LOGIC ───────────────────────────────────────────
 async function openPDF() {
     const modal = document.getElementById('pdf-modal');
+    const iframe = document.getElementById('pdf-iframe');
     modal.classList.add('show');
-    document.body.classList.add('pdf-open');
 
-    // Only fetch if nothing is currently loaded
-    if (!document.getElementById('pdf-iframe').src) {
-        const autoPdfUrl = currentFileName + ".pdf";
+    // Only auto-fetch if the iframe is currently empty
+    if (!iframe.src || iframe.src === window.location.href || iframe.src === "") {
         showToast('info', '🔍 Locating solutions...');
-        
+
+        // 1. Check Fallback Database First (Faster for known links)
+        if (fallbackPDFs[currentFileName]) {
+            let link = fallbackPDFs[currentFileName];
+            if (link.includes('drive.google.com') && link.includes('/view')) {
+                link = link.replace('/view', '/preview');
+            }
+            iframe.src = link;
+            showToast('correct', '⚡ Loaded from Database');
+            return;
+        }
+
+        // 2. Otherwise, check if the PDF exists on your server/GitHub
+        const autoPdfUrl = currentFileName + ".pdf";
         try {
-            // 1. First, check if the PDF exists on your server/GitHub
             const check = await fetch(autoPdfUrl, { method: 'HEAD' });
             if (check.ok) {
-                document.getElementById('pdf-iframe').src = autoPdfUrl;
+                iframe.src = autoPdfUrl;
                 showToast('correct', '✅ Solutions loaded from server');
-            } else {
-                throw new Error("Not on server");
-            }
-        } catch (e) {
-            // 2. Second, check if we have a fallback link in our database
-            if (fallbackPDFs[currentFileName]) {
-                let link = fallbackPDFs[currentFileName];
-                // Ensure Google Drive links are in /preview mode for the iframe
-                if (link.includes('drive.google.com') && link.includes('/view')) {
-                    link = link.replace('/view', '/preview');
-                }
-                document.getElementById('pdf-iframe').src = link;
-                showToast('correct', '⚡ Loaded from Fallback Database');
             } else {
                 showToast('info', '💡 No PDF found. Paste a link manually.');
             }
+        } catch (e) {
+            // Likely a CORS or Local Server issue blocking the check
+            showToast('info', '💡 Server check blocked. Paste link manually.');
         }
     }
 }
 
 function closePDF() {
     document.getElementById('pdf-modal').classList.remove('show');
-    document.body.classList.remove('pdf-open');
 }
 
 function loadPDFIframe() {
     let url = document.getElementById('pdf-url-input').value;
     if (!url) return;
     
+    // Auto-convert Drive links
     if (url.includes('drive.google.com') && url.includes('/view')) {
         url = url.replace('/view', '/preview');
     }
