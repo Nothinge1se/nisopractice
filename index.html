@@ -9,17 +9,17 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800;900&display=swap');
 
   :root {
-    --bg: #090a0f;
-    --surface: #13151f;
-    --surface2: #1e2233;
-    --surface3: #2a2f45;
-    --border: #313752;
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --accent-glow: rgba(79, 70, 229, 0.4);
+    --bg: #07080c;
+    --surface: #11131c;
+    --surface2: #1c2030;
+    --surface3: #262b40;
+    --border: #2d334a;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --accent-glow: rgba(99, 102, 241, 0.5);
     --accent2: #a855f7;
     --text: #ffffff;
     --text2: #94a3b8;
@@ -39,42 +39,42 @@
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* --- INLINE PROGRESS BAR --- */
-  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 6px; margin-top: 8px; width: 100%; position: relative; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
-  .progress-text { font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 600; text-align: right; font-family: 'Outfit'; }
+  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 6px; margin-top: 8px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-glow); }
+  .progress-text { font-size: 12px; color: var(--text2); margin-top: 6px; font-weight: 700; text-align: right; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px;}
 
   /* --- SHARED MENUS & CARDS --- */
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg); z-index: 10; padding: 40px 20px; overflow-y: auto; }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: radial-gradient(circle at top, #11131c 0%, #07080c 100%); z-index: 10; padding: 40px 20px; overflow-y: auto; }
   .screen.hidden { display: none !important; }
   
-  .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 8vw, 56px); font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -1px; }
-  .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; }
+  .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 8vw, 64px); font-weight: 900; background: linear-gradient(135deg, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(99,102,241,0.2); }
+  .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase; }
 
-  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
-  .card-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
+  .card-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1.5px; color: #fff;}
 
-  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 14px; color: white; padding: 16px; font-size: 18px; font-weight: 600; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; }
-  .input-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 14px; color: white; padding: 18px; font-size: 18px; font-weight: 700; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
+  .input-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 4px 10px rgba(0,0,0,0.3); }
 
-  .btn { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; padding: 16px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+  .btn { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; padding: 18px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; justify-content: center; gap: 8px;}
   .btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface3); }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3); }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border:none;}
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6); }
 
-  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
-  .upload-zone:hover { border-color: var(--accent); background: rgba(79, 70, 229, 0.05); }
+  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 36px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.08); }
 
-  .label-title { font-size: 12px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .label-title { font-size: 13px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'Outfit'; }
 
   /* --- APP LAYOUT --- */
   #app { display: none; height: 100vh; flex-direction: column; }
   
-  .header { height: 72px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; z-index: 50; }
-  .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(18px, 4vw, 24px); color: var(--accent); letter-spacing: -1px; flex: 1;}
+  .header { height: 80px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .brand { font-family: 'Syne', sans-serif; font-weight: 900; font-size: clamp(20px, 4vw, 26px); color: var(--accent); letter-spacing: -1px; flex: 1; text-shadow: 0 0 20px rgba(99,102,241,0.4);}
   
   /* BOLD TIMER CENTERED */
   .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
-  .timer-box { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; background: var(--bg); padding: 6px 24px; border-radius: 12px; border: 2px solid var(--accent); color: var(--accent2); box-shadow: 0 0 15px var(--accent-glow); letter-spacing: 2px;}
+  .timer-box { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; background: var(--bg); padding: 8px 28px; border-radius: 14px; border: 2px solid var(--accent); color: var(--accent2); box-shadow: 0 0 20px var(--accent-glow), inset 0 2px 10px rgba(0,0,0,0.5); letter-spacing: 2px;}
   
   .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
 
@@ -82,101 +82,103 @@
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-  .q-top { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; }
-  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 20px; background: var(--surface3); padding: 8px 20px; border-radius: 10px; border: 1px solid var(--border); color: #fff; }
+  .q-top { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10;}
+  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 22px; background: var(--surface3); padding: 8px 24px; border-radius: 12px; border: 1px solid var(--border); color: #fff; text-transform: uppercase; letter-spacing: 1px;}
   
-  .q-scroll { flex: 1; overflow-y: auto; padding: 32px; display: flex; flex-direction: column; align-items: center; }
+  .q-scroll { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; }
   .q-images { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 850px; }
-  .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .q-images img { max-width: 100%; border-radius: 16px; border: 2px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
 
-  .ans-area { padding: 24px; background: var(--surface); border-top: 1px solid var(--border); position: relative; }
+  .ans-area { padding: 32px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10;}
   .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 850px; margin: 0 auto; }
-  .opt-btn { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 18px; font-weight: 600; }
-  .opt-btn:hover:not(:disabled) { border-color: var(--accent2); }
-  .opt-btn.selected { border-color: var(--accent); background: rgba(79, 70, 229, 0.15); box-shadow: 0 0 0 2px var(--accent-glow); }
-  .opt-key { width: 36px; height: 36px; border-radius: 10px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }
+  .opt-btn { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 18px; font-weight: 700; font-family: 'Outfit'; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);}
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface2); }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); box-shadow: 0 0 0 2px var(--accent-glow), inset 0 2px 10px rgba(0,0,0,0.2); }
+  .opt-key { width: 40px; height: 40px; border-radius: 10px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: var(--text2);}
   .opt-btn.selected .opt-key { background: var(--accent); color: white; }
-  .nat-input { width: 100%; max-width: 350px; font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; padding: 16px 24px; border-radius: 14px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; }
+  .nat-input { width: 100%; max-width: 350px; font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; padding: 20px 24px; border-radius: 16px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; box-shadow: inset 0 4px 15px rgba(0,0,0,0.4);}
 
-  .btm-bar { height: 80px; padding: 0 24px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;}
-  .action-btn { padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 15px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase;}
+  .btm-bar { height: 90px; padding: 0 24px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10;}
+  .action-btn { padding: 14px 28px; border-radius: 12px; font-weight: 800; font-size: 15px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
   .action-btn:hover:not(:disabled) { background: var(--surface3); }
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
-  .action-btn.save { background: var(--accent); border-color: var(--accent); color: white; }
+  .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);}
 
   /* OVERLAY FOR SUBMITTED STATE */
-  .submitted-overlay { position: absolute; inset: 0; background: rgba(19, 21, 31, 0.6); z-index: 10; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(4px); display: none; }
+  .submitted-overlay { position: absolute; inset: 0; background: rgba(7, 8, 12, 0.8); z-index: 10; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); display: none; }
   .submitted-overlay.show { display: flex; }
-  .sub-badge { background: var(--ans); color: white; padding: 12px 32px; border-radius: 20px; font-family: 'Outfit'; font-weight: 800; font-size: 24px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); margin-bottom: 16px;}
+  .sub-badge { background: var(--ans); color: white; padding: 16px 40px; border-radius: 24px; font-family: 'Outfit'; font-weight: 900; font-size: 28px; box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;}
 
   /* SIDEBAR (Grid + Leaderboard + Chat) */
-  .sidebar { width: 360px; background: var(--surface); border-left: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  .sec-sel { padding: 20px; border-bottom: 1px solid var(--border); }
-  .sec-sel select { width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; font-weight: 700; font-size: 16px; outline: none;}
+  .sidebar { width: 380px; background: var(--surface); border-left: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.3);}
+  .sec-sel { padding: 24px; border-bottom: 1px solid var(--border); background: var(--surface2);}
+  .sec-sel select { width: 100%; padding: 14px 16px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; font-weight: 800; font-size: 16px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
-  .grid-wrap { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; border-bottom: 1px solid var(--border); }
-  .dot { width: 46px; height: 46px; border-radius: 12px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
-  .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+  .grid-wrap { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
+  .dot { width: 48px; height: 48px; border-radius: 12px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);}
+  .dot.active { border-color: white; transform: scale(1.15); box-shadow: 0 0 15px rgba(255,255,255,0.3), inset 0 2px 5px rgba(0,0,0,0.3); z-index: 2;}
   .dot.ans { background: var(--ans); color: #fff; }
   .dot.unans { background: var(--unans); color: #fff; }
   .dot.marked { background: var(--marked); color: #fff; }
+  .dot.mark-ans { background: #14b8a6; color: #fff; }
 
   /* Minimizable Widgets */
   .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease;}
-  .widget-header { padding: 16px 20px; font-size: 14px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px;}
+  .widget-header { padding: 18px 24px; font-size: 15px; font-weight: 900; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1.5px; border-bottom: 1px solid var(--border);}
   .widget-body { overflow: hidden; display: flex; flex-direction: column; flex: 1; }
   
-  .widget.minimized { height: 50px !important; flex: none !important; }
+  .widget.minimized { height: 56px !important; flex: none !important; }
   .widget.minimized .widget-body { display: none; }
 
   /* Leaderboard UI */
-  .lb-list { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; height: 200px; }
-  .lb-item { display: flex; flex-direction: column; background: var(--bg); padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); }
-  .lb-item.me { border-color: var(--accent); }
-  .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .lb-name { font-weight: 700; font-size: 15px; }
-  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
+  .lb-list { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; height: 200px; background: var(--bg); }
+  .lb-item { display: flex; flex-direction: column; background: var(--surface2); padding: 14px 16px; border-radius: 12px; border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+  .lb-item.me { border-color: var(--accent); background: rgba(99, 102, 241, 0.05);}
+  .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .lb-name { font-weight: 800; font-size: 15px; font-family: 'Outfit'; letter-spacing: 0.5px;}
+  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 16px; color: var(--accent2); }
 
   /* Chat UI */
-  .chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; height: 200px; }
-  .msg { background: var(--surface3); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); word-break: break-word;}
-  .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 12px; text-transform: uppercase;}
-  .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); }
-  .chat-input-wrap input { flex: 1; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 10px 14px; color: white; outline: none; font-size: 14px; font-weight: 500;}
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; height: 200px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
+  .msg { background: var(--surface3); padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border); word-break: break-word; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+  .msg-name { font-weight: 900; color: var(--accent2); margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;}
+  .chat-input-wrap { display: flex; padding: 16px; background: var(--surface2); border-top: 1px solid var(--border); }
+  .chat-input-wrap input { flex: 1; background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; color: white; outline: none; font-size: 15px; font-weight: 600; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);}
   .chat-input-wrap input:focus { border-color: var(--accent); }
-  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 10px; font-weight: 700; font-family: 'Outfit';}
+  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 10px; padding: 0 20px; margin-left: 12px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
   /* Lobby Grid adjustments */
-  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 1000px; align-items: start;}
+  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width:100%; max-width: 1050px; align-items: start;}
   .lobby-left { display: flex; flex-direction: column; gap: 24px; }
   .lobby-right { display: flex; flex-direction: column; gap: 24px; height: 100%;}
-  .config-row { margin-bottom: 16px; }
-  .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 15px; }
+  .config-row { margin-bottom: 20px; }
+  .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 14px; padding: 14px; outline: none; font-weight: 700; font-size: 16px; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);}
+  .config-select:focus { border-color: var(--accent); }
   
   /* Vote Kick Button */
-  .kick-btn { background: var(--unans); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 700; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); }
+  .kick-btn { background: var(--unans); color: white; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 12px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);}
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
-  .kick-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .kick-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   /* Mobile Specific Layout */
-  .mob-menu-btn { display: none; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; padding: 8px; color: white; }
-  #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: none; }
+  .mob-menu-btn { display: none; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 10px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+  #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
   @media (max-width: 850px) {
     .header { padding: 0 16px; }
     .timer-center { flex: none; position: absolute; left: 50%; transform: translateX(-50%); }
-    .timer-box { font-size: 20px; padding: 4px 16px; }
+    .timer-box { font-size: 24px; padding: 6px 16px; }
     #top-file-name { display: none; }
     
     .mob-menu-btn { display: block; }
     .header-right .btn-primary { display: none; } 
 
-    .sidebar { position: fixed; right: 0; top: 72px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 360px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .sidebar { position: fixed; right: 0; top: 80px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 380px; box-shadow: -15px 0 40px rgba(0,0,0,0.7); }
     .sidebar.open { transform: translateX(0); }
     #mob-overlay.open { display: block; }
 
     .btm-bar { padding: 0 16px; }
-    .action-btn { padding: 10px 12px; font-size: 12px; }
+    .action-btn { padding: 12px 14px; font-size: 13px; }
     .opts-grid { grid-template-columns: 1fr; }
     
     .lobby-grid { grid-template-columns: 1fr; }
@@ -184,7 +186,7 @@
 
   /* Toast */
   @keyframes slideUp { 0% { opacity: 0; transform: translate(-50%, 20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 14px 28px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; white-space: nowrap;}
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 16px 32px; border-radius: 16px; font-weight: 800; font-size: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); z-index: 99999; animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase; letter-spacing: 1px;}
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 </style>
@@ -201,28 +203,28 @@
     <div class="card-title">Join or Host Room</div>
     <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
     <div style="display:flex; gap:16px;">
-      <input type="text" id="join-code" class="input-styled" placeholder="CODE" style="text-transform: uppercase;" maxlength="6">
-      <button class="btn btn-primary" id="btn-join-room" style="flex: 0 0 120px;">Join</button>
+      <input type="text" id="join-code" class="input-styled" placeholder="CODE" style="text-transform: uppercase; letter-spacing: 2px; font-weight: 900;" maxlength="6">
+      <button class="btn btn-primary" id="btn-join-room" style="flex: 0 0 130px;">Join</button>
     </div>
-    <div style="text-align:center; color:var(--text2); font-size:14px; font-weight:800; text-transform:uppercase;">Or Create New</div>
-    <button class="btn" id="btn-host-screen">Host a Room</button>
+    <div style="text-align:center; color:var(--text2); font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing: 2px; margin: 10px 0;">Or Create New</div>
+    <button class="btn" id="btn-host-screen" style="border-color: var(--accent); color: var(--accent); box-shadow: inset 0 0 10px rgba(99,102,241,0.1);">Host a Room</button>
   </div>
 </div>
 
 <!-- 2. HOST SELECT FILE SCREEN -->
 <div id="host-screen" class="screen hidden">
-  <div class="hero-title" style="font-size: 40px; margin-bottom: 24px;">Select Test Paper</div>
+  <div class="hero-title" style="font-size: clamp(32px, 6vw, 48px); margin-bottom: 24px;">Select Test Paper</div>
   <div class="glass-card" style="max-width: 550px;">
     
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
+    <div style="display:flex; flex-direction:column; gap:16px; margin-bottom: 24px;">
       <button class="btn" onclick="window.hostSelectOnline('1D.niso')">🚀 Demo Module (NEET)</button>
       <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2021_JEE.niso')">🚀 2021 Top 200 PYQ</button>
       <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2022_JEE.niso')">🚀 2022 Top 200 PYQ</button>
     </div>
     
     <div class="upload-zone" id="upload-zone">
-      <div style="font-family:'Outfit'; font-weight:800; font-size:20px; margin-bottom: 8px;">Or Upload Custom File (.zip/.niso)</div>
-      <div style="font-size: 14px; color: var(--text2); font-weight:500;">It will be securely P2P transferred to all players</div>
+      <div style="font-family:'Outfit'; font-weight:900; font-size:22px; margin-bottom: 10px; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px;">Or Upload Custom File</div>
+      <div style="font-size: 15px; color: var(--text2); font-weight:600;">(.zip / .niso format) <br> Securely P2P transferred to all players.</div>
       <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
     </div>
 
@@ -236,28 +238,29 @@
 
 <!-- 3. LOBBY SCREEN (Settings + Chat + Players) -->
 <div id="lobby-screen" class="screen hidden">
-  <div class="hero-title" style="font-size: 36px; margin-bottom:4px;" id="lobby-title">Room Lobby</div>
+  <div class="hero-title" style="font-size: clamp(32px, 6vw, 48px); margin-bottom:4px;" id="lobby-title">Room Lobby</div>
   <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2);">Connecting to Peer Network...</div>
   
   <div class="lobby-grid">
     
     <!-- LEFT: Room Info & Settings -->
     <div class="lobby-left">
-      <div class="glass-card" style="padding: 24px;">
-        <div class="label-title" style="text-align:center;">Invite Friends</div>
-        <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
-        <div style="text-align:center; font-size:13px; color:var(--text2); margin-top:-10px; font-weight:600;">Click to copy join link</div>
+      <div class="glass-card" style="padding: 28px;">
+        <div class="label-title" style="text-align:center; font-size: 15px;">Invite Friends</div>
+        <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link" style="font-size: 48px; border: 2px dashed var(--accent);">------</div>
+        <div style="text-align:center; font-size:14px; color:var(--text2); margin-top:-10px; font-weight:700; font-family:'Outfit';">Click to copy join link</div>
       </div>
 
-      <div class="glass-card" style="padding: 24px; display:none;" id="host-controls">
-        <div class="card-title" style="font-size:20px; margin-bottom:16px;">Test Configuration</div>
+      <!-- Host sees this -->
+      <div class="glass-card" style="padding: 28px; display:none;" id="host-controls">
+        <div class="card-title" style="font-size:22px; margin-bottom:20px; color: var(--accent2);">Test Configuration</div>
         
         <div class="config-row">
           <label class="label-title">Sections to Include</label>
-          <select id="cfg-sections" class="config-select" multiple style="height:90px;"></select>
+          <select id="cfg-sections" class="config-select" multiple style="height:100px;"></select>
         </div>
         
-        <div class="config-row" style="display:flex; gap:16px;">
+        <div class="config-row" style="display:flex; gap:20px;">
           <div style="flex:1;">
             <label class="label-title">Timer Mode</label>
             <select id="cfg-timer-mode" class="config-select">
@@ -266,7 +269,7 @@
             </select>
           </div>
           <div style="flex:1;">
-            <label class="label-title">Mins</label>
+            <label class="label-title">Duration (Mins)</label>
             <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
           </div>
         </div>
@@ -275,44 +278,45 @@
           <label class="label-title">Live Fair-Play Stats</label>
           <select id="cfg-live-stats" class="config-select">
             <option value="false">Hidden (Prevent Cheating)</option>
-            <option value="true">Visible (Show correct/wrong blocks)</option>
+            <option value="true">Visible (Show Correct/Wrong)</option>
           </select>
         </div>
 
-        <button class="btn btn-primary" id="btn-start-game" disabled style="margin-top:8px;">Start Match</button>
+        <button class="btn btn-primary" id="btn-start-game" disabled style="margin-top:12px; font-size: 18px; padding: 20px;">Start Match</button>
       </div>
 
       <!-- Player sees this instead of controls -->
-      <div class="glass-card" style="padding: 24px;" id="player-view-cfg">
-        <div class="card-title" style="font-size:18px; margin-bottom:16px; color:var(--text2);">Host Configuration</div>
-        <div style="font-size:14px; font-weight:600; line-height:1.6;">
-          <span style="color:var(--text2);">Paper:</span> <span id="view-file" style="color:var(--accent2);">...</span><br>
-          <span style="color:var(--text2);">Mode:</span> <span id="view-mode">...</span><br>
-          <span style="color:var(--text2);">Time:</span> <span id="view-time">...</span>
+      <div class="glass-card" style="padding: 28px;" id="player-view-cfg">
+        <div class="card-title" style="font-size:22px; margin-bottom:20px; color:var(--accent2); text-transform:uppercase; letter-spacing: 1px;">Room Settings</div>
+        <div style="font-size:16px; font-weight:800; line-height:2; font-family:'Outfit'; background: var(--bg); padding: 20px; border-radius: 16px; border: 2px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
+          <span style="color:var(--text2);">PAPER:</span> <span id="view-file" style="color:white; word-break: break-all;">...</span><br>
+          <span style="color:var(--text2);">SECTIONS:</span> <span id="view-sections" style="color:white;">...</span><br>
+          <span style="color:var(--text2);">MODE:</span> <span id="view-mode" style="color:white;">...</span><br>
+          <span style="color:var(--text2);">TIME:</span> <span id="view-time" style="color:white;">...</span>
         </div>
       </div>
     </div>
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card" style="padding: 20px; flex: 1; max-height: 400px; display:flex; flex-direction:column;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <span class="label-title" style="margin:0;">Players</span>
-          <span style="font-family:'Outfit'; font-weight:800; font-size:18px; color:var(--accent); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
+      <div class="glass-card" style="padding: 24px; flex: 1; max-height: 450px; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <span class="label-title" style="margin:0; font-size: 16px;">Players</span>
+          <span style="font-family:'Outfit'; font-weight:900; font-size:20px; color:var(--accent); background:var(--surface2); padding:6px 16px; border-radius:10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);" id="player-count">0</span>
         </div>
-        <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
+        <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px; padding-right: 4px;">
           <!-- Players injected here -->
         </div>
         <!-- I'm Ready Button -->
-        <button class="btn btn-primary" id="btn-ready-up" style="margin-top:12px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.sendReady()">I'm Ready</button>
+        <button class="btn btn-primary" id="btn-ready-up" style="margin-top:20px; background:var(--ans); border-color:var(--ans); display:none; font-size: 18px; padding: 18px;" onclick="window.toggleReady()">I'm Ready</button>
       </div>
 
       <!-- Lobby Chat -->
       <div class="glass-card" style="padding: 0; flex: 1; max-height: 350px; display:flex; flex-direction:column;">
-        <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
-        <div class="chat-msgs" id="lobby-chat-msgs"></div>
-        <div class="chat-input-wrap">
-          <input type="text" id="lobby-chat-input" placeholder="Say hello..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()">
+        <div class="label-title" style="padding: 20px 20px 0; margin:0; font-size: 15px;">Lobby Chat</div>
+        <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 20px;"></div>
+        <div class="chat-input-wrap" style="padding: 16px 20px;">
+          <input type="text" id="lobby-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()">
           <button onclick="window.sendLobbyChat()">Send</button>
         </div>
       </div>
@@ -328,8 +332,8 @@
     <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
     
     <div class="header-right">
-      <div style="font-family:'Outfit'; font-weight:700; color:var(--text2); background:var(--surface2); padding:8px 16px; border-radius:10px; border:1px solid var(--border);" id="top-file-name">Paper Name</div>
-      <button class="btn btn-primary" style="padding: 10px 20px; font-size: 14px; width:auto; border-radius:10px;" id="btn-top-submit" onclick="window.submitQuizBtn()">Submit</button>
+      <div style="font-family:'Outfit'; font-weight:800; color:var(--text2); background:var(--surface2); padding:10px 20px; border-radius:12px; border:2px solid var(--border); font-size: 15px;" id="top-file-name">Paper Name</div>
+      <button class="btn btn-primary" style="padding: 12px 24px; font-size: 15px; width:auto; border-radius:12px;" id="btn-top-submit" onclick="window.submitQuizBtn()">Submit Test</button>
       <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
     </div>
   </div>
@@ -339,23 +343,23 @@
     <!-- SUBMITTED OVERLAY -->
     <div class="submitted-overlay" id="submitted-layer">
        <div class="sub-badge">Test Submitted</div>
-       <div style="font-weight:600; font-size:16px; color:var(--text2);">Waiting for other players to finish...</div>
-       <div style="margin-top:20px; font-size:14px; color:var(--text2); max-width: 400px; text-align:center;">You can continue chatting or reviewing questions while waiting. Final ranks will appear when everyone is done.</div>
+       <div style="font-weight:800; font-size:20px; color:var(--text2); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;">Waiting for other players...</div>
+       <div style="margin-top:24px; font-size:15px; color:var(--text2); max-width: 450px; text-align:center; font-weight: 600; line-height: 1.6;">You can continue chatting or reviewing questions while waiting. Final ranks will appear when everyone is done.</div>
     </div>
 
     <!-- FINAL LEADERBOARD PANEL (Slides in when all done) -->
     <div class="submitted-overlay" id="final-results-layer" style="background:var(--bg); z-index:20;">
-      <div class="hero-title" style="font-size:40px; margin-bottom:8px;">Final Results 🏆</div>
-      <div class="glass-card" style="max-width: 600px; width: 90%; max-height:70vh; overflow-y:auto; padding:24px;">
-        <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
-        <button class="btn" style="margin-top:24px;" onclick="window.location.reload()">Back to Home</button>
+      <div class="hero-title" style="font-size:clamp(40px, 8vw, 64px); margin-bottom:16px;">Final Results 🏆</div>
+      <div class="glass-card" style="max-width: 650px; width: 90%; max-height:75vh; overflow-y:auto; padding:32px;">
+        <div id="final-lb-list" style="display:flex; flex-direction:column; gap:16px;"></div>
+        <button class="btn" style="margin-top:32px; font-size: 18px; padding: 18px;" onclick="window.location.reload()">Back to Home</button>
       </div>
     </div>
 
     <div class="q-area">
       <div class="q-top">
         <div class="q-badge" id="q-num-badge">Question 1</div>
-        <div style="font-weight:700; color:var(--text2); font-size:15px; background:var(--bg); padding:6px 16px; border-radius:8px; border:1px solid var(--border);" id="q-type-badge">Multiple Choice</div>
+        <div style="font-weight:800; color:var(--text2); font-size:16px; background:var(--bg); padding:8px 20px; border-radius:10px; border:2px solid var(--border); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;" id="q-type-badge">Multiple Choice</div>
       </div>
       
       <div class="q-scroll">
@@ -388,7 +392,7 @@
       <div class="grid-wrap" id="q-grid"></div>
 
       <!-- Minimizable Leaderboard -->
-      <div class="widget" id="wid-lb" style="height: 250px;">
+      <div class="widget" id="wid-lb" style="height: 280px;">
         <div class="widget-header" onclick="window.toggleWidget('wid-lb')">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> <span>↕</span>
         </div>
@@ -398,22 +402,22 @@
       </div>
 
       <!-- Minimizable Chat -->
-      <div class="widget" id="wid-chat" style="height: 250px; border-bottom:none;">
+      <div class="widget" id="wid-chat" style="height: 280px; border-bottom:none;">
         <div class="widget-header" onclick="window.toggleWidget('wid-chat')">
           <span>Live Chat</span> <span>↕</span>
         </div>
         <div class="widget-body">
           <div class="chat-msgs" id="game-chat-msgs"></div>
           <div class="chat-input-wrap">
-            <input type="text" id="game-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
+            <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
             <button onclick="window.sendGameChat()">Send</button>
           </div>
         </div>
       </div>
       
       <!-- Mobile Submit Button inside Sidebar -->
-      <div style="padding: 16px; background:var(--surface2); border-top:1px solid var(--border); display:none;" id="mob-submit-area">
-        <button class="btn btn-primary" style="width:100%;" onclick="window.submitQuizBtn()">Submit Test</button>
+      <div style="padding: 20px; background:var(--surface2); border-top:1px solid var(--border); display:none;" id="mob-submit-area">
+        <button class="btn btn-primary" style="width:100%; font-size: 16px; padding: 16px;" onclick="window.submitQuizBtn()">Submit Test</button>
       </div>
     </div>
   </div>
@@ -631,7 +635,7 @@ async function processFileHost(source, isUrl) {
             el('lobby-screen').classList.remove('hidden');
             el('host-controls').style.display = 'block';
             el('player-view-cfg').style.display = 'none';
-            el('btn-ready-up').style.display = 'block'; // Host explicitly confirms
+            el('btn-ready-up').style.display = 'block'; 
             initPeerAsHost();
         }, 500);
 
@@ -643,6 +647,7 @@ async function processFileHost(source, isUrl) {
 
 // ── 3. PEERJS NETWORKING ──
 function initPeerAsHost() {
+    isHost = true;
     roomCode = generateCode();
     peer = new Peer(roomCode);
     
@@ -651,7 +656,9 @@ function initPeerAsHost() {
         roomData.hostId = myId;
         el('lobby-status-text').textContent = "Waiting for players to join...";
         el('lobby-room-code').textContent = roomCode;
-        roomData.players[myId] = { name: myName, ready: false, state: 'downloading', progressText: 'Waiting for Ready...', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
+        
+        // Host starts as ready automatically
+        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: 'Ready', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
         updateLobbyUI();
         attachHostSettingsListeners();
     });
@@ -671,10 +678,12 @@ function initPeerAsHost() {
                     broadcastRoomState();
                 }
             }
-            if(data.type === 'ready') {
+            if(data.type === 'toggle_ready') {
                 if(roomData.players[conn.peer]) {
-                    roomData.players[conn.peer].ready = true;
-                    roomData.players[conn.peer].state = 'ready';
+                    roomData.players[conn.peer].ready = data.ready;
+                    roomData.players[conn.peer].state = data.ready ? 'ready' : 'downloading';
+                    roomData.players[conn.peer].progressText = data.ready ? 'Ready' : 'Not Ready';
+                    roomData.players[conn.peer].progressPct = 100;
                     broadcastRoomState();
                 }
             }
@@ -843,6 +852,7 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
     
     el('view-file').textContent = roomData.testFile;
+    el('view-sections').textContent = roomData.settings.sections.join(', ');
     el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown';
     el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
     
@@ -893,14 +903,19 @@ async function processFilePlayer(buffer) {
     } catch(err) { sendLobbyProgress('Processing Error', 0); showToast('error', 'Failed processing file'); }
 }
 
-window.sendReady = () => {
-    el('btn-ready-up').style.display = 'none';
+window.toggleReady = () => {
+    const p = roomData.players[myId];
+    if(!p) return;
+    const isNowReady = !p.ready;
+    
     if(isHost) {
-        roomData.players[myId].ready = true;
-        roomData.players[myId].state = 'ready';
+        p.ready = isNowReady;
+        p.state = isNowReady ? 'ready' : 'downloading';
+        p.progressText = isNowReady ? 'Ready' : 'Not Ready';
+        p.progressPct = 100;
         broadcastRoomState();
     } else {
-        if(hostConn && hostConn.open) hostConn.send({ type: 'ready' });
+        if(hostConn && hostConn.open) hostConn.send({ type: 'toggle_ready', ready: isNowReady });
     }
 };
 
@@ -918,7 +933,7 @@ function updateLobbyUI() {
         
         let statusHtml = '';
         if(p.state === 'ready') {
-            statusHtml = `<span style="font-size:12px; font-weight:800; color:var(--ans); background:rgba(16,185,129,0.1); padding:4px 10px; border-radius:8px;">READY</span>`;
+            statusHtml = `<span style="font-size:13px; font-weight:900; font-family:'Outfit'; color:var(--ans); background:rgba(16,185,129,0.15); padding:6px 12px; border-radius:10px; border:1px solid var(--ans); box-shadow: inset 0 0 5px rgba(16,185,129,0.2);">READY</span>`;
         } else {
             statusHtml = `<div style="width:140px;">
                 <div class="progress-wrap"><div class="progress-fill" style="width:${p.progressPct}%"></div></div>
@@ -935,14 +950,32 @@ function updateLobbyUI() {
             kickHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hasVoted?'disabled':''}>🥾 Kick (${votesCount}/${requiredKickVotes})</button>`;
         }
 
-        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
+        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--bg); border-radius:14px; border:2px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
             <div style="display:flex; align-items:center;">
-               <span style="font-weight:700; font-size:15px;">${p.name}</span>
+               <span style="font-weight:800; font-size:16px; font-family:'Outfit';">${p.name}</span>
                ${kickHtml}
             </div>
             ${statusHtml}
         </div>`;
     });
+    
+    // Update self Ready button state
+    const me = roomData.players[myId];
+    const btn = el('btn-ready-up');
+    if(me && btn && btn.style.display !== 'none') {
+        if(me.ready) {
+            btn.textContent = "Not Ready";
+            btn.style.background = "var(--unans)";
+            btn.style.borderColor = "var(--unans)";
+            btn.style.boxShadow = "0 8px 25px rgba(239, 68, 68, 0.4)";
+        } else {
+            btn.textContent = "I'm Ready";
+            btn.style.background = "var(--ans)";
+            btn.style.borderColor = "var(--ans)";
+            btn.style.boxShadow = "0 8px 25px rgba(16, 185, 129, 0.4)";
+        }
+    }
+
     if(isHost) el('btn-start-game').disabled = !allReady;
 }
 
@@ -1207,12 +1240,12 @@ function showFinalResults() {
     pArr.forEach((p, idx) => {
         listUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 24px; border-radius:16px; border:2px solid ${p.name === myName ? 'var(--accent)' : 'var(--border)'};">
             <div style="display:flex; gap:20px; align-items:center;">
-                <span style="font-size:28px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${idx+1}</span>
-                <span style="font-size:20px; font-weight:700;">${p.name}</span>
+                <span style="font-size:32px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${idx+1}</span>
+                <span style="font-size:22px; font-weight:800; font-family:'Outfit';">${p.name}</span>
             </div>
             <div style="text-align:right;">
-                <div style="font-size:26px; color:var(--ans); font-weight:800; font-family:'Outfit';">${p.score} <span style="font-size:14px;color:var(--text2);">marks</span></div>
-                <div style="font-size:13px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>
+                <div style="font-size:28px; color:var(--ans); font-weight:900; font-family:'Outfit';">${p.score} <span style="font-size:15px;color:var(--text2);">marks</span></div>
+                <div style="font-size:14px; color:var(--text2); font-weight:700;">Time: ${formatTime(p.timeTaken)}</div>
             </div>
         </div>`;
     });
