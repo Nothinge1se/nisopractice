@@ -153,11 +153,18 @@
   .config-row { margin-bottom: 16px; }
   .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 15px; }
   
+  /* Vote Kick Button */
+  .kick-btn { background: var(--unans); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 700; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); }
+  .kick-btn:hover:not(:disabled) { background: #dc2626; }
+  .kick-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
   /* Mobile Specific Layout */
   .mob-menu-btn { display: none; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; padding: 8px; color: white; }
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: none; }
 
   @media (max-width: 850px) {
+    .hero-title { font-size: 40px; }
+    .hero-sub { font-size: 15px; }
     .header { padding: 0 16px; }
     .brand { font-size: 20px; }
     .timer-center { flex: none; position: absolute; left: 50%; transform: translateX(-50%); }
@@ -178,9 +185,13 @@
     .lobby-grid { grid-template-columns: 1fr; }
   }
 
+  @media (max-width: 480px) {
+    .hero-title { font-size: 32px; }
+  }
+
   /* Toast */
   @keyframes slideUp { 0% { opacity: 0; transform: translate(-50%, 20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 14px 28px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 14px 28px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; white-space: nowrap;}
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 </style>
@@ -291,7 +302,7 @@
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card" style="padding: 20px; flex: 1; max-height: 350px;">
+      <div class="glass-card" style="padding: 20px; flex: 1; max-height: 400px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span class="label-title" style="margin:0;">Players</span>
           <span style="font-family:'Outfit'; font-weight:800; font-size:18px; color:var(--accent); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
@@ -299,6 +310,8 @@
         <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
           <!-- Players injected here -->
         </div>
+        <!-- I'm Ready Button -->
+        <button class="btn btn-primary" id="btn-ready-up" style="margin-top:12px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.sendReady()">I'm Ready</button>
       </div>
 
       <!-- Lobby Chat -->
@@ -455,6 +468,7 @@ let roomCode = "";
 
 // State tracked and broadcasted by Host
 let roomData = {
+    hostId: null,
     status: 'waiting', 
     testFile: null, 
     testUrl: null, 
@@ -467,6 +481,7 @@ let roomData = {
     },
     startTime: null, 
     totalQuestions: 0,
+    kickVotes: {}, // Tracks kicking { targetId: [voterId1, voterId2] }
     players: {} // { id: {name, ready, state: 'downloading'|'ready', progressPct, progressText, submitted, attempted, score, timeTaken} }
 };
 
@@ -482,6 +497,7 @@ let timerInterval = null;
 let syncInterval = null;
 let hasSubmitted = false;
 let gameFinished = false;
+let isFileAcquisitionStarted = false; // prevents unpacking loop
 
 // Helpers
 const el = id => document.getElementById(id);
@@ -550,7 +566,6 @@ async function processFileHost(source, isUrl) {
     el('host-file-progress').style.display = 'block';
     try {
         if(isUrl) {
-            // Check cache
             el('host-file-status').textContent = "Checking Cache...";
             let cached = await loadFromCache(source);
             if(cached) {
@@ -581,7 +596,6 @@ async function processFileHost(source, isUrl) {
         el('host-file-status').textContent = "Ready!";
         el('host-file-fill').style.width = '100%';
         
-        // Setup Sections Dropdown
         const sel = el('cfg-sections');
         sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
         Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
@@ -592,6 +606,7 @@ async function processFileHost(source, isUrl) {
             el('lobby-screen').classList.remove('hidden');
             el('host-controls').style.display = 'block';
             el('player-view-cfg').style.display = 'none';
+            el('btn-ready-up').style.display = 'block'; // Host also explicitly confirms
             initPeerAsHost();
         }, 500);
 
@@ -608,9 +623,10 @@ function initPeerAsHost() {
     
     peer.on('open', (id) => {
         myId = id;
+        roomData.hostId = myId;
         el('lobby-status-text').textContent = "Waiting for players to join...";
         el('lobby-room-code').textContent = roomCode;
-        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: '', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
+        roomData.players[myId] = { name: myName, ready: false, state: 'downloading', progressText: 'Waiting for Ready...', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
         updateLobbyUI();
         attachHostSettingsListeners();
     });
@@ -627,10 +643,13 @@ function initPeerAsHost() {
                 if(roomData.players[conn.peer]) {
                     roomData.players[conn.peer].progressText = data.text;
                     roomData.players[conn.peer].progressPct = data.pct;
-                    if(data.pct === 100 && data.text === 'Ready') {
-                        roomData.players[conn.peer].ready = true;
-                        roomData.players[conn.peer].state = 'ready';
-                    }
+                    broadcastRoomState();
+                }
+            }
+            if(data.type === 'ready') {
+                if(roomData.players[conn.peer]) {
+                    roomData.players[conn.peer].ready = true;
+                    roomData.players[conn.peer].state = 'ready';
                     broadcastRoomState();
                 }
             }
@@ -641,20 +660,55 @@ function initPeerAsHost() {
                 if(roomData.players[conn.peer]) {
                     const p = roomData.players[conn.peer];
                     p.attempted = data.attempted;
-                    if(data.submitted) {
-                        p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken;
-                    }
+                    if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; }
                     broadcastRoomState();
                     checkAllSubmitted();
                 }
             }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
+            if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
         });
 
-        conn.on('close', () => { delete connections[conn.peer]; delete roomData.players[conn.peer]; broadcastRoomState(); });
+        conn.on('close', () => { 
+            delete connections[conn.peer]; 
+            delete roomData.players[conn.peer];
+            if(roomData.kickVotes[conn.peer]) delete roomData.kickVotes[conn.peer];
+            broadcastRoomState(); 
+        });
     });
     peer.on('error', err => showToast('error', 'Network Error: ' + err.type));
 }
+
+function handleVoteKick(targetId, voterId) {
+    if(!roomData.kickVotes[targetId]) roomData.kickVotes[targetId] = [];
+    if(!roomData.kickVotes[targetId].includes(voterId)) {
+        roomData.kickVotes[targetId].push(voterId);
+    }
+    
+    // Kick requirement: all players minus 1 (the target). Minimum 1 vote.
+    const activePlayers = Object.keys(roomData.players).length;
+    const requiredVotes = Math.max(1, activePlayers - 1);
+    
+    if (roomData.kickVotes[targetId].length >= requiredVotes) {
+        if (connections[targetId]) {
+            connections[targetId].send({ type: 'kicked' });
+            setTimeout(() => {
+                connections[targetId].close();
+                delete connections[targetId];
+                delete roomData.players[targetId];
+                delete roomData.kickVotes[targetId];
+                broadcastRoomState();
+            }, 500);
+        }
+    } else {
+        broadcastRoomState();
+    }
+}
+
+window.voteKick = (targetId) => {
+    if (isHost) handleVoteKick(targetId, myId);
+    else if(hostConn && hostConn.open) hostConn.send({ type: 'vote_kick', target: targetId });
+};
 
 function attachHostSettingsListeners() {
     const pushCfg = () => {
@@ -694,402 +748,13 @@ function initPeerAsPlayer() {
         hostConn.on('data', async (data) => {
             if(data.type === 'room_state') {
                 const oldStatus = roomData.status;
-                const wasReady = roomData.players && roomData.players[myId]?.ready;
                 roomData = data.state;
-                handleRoomStateUpdatePlayer(oldStatus, wasReady);
+                handleRoomStateUpdatePlayer(oldStatus);
             }
-            // P2P File Receiving Logic
+            if(data.type === 'kicked') {
+                showToast('error', 'You have been kicked from the room.');
+                setTimeout(() => window.location.reload(), 2000);
+            }
+            // P2P File Receiving
             if(data.type === 'file_start') {
-                totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0;
-                sendLobbyProgress(`Receiving 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5);
-            }
-            if(data.type === 'file_chunk') {
-                receiveBuffer.push(data.chunk);
-                receivedSize += data.chunk.byteLength;
-                let pct = Math.floor((receivedSize/totalSize)*80) + 5; // scales 5% to 85%
-                if(receivedSize % (1024 * 512) < 130000) { // update UI roughly every 512kb to avoid spam
-                    sendLobbyProgress(`Receiving ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, pct);
-                }
-            }
-            if(data.type === 'file_end') {
-                sendLobbyProgress(`Unpacking Data...`, 90);
-                const blob = new Blob(receiveBuffer);
-                fileBuffer = await blob.arrayBuffer();
-                await saveToCache(roomData.testFile, fileBuffer);
-                await processFilePlayer(fileBuffer);
-            }
-            if(data.type === 'chat') { appendChatUI(data.name, data.text); }
-        });
-        hostConn.on('close', () => showToast('error', 'Host disconnected!'));
-    });
-    peer.on('error', err => showToast('error', 'Connection Error: ' + err.type));
-}
-
-async function sendP2PFileChunks(conn) {
-    if(!fileBuffer) return;
-    const size = 128 * 1024; // 128KB chunks
-    let offset = 0;
-    conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
-    while(offset < fileBuffer.byteLength) {
-        const chunk = fileBuffer.slice(offset, offset + size);
-        conn.send({ type: 'file_chunk', chunk });
-        offset += size;
-        await new Promise(r => setTimeout(r, 10)); // throttle to prevent WebRTC buffer overflow
-    }
-    conn.send({ type: 'file_end' });
-}
-
-function sendLobbyProgress(text, pct) {
-    if(hostConn && hostConn.open) hostConn.send({ type: 'lobby_progress', text, pct });
-}
-
-function broadcastRoomState() {
-    updateLobbyUI();
-    if(roomData.status === 'playing' && el('app').style.display === 'flex') renderSidebarLeaderboard();
-    for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
-}
-
-async function handleRoomStateUpdatePlayer(oldStatus, wasReady) {
-    updateLobbyUI();
-    
-    // Update player's view of Host Settings
-    el('view-file').textContent = roomData.testFile;
-    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown';
-    el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
-    
-    if(roomData.status === 'playing' && el('app').style.display === 'flex') renderSidebarLeaderboard();
-    
-    if(oldStatus === 'waiting' && !wasReady && roomData.testFile) {
-        // Trigger acquisition
-        let cached = await loadFromCache(roomData.testFile);
-        if(cached) {
-            sendLobbyProgress('Loading from Cache...', 50);
-            fileBuffer = cached;
-            await processFilePlayer(fileBuffer);
-        } else {
-            if(roomData.testUrl) {
-                // Fetch directly
-                sendLobbyProgress('Downloading from Web...', 10);
-                try {
-                    const res = await fetch(roomData.testUrl);
-                    fileBuffer = await res.arrayBuffer();
-                    await saveToCache(roomData.testFile, fileBuffer);
-                    await processFilePlayer(fileBuffer);
-                } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
-            } else {
-                // Request P2P transfer
-                sendLobbyProgress('Requesting file from Host...', 5);
-                hostConn.send({ type: 'request_file' });
-            }
-        }
-    }
-
-    if(oldStatus === 'waiting' && roomData.status === 'playing') launchGame();
-    if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
-    if(roomData.status === 'finished' && hasSubmitted) showFinalResults();
-}
-
-async function processFilePlayer(buffer) {
-    try {
-        sendLobbyProgress('Unpacking Zip...', 90);
-        const zip = await JSZip.loadAsync(buffer);
-        const jf = zip.file('data.json');
-        const data = JSON.parse(await jf.async('string'));
-        buildQuestions(data);
-        await preloadImages(zip);
-        sendLobbyProgress('Ready', 100);
-        showToast('success', 'Ready for Host to start!');
-    } catch(err) { sendLobbyProgress('Processing Error', 0); showToast('error', 'Failed processing file'); }
-}
-
-// ── 4. LOBBY UI & CHAT ──
-function updateLobbyUI() {
-    const list = el('players-list-ui'); list.innerHTML = '';
-    const players = Object.values(roomData.players);
-    el('player-count').textContent = players.length;
-    
-    let allReady = true;
-    players.forEach(p => {
-        if(!p.ready) allReady = false;
-        
-        let statusHtml = '';
-        if(p.state === 'ready') {
-            statusHtml = `<span style="font-size:12px; font-weight:800; color:var(--ans); background:rgba(16,185,129,0.1); padding:4px 10px; border-radius:8px;">READY</span>`;
-        } else {
-            statusHtml = `<div style="width:140px;">
-                <div class="progress-wrap"><div class="progress-fill" style="width:${p.progressPct}%"></div></div>
-                <div class="progress-text">${p.progressText}</div>
-            </div>`;
-        }
-
-        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
-            <span style="font-weight:700; font-size:15px;">${p.name}</span>
-            ${statusHtml}
-        </div>`;
-    });
-    if(isHost) el('btn-start-game').disabled = !allReady;
-}
-
-el('btn-start-game').addEventListener('click', () => {
-    if(!isHost) return;
-    roomData.status = 'playing'; roomData.startTime = Date.now();
-    broadcastRoomState(); launchGame();
-});
-
-window.copyJoinLink = () => {
-    navigator.clipboard.writeText(window.location.href.split('?')[0] + '?join=' + roomCode); 
-    showToast('success', 'Link copied!');
-};
-if (new URLSearchParams(window.location.search).get('join')) el('join-code').value = new URLSearchParams(window.location.search).get('join').toUpperCase();
-
-// Chat system (dual UI)
-window.sendLobbyChat = () => _sendChat('lobby-chat-input');
-window.sendGameChat = () => _sendChat('game-chat-input');
-
-function _sendChat(inputId) {
-    const inp = el(inputId); const text = inp.value.trim();
-    if(!text) return;
-    inp.value = '';
-    if(isHost) broadcastChat(myName, text);
-    else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: text });
-}
-function broadcastChat(name, text) {
-    appendChatUI(name, text);
-    for(let id in connections) connections[id].send({ type: 'chat', name, text });
-}
-function appendChatUI(name, text) {
-    const html = `<div class="msg"><div class="msg-name">${name}</div>${text}</div>`;
-    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
-        const box = el(id);
-        if(box) { box.innerHTML += html; box.scrollTop = box.scrollHeight; }
-    });
-}
-
-// ── 5. GAME ENGINE ──
-function launchGame() {
-    el('lobby-screen').classList.add('hidden');
-    el('app').style.display = 'flex';
-    el('top-file-name').textContent = roomData.testFile;
-
-    // Filter questions
-    if (!roomData.settings.sections.includes('ALL')) {
-        let newQ = []; let newMap = {}; let qIdx = 0;
-        roomData.settings.sections.forEach(sKey => {
-            newMap[sKey] = [];
-            if(sectionMap[sKey]) sectionMap[sKey].forEach(idx => { newQ.push(allQuestions[idx]); newMap[sKey].push(qIdx++); });
-        });
-        allQuestions = newQ; sectionMap = newMap;
-    }
-
-    allQuestions.forEach(q => answers[q.id] = { status: 'not-vis' });
-
-    const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
-    Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
-    currentSection = 'ALL'; currentQIdx = 0;
-
-    startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
-    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 4000);
-}
-
-function startTimers() {
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        if(hasSubmitted || !roomData.startTime) return;
-        const elapsed = Math.floor((Date.now() - roomData.startTime) / 1000);
-        const tEl = el('total-timer');
-        if (roomData.settings.timerMode === 'countdown') {
-            const rem = roomData.settings.timerDuration - elapsed;
-            if(rem <= 0) { tEl.textContent = "00:00"; forceSubmit(); } else tEl.textContent = formatTime(rem);
-        } else { tEl.textContent = formatTime(elapsed); }
-    }, 1000);
-}
-function formatTime(sec) {
-  if(sec<0)sec=0; const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = (sec%60).toString().padStart(2,'0');
-  return sec>=3600 ? `${Math.floor(sec/3600).toString().padStart(2,'0')}:${m}:${s}` : `${m}:${s}`;
-}
-
-function calculateScore() {
-    let net = 0;
-    allQuestions.forEach(q => {
-        const a = answers[q.id];
-        if(a && a.selected) {
-            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
-            if(isC) net += (q.marks.cm || 4); else net -= Math.abs(q.marks.im || 1);
-        }
-    });
-    return net;
-}
-
-function pushProgressToHost(isFinal = false) {
-    const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
-    const payload = {
-        attempted: att,
-        submitted: isFinal,
-        score: isFinal ? calculateScore() : 0,
-        timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0
-    };
-    if(isHost) {
-        const p = roomData.players[myId];
-        p.attempted = payload.attempted;
-        if(isFinal) { p.submitted = true; p.score = payload.score; p.timeTaken = payload.timeTaken; }
-        broadcastRoomState(); checkAllSubmitted();
-    } else {
-        if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...payload });
-    }
-}
-
-function checkAllSubmitted() {
-    if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) {
-        roomData.status = 'finished'; broadcastRoomState(); showFinalResults();
-    }
-}
-
-window.submitQuizBtn = () => { if(confirm("Submit test? You cannot change answers after this.")) forceSubmit(); };
-
-function forceSubmit() {
-    if(hasSubmitted) return;
-    hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
-    pushProgressToHost(true);
-    
-    // UI changes for NON-INTRUSIVE wait
-    el('btn-top-submit').disabled = true;
-    el('btn-top-submit').textContent = "Submitted";
-    el('btn-mark').disabled = true; el('btn-clear').disabled = true; el('btn-save').disabled = true;
-    el('submitted-layer').classList.add('show');
-    
-    // Disable inputs
-    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-    document.querySelectorAll('.nat-input').forEach(b => b.disabled = true);
-    
-    if(roomData.status === 'finished') showFinalResults();
-}
-
-// ── 6. DATA PARSING & RENDERING ──
-function buildQuestions(data) {
-  allQuestions = []; sectionMap = {}; imageCache = {};
-  const pdfData = data.pdfCropperData || data.questions || {}; 
-  const ansKey = data.testAnswerKey || data.answerKey || {}; 
-  let idx = 0;
-  for (const sub of Object.keys(pdfData)) {
-    for (const top of Object.keys(pdfData[sub])) {
-      const tqs = pdfData[sub][top] || {}; const tans = (ansKey[sub] || {})[top] || {}; 
-      const sk = `${sub} › ${top}`; sectionMap[sk] = [];
-      for (const qNum of Object.keys(tqs)) {
-        const qd = tqs[qNum] || {}; const ad = tans[qNum] || {};
-        allQuestions.push({
-          id: `${sub}__${top}__${qNum}`, globalNum: parseInt(qNum), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
-          correctAnswer: ad.correctAnswer, images: (()=>{ const imgs=[]; for(let i=1;i<=Math.max((qd.pdfData||[]).length||1,1);i++) imgs.push(`${top}__--__${qNum}__--__${i}.png`); return imgs;})()
-        });
-        sectionMap[sk].push(idx++);
-      }
-    }
-  }
-}
-async function preloadImages(zip) {
-  const files = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png'));
-  for (let i = 0; i < files.length; i++) {
-    try { const blob = await zip.files[files[i]].async('blob'); imageCache[files[i]] = URL.createObjectURL(blob); } catch(e) {}
-  }
-}
-
-// ── 7. CBT INTERACTIONS ──
-window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
-const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
-window.navigate = (dir) => { const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; if(np >= 0 && np < ind.length) { currentQIdx = ind[np]; renderSidebar(); renderQuestion(); } };
-window.goToQ = (idx) => { currentQIdx = idx; renderSidebar(); renderQuestion(); };
-
-window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; navigate(1); };
-window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'mark-ans' : 'marked'; navigate(1); };
-window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis' }; renderSidebar(); renderQuestion(); };
-
-function renderQuestion() {
-  const q = allQuestions[currentQIdx]; if (!q) return;
-  el('q-num-badge').textContent = `Question ${q.globalNum}`;
-  el('q-type-badge').textContent = q.type === 'mcq' ? 'Multiple Choice' : 'Numerical Value';
-  
-  const imgArea = el('q-image-container'); imgArea.innerHTML = '';
-  let hasImg = false;
-  for (const fname of q.images) { 
-      if (imageCache[fname]) { const img = document.createElement('img'); img.src = imageCache[fname]; imgArea.appendChild(img); hasImg = true; } 
-  }
-  if (!hasImg) imgArea.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center; font-weight:700;">📷 Image not found</div>`;
-
-  renderAnswerArea(q);
-}
-
-function renderAnswerArea(q) {
-  const area = el('answer-area'); const ans = answers[q.id];
-  if (q.type === 'mcq') {
-    const grid = document.createElement('div'); grid.className = 'opts-grid';
-    const labels = ['A','B','C','D']; const numOpts = q.answerOptions || 4; 
-    for (let i = 1; i <= numOpts; i++) {
-      const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.disabled = hasSubmitted;
-      if (ans && ans.selected === i) btn.classList.add('selected');
-      btn.innerHTML = `<div class="opt-key">${labels[i-1]}</div><span>Option ${labels[i-1]}</span>`;
-      if(!hasSubmitted) btn.onclick = () => { ans.selected = i; renderAnswerArea(q); };
-      grid.appendChild(btn);
-    }
-    area.innerHTML = ''; area.appendChild(grid);
-  } else {
-    area.innerHTML = '';
-    const input = document.createElement('input'); input.className = 'nat-input'; input.type = 'text'; input.placeholder = '0.00';
-    if (ans && ans.selected) input.value = ans.selected; input.disabled = hasSubmitted;
-    input.oninput = (e) => {
-        let val = e.target.value.replace(/[^0-9.\-]/g, '').trim(); e.target.value = val;
-        ans.selected = val || null;
-    };
-    area.appendChild(input);
-  }
-}
-
-function renderSidebar() {
-  const grid = el('q-grid'); grid.innerHTML = '';
-  getSeq().forEach(idx => {
-    const q = allQuestions[idx]; const dot = document.createElement('div'); dot.className = `dot ${answers[q.id].status}`;
-    if (idx === currentQIdx) dot.classList.add('active');
-    dot.textContent = q.globalNum;
-    dot.onclick = () => window.goToQ(idx); grid.appendChild(dot);
-  });
-}
-
-function renderSidebarLeaderboard() {
-    const listUI = el('sidebar-leaderboard'); if(!listUI) return;
-    const playersArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted);
-    listUI.innerHTML = '';
-    playersArr.forEach(p => {
-        const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
-        listUI.innerHTML += `
-            <div class="lb-item ${p.name === myName ? 'me' : ''}">
-                <div class="lb-top">
-                  <span class="lb-name">${p.name} ${p.submitted?'🏁':''}</span>
-                  <span class="lb-stat">${p.attempted} / ${roomData.totalQuestions}</span>
-                </div>
-                <div class="progress-wrap" style="height:4px; margin-top:0;"><div class="progress-fill" style="width:${pct}%"></div></div>
-            </div>`;
-    });
-}
-
-function showFinalResults() {
-    gameFinished = true;
-    el('submitted-layer').classList.remove('show');
-    el('final-results-layer').classList.add('show');
-    
-    const listUI = el('final-lb-list'); listUI.innerHTML = '';
-    const pArr = Object.values(roomData.players).sort((a,b) => b.score - a.score);
-
-    pArr.forEach((p, idx) => {
-        listUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 24px; border-radius:16px; border:2px solid ${p.name === myName ? 'var(--accent)' : 'var(--border)'};">
-            <div style="display:flex; gap:20px; align-items:center;">
-                <span style="font-size:28px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${idx+1}</span>
-                <span style="font-size:20px; font-weight:700;">${p.name}</span>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-size:26px; color:var(--ans); font-weight:800; font-family:'Outfit';">${p.score} <span style="font-size:14px;color:var(--text2);">marks</span></div>
-                <div style="font-size:13px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>
-            </div>
-        </div>`;
-    });
-}
-</script>
-</body>
-</html>
+                total
