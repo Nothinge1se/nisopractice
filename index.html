@@ -57,6 +57,9 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border:none;}
   .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6); }
 
+  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.08); }
+
   .label-title { font-size: 12px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Outfit'; }
 
   /* --- FILE PROGRESS UI --- */
@@ -82,10 +85,6 @@
   .st-dot { width: 10px; height: 10px; border-radius: 3px; }
 
   .main-stage { display: flex; flex: 1; overflow: hidden; position: relative; }
-
-  /* LEFT DOCK (For Chat) */
-  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
-  #left-dock .widget-header { border-top: none; }
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
@@ -125,7 +124,10 @@
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);}
 
-  /* SIDEBAR (Grid + Leaderboard + Chat) */
+  /* LEFT DOCK (For Chat on Desktop) */
+  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
+  
+  /* SIDEBAR (Grid + Leaderboard) */
   .sidebar { width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3);}
   .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 14px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
@@ -140,17 +142,22 @@
 
   /* Minimizable Widgets */
   .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0;}
-  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border);}
+  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border);}
   .widget-body { overflow: hidden; display: flex; flex-direction: column; flex: 1; }
   .widget.minimized { height: 46px !important; flex: none !important; }
   .widget.minimized .widget-body { display: none; }
 
-  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; height: 200px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
   .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word;}
   .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
   .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); }
   .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit';}
+  .chat-input-wrap input:focus { border-color: var(--accent); }
   .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase;}
+  
+  .controls-row { display: flex; gap: 8px; }
+  .control-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;}
+  .control-btn:hover { background: var(--accent); border-color: var(--accent); }
 
   /* Lobby Grid */
   .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 900px; align-items: start;}
@@ -176,6 +183,12 @@
   /* Mobile Overrides */
   .mob-menu-btn { display: none; font-size: 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: white; }
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
+
+  /* Mobile Chat Wrapper placed globally to prevent fixed clipping */
+  .chat-wrapper { display: flex; flex-direction: column; flex: 1; height: 100%; }
+  
+  #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
+  #mob-chat-wrapper.show-mob { bottom: 0; }
 
   #mob-chat-fab { display: none; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   #mob-chat-fab:active { transform: scale(0.9); }
@@ -203,16 +216,12 @@
     .q-scroll { padding: 16px; }
     .ans-area { padding: 16px 12px; }
 
-    /* Floating Chat Mobile */
-    #wid-chat-main { display: none !important; }
+    /* Hide desktop chat widget */
+    #wid-chat-desk { display: none !important; }
     #mob-chat-fab { display: flex; }
-    #chat-core-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: flex; flex-direction: column; transition: bottom 0.3s ease; border-radius: 20px 20px 0 0;}
-    #chat-core-wrapper.show-mob { bottom: 0; }
-    #chat-core-wrapper .widget-header { display: flex !important; justify-content: space-between; border-radius: 20px 20px 0 0; }
+    #mob-chat-wrapper { display: flex; }
   }
-  @media (min-width: 851px) {
-    #chat-core-wrapper .widget-header { display: none !important; }
-  }
+  
   @media (max-width: 480px) {
     .join-wrap { flex-direction: column; gap: 10px; }
     .join-wrap button { flex: none !important; width: 100%; }
@@ -262,7 +271,6 @@
     </div>
   </div>
   
-  <!-- File Processing Overridden Card -->
   <div class="glass-card" style="max-width: 500px; display:none;" id="host-file-progress">
        <div class="progress-container">
            <div class="progress-text" id="host-file-status">Processing File...</div>
@@ -278,7 +286,6 @@
   <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2); margin-bottom: 20px;">Connecting to Peer Network...</div>
   
   <div class="lobby-grid">
-    <!-- LEFT: Settings -->
     <div class="lobby-left">
       <div class="glass-card" style="padding: 20px;">
         <div class="label-title" style="text-align:center; font-size: 13px;">Invite Friends</div>
@@ -328,7 +335,6 @@
       </div>
     </div>
 
-    <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
       <div class="glass-card" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -356,7 +362,6 @@
   <div class="header">
     <div class="brand">NPRAQ</div>
     
-    <!-- Top Stats (Desktop) -->
     <div class="compact-stats-top" id="top-stats-desk">
        <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
        <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
@@ -372,7 +377,6 @@
     </div>
   </div>
 
-  <!-- Review Banner (Post-submit non-intrusive header) -->
   <div class="review-banner" id="review-banner">
       <div style="display:flex; align-items:center; gap:12px;">
          <span>👀 <b>Review Mode</b> (Test Submitted)</span>
@@ -383,12 +387,15 @@
 
   <div class="main-stage">
     
-    <!-- LEFT DOCK FOR CHAT -->
+    <!-- LEFT DOCK FOR CHAT (Desktop only) -->
     <div id="left-dock">
        <div class="widget-header">
           <span>Live Chat</span>
-          <span onclick="window.toggleChatDock()" style="color:var(--text2); cursor:pointer;">◨ Undock</span>
+          <div class="controls-row">
+            <button class="control-btn" onclick="window.toggleChatDock()">◨ Undock</button>
+          </div>
        </div>
+       <div class="chat-wrapper" id="dock-chat-target"></div>
     </div>
 
     <div class="q-area">
@@ -397,7 +404,6 @@
            <div class="q-badge" id="q-num-badge">Q1</div>
            <div style="font-weight:700; color:var(--text2); font-size:14px; font-family:'Outfit'; text-transform:uppercase;" id="q-type-badge">MCQ</div>
         </div>
-        <!-- Top Stats (Mobile fallback) -->
         <div class="compact-stats-top" id="top-stats-mob" style="display:none;">
            <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-mob">0</span></div>
            <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-mob">0</span></div>
@@ -435,30 +441,28 @@
       <div class="grid-wrap" id="q-grid"></div>
 
       <div class="widget" id="wid-lb" style="height: 250px;">
-        <div class="widget-header" onclick="window.toggleWidget('wid-lb')">
+        <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
-          <span style="cursor:pointer; color:var(--text2);">↕</span>
+          <div class="controls-row">
+            <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
+          </div>
         </div>
         <div class="widget-body">
           <div class="lb-list" id="sidebar-leaderboard"></div>
         </div>
       </div>
 
-      <div class="widget" id="wid-chat-main" style="border-bottom:none; flex:1;">
+      <!-- DESKTOP CHAT WIDGET -->
+      <div class="widget" id="wid-chat-desk" style="border-bottom:none; flex:1;">
         <div class="widget-header">
-          <span onclick="window.toggleWidget('wid-chat-main')">Live Chat <span style="color:var(--text2);">↕</span></span> 
-          <span onclick="window.toggleChatDock()" style="color:var(--accent2); cursor:pointer;">◧ Dock</span>
+          <span>Live Chat</span> 
+          <div class="controls-row">
+            <button class="control-btn" onclick="window.toggleChatDock()">◧ Dock</button>
+            <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
+          </div>
         </div>
-        <div class="widget-body" id="chat-core-wrapper">
-          <div class="widget-header" style="display:none; border-bottom:1px solid var(--border);">
-            <span>Live Chat</span>
-            <span onclick="document.getElementById('chat-core-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--unans);">✕ Close</span>
-          </div>
-          <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
-          <div class="chat-input-wrap">
-            <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
-            <button onclick="window.sendGameChat()">Send</button>
-          </div>
+        <div class="widget-body" id="desk-chat-target">
+            <!-- Chat core injected here on desktop -->
         </div>
       </div>
       
@@ -468,8 +472,24 @@
     </div>
   </div>
 
-  <!-- Mobile Floating Chat Button -->
-  <button id="mob-chat-fab" onclick="document.getElementById('chat-core-wrapper').classList.toggle('show-mob')">💬</button>
+  <!-- THE ACTUAL CHAT CORE (Moved around by JS/CSS) -->
+  <div id="chat-core-wrapper" style="display: none;">
+      <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
+      <div class="chat-input-wrap">
+        <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
+        <button onclick="window.sendGameChat()">Send</button>
+      </div>
+  </div>
+
+  <!-- MOBILE FLOATING CHAT -->
+  <div id="mob-chat-wrapper">
+      <div class="widget-header">
+        <span>Live Chat</span>
+        <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
+      </div>
+      <div id="mob-chat-target" style="display:flex; flex-direction:column; flex:1; overflow:hidden;"></div>
+  </div>
+  <button id="mob-chat-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
 
   <!-- SUBMIT WARNING MODAL -->
   <div class="modal-layer" id="submit-warning-modal">
@@ -542,7 +562,9 @@ let roomData = {
     startTime: null, totalQuestions: 0, kickVotes: {}, players: {}
 };
 
-let fileBuffer = null; let allQuestions = []; let sectionMap = {};
+let fileBuffer = null; 
+let masterQuestions = []; let masterSectionMap = {}; // Master pure copy
+let allQuestions = []; let sectionMap = {}; // Filtered game copy
 let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};   
 let imageCache = {}; let timerInterval = null; let syncInterval = null;
 let hasSubmitted = false; let gameFinished = false; 
@@ -552,23 +574,13 @@ const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
 const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCase();
 
-// UI Toggles
+// UI Toggles & Setup
 window.toggleMobMenu = () => { const sb = el('main-sidebar'); const ov = el('mob-overlay'); if(sb && ov) { sb.classList.toggle('open'); ov.classList.toggle('open'); } };
 
 let isChatDockedLeft = false;
 window.toggleChatDock = () => {
-    if(window.innerWidth <= 850) return; // Ignore on mobile
     isChatDockedLeft = !isChatDockedLeft;
-    const wrapper = el('chat-core-wrapper');
-    if(isChatDockedLeft) {
-        el('left-dock').appendChild(wrapper);
-        el('left-dock').style.display = 'flex';
-        el('wid-chat-main').style.display = 'none';
-    } else {
-        el('wid-chat-main').appendChild(wrapper);
-        el('left-dock').style.display = 'none';
-        el('wid-chat-main').style.display = 'flex';
-    }
+    mountChatCore();
 };
 
 window.toggleWidget = (id) => {
@@ -576,7 +588,32 @@ window.toggleWidget = (id) => {
     if(w) w.classList.toggle('minimized');
 };
 
+function mountChatCore() {
+    const core = el('chat-core-wrapper');
+    core.style.display = 'flex';
+    core.className = 'chat-wrapper';
+    if(window.innerWidth <= 850) {
+        el('mob-chat-target').appendChild(core);
+    } else {
+        if(isChatDockedLeft) {
+            el('dock-chat-target').appendChild(core);
+            el('left-dock').style.display = 'flex';
+            el('wid-chat-desk').style.display = 'none';
+        } else {
+            el('desk-chat-target').appendChild(core);
+            el('left-dock').style.display = 'none';
+            el('wid-chat-desk').style.display = 'flex';
+        }
+    }
+    // Auto scroll bottom
+    const box = el('game-chat-msgs');
+    if(box) box.scrollTop = box.scrollHeight;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    mountChatCore();
+    window.addEventListener('resize', mountChatCore); // Keep chat in right place on rotate
+
     if(window.innerWidth <= 850) { 
         const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
         el('top-stats-desk').style.display = 'none';
@@ -637,7 +674,7 @@ async function processFileHost(source, isUrl) {
             el('host-file-status').textContent = "Checking Cache..."; let cached = await loadFromCache(source);
             if(cached) { fileBuffer = cached; } else {
                 el('host-file-status').textContent = "Downloading Mock Paper...";
-                const res = await fetch(source); if(!res.ok) throw new Error("Fetch failed.");
+                const res = await fetch(source); if(!res.ok) throw new Error("Fetch failed. Paper might not exist on this server.");
                 
                 const contentLength = res.headers.get('content-length');
                 const total = parseInt(contentLength, 10) || 0;
@@ -664,7 +701,7 @@ async function processFileHost(source, isUrl) {
         
         el('host-file-status').textContent = "Ready!"; el('host-file-sub').textContent = 'Opening Lobby...'; el('host-file-fill').style.width = '100%';
         const sel = el('cfg-sections'); sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
-        Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
+        Object.keys(masterSectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
 
         setTimeout(() => {
             el('host-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
@@ -721,7 +758,7 @@ function attachHostSettingsListeners() {
         roomData.settings.timerMode = el('cfg-timer-mode').value;
         roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
         roomData.settings.showLiveStats = el('cfg-live-stats').value;
-        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = allQuestions.length; else { let t = 0; roomData.settings.sections.forEach(s => { if(sectionMap[s]) t += sectionMap[s].length; }); roomData.totalQuestions = t; }
+        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length; else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
         broadcastRoomState();
     };
     ['cfg-sections', 'cfg-timer-mode', 'cfg-duration', 'cfg-live-stats'].forEach(id => el(id).addEventListener('change', pushCfg));
@@ -796,7 +833,7 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     }
     
     if((!oldStatus || oldStatus === 'waiting') && roomData.status === 'playing') {
-        if(allQuestions.length > 0) launchGame();
+        if(masterQuestions.length > 0) launchGame();
         else isLaunchPending = true; // Wait for processing
     }
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
@@ -853,15 +890,26 @@ function appendChatUI(n, t) {
 // ── 5. GAME ENGINE ──
 function launchGame() {
     el('lobby-screen').classList.add('hidden'); el('app').style.display = 'flex'; el('top-file-name').textContent = roomData.testFile;
-    if (!roomData.settings.sections.includes('ALL')) {
-        let nQ = []; let nM = {}; let qI = 0;
-        roomData.settings.sections.forEach(k => { nM[k] = []; if(sectionMap[k]) sectionMap[k].forEach(i => { nQ.push(allQuestions[i]); nM[k].push(qI++); }); });
-        allQuestions = nQ; sectionMap = nM;
+    
+    // Safely copy Master Questions to Game Questions
+    allQuestions = []; sectionMap = {};
+    if (roomData.settings.sections.includes('ALL')) {
+        allQuestions = [...masterQuestions]; sectionMap = JSON.parse(JSON.stringify(masterSectionMap));
+    } else {
+        let qI = 0;
+        roomData.settings.sections.forEach(k => { 
+            sectionMap[k] = []; 
+            if(masterSectionMap[k]) {
+                masterSectionMap[k].forEach(i => { allQuestions.push(masterQuestions[i]); sectionMap[k].push(qI++); }); 
+            }
+        });
     }
+
     allQuestions.forEach(q => answers[q.id] = { status: 'not-vis' });
     const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
+    
     startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
     syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 3000);
 }
@@ -870,13 +918,15 @@ function startTimers() {
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if(hasSubmitted || !roomData.startTime) return;
-        const elps = Math.floor((Date.now() - roomData.startTime) / 1000); const t = el('total-timer');
+        const elps = Math.floor((Date.now() - roomData.startTime) / 1000);
+        let correctedElps = elps < 0 ? 0 : elps; // Protect against clock drift
+        const t = el('total-timer');
         if (roomData.settings.timerMode === 'countdown') { 
-            const r = roomData.settings.timerDuration - elps; 
+            const r = roomData.settings.timerDuration - correctedElps; 
             if(r <= 0) { t.textContent = "00:00"; forceSubmit(); } 
             else { t.textContent = formatTime(r); if(r < 300) t.parentElement.classList.add('ending'); }
         } 
-        else { t.textContent = formatTime(elps); }
+        else { t.textContent = formatTime(correctedElps); }
     }, 1000);
 }
 function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
@@ -917,14 +967,14 @@ window.forceSubmit = () => {
 
 // ── 6. DATA PARSING ──
 function buildQuestions(data) {
-  allQuestions = []; sectionMap = {}; imageCache = {}; const pD = data.pdfCropperData || data.questions || {}; const aK = data.testAnswerKey || data.answerKey || {}; let i = 0;
+  masterQuestions = []; masterSectionMap = {}; imageCache = {}; const pD = data.pdfCropperData || data.questions || {}; const aK = data.testAnswerKey || data.answerKey || {}; let i = 0;
   for (const s of Object.keys(pD)) {
     for (const t of Object.keys(pD[s])) {
-      const tq = pD[s][t] || {}; const ta = (aK[s] || {})[t] || {}; const sk = `${s} › ${t}`; sectionMap[sk] = [];
+      const tq = pD[s][t] || {}; const ta = (aK[s] || {})[t] || {}; const sk = `${s} › ${t}`; masterSectionMap[sk] = [];
       for (const q of Object.keys(tq)) {
         const qd = tq[q] || {}; const ad = ta[q] || {};
-        allQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: ad.correctAnswer, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
-        sectionMap[sk].push(i++);
+        masterQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: ad.correctAnswer, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
+        masterSectionMap[sk].push(i++);
       }
     }
   }
