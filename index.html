@@ -86,8 +86,12 @@
 
   .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
+  /* LEFT DOCK (For Chat) */
+  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
+  #left-dock .widget-header { border-top: none; }
+
   /* QUESTION AREA */
-  .q-area { flex: 1; display: flex; flex-direction: column; min-height: 0; background: var(--bg); overflow: hidden; position: relative; }
+  .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
   
   .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700; flex-shrink: 0;}
   .review-banner.show { display: flex; }
@@ -125,8 +129,6 @@
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);}
 
   /* SIDEBARS & WIDGETS */
-  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); flex-shrink: 0;}
-  
   .sidebar { width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3);}
   .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 14px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
@@ -141,7 +143,7 @@
 
   /* Minimizable Widgets */
   .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden;}
-  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
   .widget-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .widget.minimized { height: 46px !important; flex: none !important; }
   .widget.minimized .widget-body { display: none; }
@@ -158,6 +160,14 @@
   .controls-row { display: flex; gap: 8px; }
   .control-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: 'Inter'; text-transform: none; font-weight: 600;}
   .control-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* Leaderboard UI */
+  .lb-list { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: 200px; background: var(--bg); }
+  .lb-item { display: flex; flex-direction: column; background: var(--surface2); padding: 16px; border-radius: 12px; border: 2px solid var(--border); }
+  .lb-item.me { border-color: var(--accent); background: rgba(99, 102, 241, 0.05);}
+  .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .lb-name { font-weight: 700; font-size: 16px; font-family: 'Outfit';}
+  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
 
   /* Lobby Grid */
   .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 900px; align-items: start;}
@@ -187,7 +197,7 @@
   #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
   #mob-chat-wrapper.show-mob { bottom: 0; }
 
-  #mob-chat-fab { display: none; position: fixed; bottom: 80px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  #mob-chat-fab { display: none; position: fixed; bottom: 85px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   #mob-chat-fab:active { transform: scale(0.9); }
 
   @media (max-width: 850px) {
@@ -282,6 +292,7 @@
   <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2); margin-bottom: 20px;">Connecting to Peer Network...</div>
   
   <div class="lobby-grid">
+    <!-- LEFT: Settings -->
     <div class="lobby-left">
       <div class="glass-card" style="padding: 20px;">
         <div class="label-title" style="text-align:center; font-size: 13px;">Invite Friends</div>
@@ -331,6 +342,7 @@
       </div>
     </div>
 
+    <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
       <div class="glass-card" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -358,6 +370,7 @@
   <div class="header">
     <div class="brand">NPRAQ</div>
     
+    <!-- Top Stats (Desktop) -->
     <div class="compact-stats-top" id="top-stats-desk">
        <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
        <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
@@ -368,13 +381,12 @@
     <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
     
     <div class="header-right">
-      <!-- Title fallback container for Desktop safely empty to avoid crash -->
-      <div id="top-file-name-container" style="display:none;"></div> 
       <button class="btn btn-primary" style="padding: 10px 20px; font-size: 14px; width:auto; border-radius:10px;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
       <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
     </div>
   </div>
 
+  <!-- Review Banner (Post-submit non-intrusive header) -->
   <div class="review-banner" id="review-banner">
       <div style="display:flex; align-items:center; gap:12px;">
          <span>👀 <b>Review Mode</b> (Test Submitted)</span>
@@ -580,7 +592,7 @@ let isChatDockedLeft = false;
 window.toggleChatDock = () => {
     if(window.innerWidth <= 850) return; // Ignore on mobile
     isChatDockedLeft = !isChatDockedLeft;
-    mountChatCore();
+    mountChatCore(true);
 };
 
 window.toggleWidget = (id) => {
@@ -588,7 +600,9 @@ window.toggleWidget = (id) => {
     if(w) w.classList.toggle('minimized');
 };
 
-function mountChatCore() {
+let _lastWidthCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
+
+function mountChatCore(force = false) {
     const core = el('chat-core-wrapper');
     core.style.display = 'flex';
     
@@ -612,8 +626,16 @@ function mountChatCore() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    mountChatCore();
-    window.addEventListener('resize', mountChatCore); 
+    mountChatCore(true);
+
+    window.addEventListener('resize', () => {
+        const currentCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
+        // Only remount if we cross the mobile/desktop boundary (prevents keyboard dismiss bug)
+        if (currentCategory !== _lastWidthCategory) {
+            _lastWidthCategory = currentCategory;
+            mountChatCore(true);
+        }
+    });
 
     if(window.innerWidth <= 850) { 
         const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
@@ -1104,7 +1126,16 @@ function renderSidebarLeaderboard() {
     const pArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted); list.innerHTML = '';
     pArr.forEach(p => {
         const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
-        list.innerHTML += `<div class="lb-item ${p.name === myName ? 'me' : ''}"><div class="lb-top"><span class="lb-name">${p.name} ${p.submitted?'🏁':''}</span><span class="lb-stat">${p.attempted} / ${roomData.totalQuestions}</span></div><div class="progress-wrap" style="height:4px; margin-top:0;"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+        list.innerHTML += `
+            <div class="lb-item ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
+                <div class="lb-top" style="margin-bottom: 12px;">
+                  <span class="lb-name" style="font-size: 16px;">${p.name} ${p.submitted?'🏁':''}</span>
+                  <span class="lb-stat" style="font-size: 16px;">${p.attempted} / ${roomData.totalQuestions}</span>
+                </div>
+                <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+                  <div class="progress-fill" style="width:${pct}%; box-shadow: 0 0 10px var(--accent-glow);"></div>
+                </div>
+            </div>`;
     });
 }
 
