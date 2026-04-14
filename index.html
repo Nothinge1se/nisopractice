@@ -84,12 +84,12 @@
   .st-item { display: flex; align-items: center; gap: 5px; }
   .st-dot { width: 10px; height: 10px; border-radius: 3px; }
 
-  .main-stage { display: flex; flex: 1; overflow: hidden; position: relative; }
+  .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
   /* QUESTION AREA */
-  .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
+  .q-area { flex: 1; display: flex; flex-direction: column; min-height: 0; background: var(--bg); overflow: hidden; position: relative; }
   
-  .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700;}
+  .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700; flex-shrink: 0;}
   .review-banner.show { display: flex; }
 
   .q-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10; flex-wrap: wrap; gap: 10px; flex-shrink:0;}
@@ -124,15 +124,14 @@
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);}
 
-  /* LEFT DOCK (For Chat on Desktop) */
-  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
+  /* SIDEBARS & WIDGETS */
+  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); flex-shrink: 0;}
   
-  /* SIDEBAR (Grid + Leaderboard) */
   .sidebar { width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3);}
   .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 14px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
-  .grid-wrap { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
+  .grid-wrap { padding: 16px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
   .dot { width: 40px; height: 40px; border-radius: 10px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
   .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.3); z-index: 2;}
   .dot.ans { background: var(--ans); color: #fff; }
@@ -141,22 +140,23 @@
   .dot.mark-ans { background: var(--mark-ans); color: #fff; }
 
   /* Minimizable Widgets */
-  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0;}
-  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border);}
-  .widget-body { overflow: hidden; display: flex; flex-direction: column; flex: 1; }
+  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden;}
+  .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+  .widget-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .widget.minimized { height: 46px !important; flex: none !important; }
   .widget.minimized .widget-body { display: none; }
 
-  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
-  .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word;}
+  .chat-wrapper { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500; min-height: 0;}
+  .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word; flex-shrink: 0;}
   .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
-  .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); }
-  .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit';}
+  .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); flex-shrink: 0; }
+  .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit'; min-width: 0;}
   .chat-input-wrap input:focus { border-color: var(--accent); }
-  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase;}
+  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase; flex-shrink: 0;}
   
   .controls-row { display: flex; gap: 8px; }
-  .control-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;}
+  .control-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: 'Inter'; text-transform: none; font-weight: 600;}
   .control-btn:hover { background: var(--accent); border-color: var(--accent); }
 
   /* Lobby Grid */
@@ -176,26 +176,22 @@
   .modal-layer.show { display: flex; }
 
   .medal { font-size: 28px; }
-  .lb-result-item { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 20px; border-radius:16px; border:2px solid var(--border); margin-bottom: 12px;}
+  .lb-result-item { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 20px; border-radius:16px; border:2px solid var(--border); margin-bottom: 12px; flex-shrink: 0;}
   .lb-result-item.me { border-color: var(--accent); background: rgba(99,102,241,0.1); }
   .lb-result-item.waiting { opacity: 0.6; border-style: dashed; }
 
   /* Mobile Overrides */
-  .mob-menu-btn { display: none; font-size: 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: white; }
+  .mob-menu-btn { display: none; font-size: 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: white; flex-shrink: 0;}
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
-  /* Mobile Chat Wrapper placed globally to prevent fixed clipping */
-  .chat-wrapper { display: flex; flex-direction: column; flex: 1; height: 100%; }
-  
   #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
   #mob-chat-wrapper.show-mob { bottom: 0; }
 
-  #mob-chat-fab { display: none; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  #mob-chat-fab { display: none; position: fixed; bottom: 80px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   #mob-chat-fab:active { transform: scale(0.9); }
 
   @media (max-width: 850px) {
     .header { padding: 0 12px; height: 60px;}
-    #top-file-name { display: none; }
     .mob-menu-btn { display: block; }
     .header-right { flex: 0; }
     .header-right .btn-primary { display: none; } 
@@ -372,6 +368,8 @@
     <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
     
     <div class="header-right">
+      <!-- Title fallback container for Desktop safely empty to avoid crash -->
+      <div id="top-file-name-container" style="display:none;"></div> 
       <button class="btn btn-primary" style="padding: 10px 20px; font-size: 14px; width:auto; border-radius:10px;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
       <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
     </div>
@@ -387,15 +385,16 @@
 
   <div class="main-stage">
     
-    <!-- LEFT DOCK FOR CHAT (Desktop only) -->
+    <!-- LEFT DOCK FOR CHAT -->
     <div id="left-dock">
        <div class="widget-header">
           <span>Live Chat</span>
           <div class="controls-row">
             <button class="control-btn" onclick="window.toggleChatDock()">◨ Undock</button>
+            <button class="control-btn" onclick="window.toggleWidget('left-dock')">Min</button>
           </div>
        </div>
-       <div class="chat-wrapper" id="dock-chat-target"></div>
+       <div class="widget-body" id="dock-chat-target"></div>
     </div>
 
     <div class="q-area">
@@ -404,6 +403,7 @@
            <div class="q-badge" id="q-num-badge">Q1</div>
            <div style="font-weight:700; color:var(--text2); font-size:14px; font-family:'Outfit'; text-transform:uppercase;" id="q-type-badge">MCQ</div>
         </div>
+        <!-- Top Stats (Mobile fallback) -->
         <div class="compact-stats-top" id="top-stats-mob" style="display:none;">
            <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-mob">0</span></div>
            <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-mob">0</span></div>
@@ -452,12 +452,11 @@
         </div>
       </div>
 
-      <!-- DESKTOP CHAT WIDGET -->
       <div class="widget" id="wid-chat-desk" style="border-bottom:none; flex:1;">
         <div class="widget-header">
           <span>Live Chat</span> 
           <div class="controls-row">
-            <button class="control-btn" onclick="window.toggleChatDock()">◧ Dock</button>
+            <button class="control-btn" onclick="window.toggleChatDock()">◧ Dock Left</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
           </div>
         </div>
@@ -473,7 +472,11 @@
   </div>
 
   <!-- THE ACTUAL CHAT CORE (Moved around by JS/CSS) -->
-  <div id="chat-core-wrapper" style="display: none;">
+  <div id="chat-core-wrapper" class="chat-wrapper" style="display: none;">
+      <div class="widget-header" id="mob-chat-header" style="display:none;">
+          <span>Live Chat</span>
+          <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
+      </div>
       <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
       <div class="chat-input-wrap">
         <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
@@ -481,13 +484,9 @@
       </div>
   </div>
 
-  <!-- MOBILE FLOATING CHAT -->
+  <!-- MOBILE FLOATING CHAT SHELL -->
   <div id="mob-chat-wrapper">
-      <div class="widget-header">
-        <span>Live Chat</span>
-        <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
-      </div>
-      <div id="mob-chat-target" style="display:flex; flex-direction:column; flex:1; overflow:hidden;"></div>
+      <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
   <button id="mob-chat-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
 
@@ -579,6 +578,7 @@ window.toggleMobMenu = () => { const sb = el('main-sidebar'); const ov = el('mob
 
 let isChatDockedLeft = false;
 window.toggleChatDock = () => {
+    if(window.innerWidth <= 850) return; // Ignore on mobile
     isChatDockedLeft = !isChatDockedLeft;
     mountChatCore();
 };
@@ -591,10 +591,12 @@ window.toggleWidget = (id) => {
 function mountChatCore() {
     const core = el('chat-core-wrapper');
     core.style.display = 'flex';
-    core.className = 'chat-wrapper';
+    
     if(window.innerWidth <= 850) {
         el('mob-chat-target').appendChild(core);
+        el('mob-chat-header').style.display = 'flex';
     } else {
+        el('mob-chat-header').style.display = 'none';
         if(isChatDockedLeft) {
             el('dock-chat-target').appendChild(core);
             el('left-dock').style.display = 'flex';
@@ -605,14 +607,13 @@ function mountChatCore() {
             el('wid-chat-desk').style.display = 'flex';
         }
     }
-    // Auto scroll bottom
     const box = el('game-chat-msgs');
     if(box) box.scrollTop = box.scrollHeight;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     mountChatCore();
-    window.addEventListener('resize', mountChatCore); // Keep chat in right place on rotate
+    window.addEventListener('resize', mountChatCore); 
 
     if(window.innerWidth <= 850) { 
         const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
@@ -862,7 +863,7 @@ function updateLobbyUI() {
 
     players.forEach(p => {
         if(!p.ready) allReady = false;
-        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:120px;"><div class="progress-wrap" style="height:6px;margin:0;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div class="progress-text" style="font-size:10px;">${p.progressText}</div></div>`;
+        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:120px;"><div class="progress-wrap" style="height:6px;margin:0;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div class="progress-text" style="font-size:10px; color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</div></div>`;
         let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
         if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
         list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
@@ -889,9 +890,8 @@ function appendChatUI(n, t) {
 
 // ── 5. GAME ENGINE ──
 function launchGame() {
-    el('lobby-screen').classList.add('hidden'); el('app').style.display = 'flex'; el('top-file-name').textContent = roomData.testFile;
+    el('lobby-screen').classList.add('hidden'); el('app').style.display = 'flex'; 
     
-    // Safely copy Master Questions to Game Questions
     allQuestions = []; sectionMap = {};
     if (roomData.settings.sections.includes('ALL')) {
         allQuestions = [...masterQuestions]; sectionMap = JSON.parse(JSON.stringify(masterSectionMap));
@@ -919,7 +919,7 @@ function startTimers() {
     timerInterval = setInterval(() => {
         if(hasSubmitted || !roomData.startTime) return;
         const elps = Math.floor((Date.now() - roomData.startTime) / 1000);
-        let correctedElps = elps < 0 ? 0 : elps; // Protect against clock drift
+        let correctedElps = elps < 0 ? 0 : elps;
         const t = el('total-timer');
         if (roomData.settings.timerMode === 'countdown') { 
             const r = roomData.settings.timerDuration - correctedElps; 
