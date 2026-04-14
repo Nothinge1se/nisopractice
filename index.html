@@ -47,7 +47,7 @@
   .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg); z-index: 10; padding: 40px 20px; overflow-y: auto; }
   .screen.hidden { display: none !important; }
   
-  .hero-title { font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -1px; }
+  .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 8vw, 56px); font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -1px; }
   .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; }
 
   .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
@@ -70,7 +70,7 @@
   #app { display: none; height: 100vh; flex-direction: column; }
   
   .header { height: 72px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; z-index: 50; }
-  .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: var(--accent); letter-spacing: -1px; flex: 1;}
+  .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(18px, 4vw, 24px); color: var(--accent); letter-spacing: -1px; flex: 1;}
   
   /* BOLD TIMER CENTERED */
   .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
@@ -163,16 +163,13 @@
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: none; }
 
   @media (max-width: 850px) {
-    .hero-title { font-size: 40px; }
-    .hero-sub { font-size: 15px; }
     .header { padding: 0 16px; }
-    .brand { font-size: 20px; }
     .timer-center { flex: none; position: absolute; left: 50%; transform: translateX(-50%); }
     .timer-box { font-size: 20px; padding: 4px 16px; }
     #top-file-name { display: none; }
     
     .mob-menu-btn { display: block; }
-    .header-right .btn-primary { display: none; } /* Move submit to sidebar on mobile */
+    .header-right .btn-primary { display: none; } 
 
     .sidebar { position: fixed; right: 0; top: 72px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 360px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
     .sidebar.open { transform: translateX(0); }
@@ -183,10 +180,6 @@
     .opts-grid { grid-template-columns: 1fr; }
     
     .lobby-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 480px) {
-    .hero-title { font-size: 32px; }
   }
 
   /* Toast */
@@ -433,18 +426,27 @@ const STORE_NAME = 'files';
 
 function getDB() {
     return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
-        req.onsuccess = (e) => resolve(e.target.result);
-        req.onerror = () => reject('IDB Error');
+        // Robust timeout to prevent IndexedDB hanging in sandboxed iframes
+        const timeout = setTimeout(() => reject('IDB Timeout'), 1500);
+        try {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+            req.onsuccess = (e) => { clearTimeout(timeout); resolve(e.target.result); };
+            req.onerror = () => { clearTimeout(timeout); reject('IDB Error'); };
+        } catch(e) {
+            clearTimeout(timeout);
+            reject(e);
+        }
     });
 }
+
 async function saveToCache(fileName, arrayBuffer) {
     try {
         const db = await getDB();
         db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(arrayBuffer, fileName);
-    } catch(e) { console.log("Cache save failed"); }
+    } catch(e) { console.log("Cache save skipped."); }
 }
+
 async function loadFromCache(fileName) {
     try {
         const db = await getDB();
@@ -509,33 +511,74 @@ const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCas
 
 // UI Toggles
 window.toggleMobMenu = () => {
-    el('main-sidebar').classList.toggle('open');
-    el('mob-overlay').classList.toggle('open');
+    const sb = el('main-sidebar');
+    const ov = el('mob-overlay');
+    if(sb && ov) { sb.classList.toggle('open'); ov.classList.toggle('open'); }
 };
-window.toggleWidget = (id) => el(id).classList.toggle('minimized');
+window.toggleWidget = (id) => {
+    const w = el(id);
+    if(w) w.classList.toggle('minimized');
+};
 
-if(window.innerWidth <= 850) el('mob-submit-area').style.display = 'block';
+// Guarantee safe attachment
+document.addEventListener('DOMContentLoaded', () => {
+    if(window.innerWidth <= 850) {
+        const mobArea = el('mob-submit-area');
+        if(mobArea) mobArea.style.display = 'block';
+    }
 
-// ── 1. INTRO ──
-el('btn-host-screen').addEventListener('click', () => {
-    myName = el('player-name').value.trim();
-    if(!myName) return showToast('error', 'Enter your name!');
-    el('intro-screen').classList.add('hidden');
-    el('host-screen').classList.remove('hidden');
-});
+    // ── 1. INTRO ──
+    el('btn-host-screen').addEventListener('click', () => {
+        let nameVal = el('player-name').value.trim();
+        myName = nameVal || 'Player_' + Math.floor(Math.random()*1000); // Fail-safe default
+        el('intro-screen').classList.add('hidden');
+        el('host-screen').classList.remove('hidden');
+    });
 
-el('btn-join-room').addEventListener('click', () => {
-    myName = el('player-name').value.trim();
-    const code = el('join-code').value.trim().toUpperCase();
-    if(!myName) return showToast('error', 'Enter your name!');
-    if(!code) return showToast('error', 'Enter room code!');
-    
-    isHost = false; roomCode = code;
-    el('intro-screen').classList.add('hidden');
-    el('lobby-screen').classList.remove('hidden');
-    el('lobby-room-code').textContent = roomCode;
-    
-    initPeerAsPlayer();
+    el('btn-join-room').addEventListener('click', () => {
+        let nameVal = el('player-name').value.trim();
+        myName = nameVal || 'Player_' + Math.floor(Math.random()*1000);
+        const code = el('join-code').value.trim().toUpperCase();
+        
+        if(!code) return showToast('error', 'Enter room code!');
+        
+        isHost = false; roomCode = code;
+        el('intro-screen').classList.add('hidden');
+        el('lobby-screen').classList.remove('hidden');
+        el('lobby-room-code').textContent = roomCode;
+        
+        initPeerAsPlayer();
+    });
+
+    // File Handlers
+    el('upload-zone').addEventListener('click', () => el('file-input').click());
+    el('file-input').addEventListener('change', async (e) => {
+        if (e.target.files[0]) {
+            const file = e.target.files[0];
+            roomData.testUrl = null; 
+            roomData.testFile = file.name;
+            roomData.hasCustomFile = true;
+            
+            el('host-file-progress').style.display = 'block';
+            el('host-file-status').textContent = "Reading Local File into Memory...";
+            el('host-file-fill').style.width = '20%';
+            
+            fileBuffer = await file.arrayBuffer();
+            await saveToCache(file.name, fileBuffer);
+            await processFileHost(fileBuffer, false);
+        }
+    });
+
+    // Start
+    el('btn-start-game').addEventListener('click', () => {
+        if(!isHost) return;
+        roomData.status = 'playing'; roomData.startTime = Date.now();
+        broadcastRoomState(); launchGame();
+    });
+
+    // Pre-fill URL join code
+    const urlCode = new URLSearchParams(window.location.search).get('join');
+    if (urlCode && el('join-code')) el('join-code').value = urlCode.toUpperCase();
 });
 
 // ── 2. HOST CONFIG & FILE (Pre-Lobby) ──
@@ -543,24 +586,6 @@ window.hostSelectOnline = async (url) => {
     roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false;
     await processFileHost(url, true);
 };
-
-el('upload-zone').addEventListener('click', () => el('file-input').click());
-el('file-input').addEventListener('change', async (e) => {
-    if (e.target.files[0]) {
-        const file = e.target.files[0];
-        roomData.testUrl = null; 
-        roomData.testFile = file.name;
-        roomData.hasCustomFile = true;
-        
-        el('host-file-progress').style.display = 'block';
-        el('host-file-status').textContent = "Reading Local File into Memory...";
-        el('host-file-fill').style.width = '20%';
-        
-        fileBuffer = await file.arrayBuffer();
-        await saveToCache(file.name, fileBuffer);
-        await processFileHost(fileBuffer, false);
-    }
-});
 
 async function processFileHost(source, isUrl) {
     el('host-file-progress').style.display = 'block';
@@ -573,7 +598,7 @@ async function processFileHost(source, isUrl) {
             } else {
                 el('host-file-status').textContent = "Downloading Mock Paper...";
                 const res = await fetch(source);
-                if(!res.ok) throw new Error("Fetch failed");
+                if(!res.ok) throw new Error("Fetch failed. Paper might not exist on this server.");
                 fileBuffer = await res.arrayBuffer();
                 await saveToCache(source, fileBuffer);
             }
@@ -606,7 +631,7 @@ async function processFileHost(source, isUrl) {
             el('lobby-screen').classList.remove('hidden');
             el('host-controls').style.display = 'block';
             el('player-view-cfg').style.display = 'none';
-            el('btn-ready-up').style.display = 'block'; // Host also explicitly confirms
+            el('btn-ready-up').style.display = 'block'; // Host explicitly confirms
             initPeerAsHost();
         }, 500);
 
@@ -676,7 +701,11 @@ function initPeerAsHost() {
             broadcastRoomState(); 
         });
     });
-    peer.on('error', err => showToast('error', 'Network Error: ' + err.type));
+    
+    peer.on('error', err => {
+        showToast('error', 'Network Error: ' + err.type);
+        el('lobby-status-text').textContent = "P2P Connection Failed. Please try again.";
+    });
 }
 
 function handleVoteKick(targetId, voterId) {
@@ -757,4 +786,437 @@ function initPeerAsPlayer() {
             }
             // P2P File Receiving
             if(data.type === 'file_start') {
-                total
+                totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0;
+                sendLobbyProgress(`Receiving 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5);
+            }
+            if(data.type === 'file_chunk') {
+                receiveBuffer.push(data.chunk);
+                receivedSize += data.chunk.byteLength;
+                let pct = Math.floor((receivedSize/totalSize)*80) + 5; 
+                if(receivedSize % (1024 * 512) < 130000) { 
+                    sendLobbyProgress(`Receiving ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, pct);
+                }
+            }
+            if(data.type === 'file_end') {
+                sendLobbyProgress(`Unpacking Data...`, 90);
+                const blob = new Blob(receiveBuffer);
+                fileBuffer = await blob.arrayBuffer();
+                await saveToCache(roomData.testFile, fileBuffer);
+                await processFilePlayer(fileBuffer);
+            }
+            if(data.type === 'chat') { appendChatUI(data.name, data.text); }
+        });
+        hostConn.on('close', () => showToast('error', 'Host disconnected!'));
+    });
+    
+    peer.on('error', err => {
+        showToast('error', 'Connection Error: ' + err.type);
+        el('lobby-status-text').textContent = "P2P Connection Failed. Refresh and check the code.";
+    });
+}
+
+async function sendP2PFileChunks(conn) {
+    if(!fileBuffer) return;
+    const size = 128 * 1024; 
+    let offset = 0;
+    conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
+    while(offset < fileBuffer.byteLength) {
+        const chunk = fileBuffer.slice(offset, offset + size);
+        conn.send({ type: 'file_chunk', chunk });
+        offset += size;
+        await new Promise(r => setTimeout(r, 10)); // throttle 
+    }
+    conn.send({ type: 'file_end' });
+}
+
+function sendLobbyProgress(text, pct) {
+    if(hostConn && hostConn.open) hostConn.send({ type: 'lobby_progress', text, pct });
+}
+
+function broadcastRoomState() {
+    updateLobbyUI();
+    if(roomData.status === 'playing' && el('app').style.display === 'flex') renderSidebarLeaderboard();
+    for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
+}
+
+async function handleRoomStateUpdatePlayer(oldStatus) {
+    updateLobbyUI();
+    
+    el('view-file').textContent = roomData.testFile;
+    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown';
+    el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
+    
+    if(roomData.status === 'playing' && el('app').style.display === 'flex') renderSidebarLeaderboard();
+    
+    // Manage exactly-once file download/processing hook
+    if(oldStatus === 'waiting' && !isFileAcquisitionStarted && roomData.testFile) {
+        isFileAcquisitionStarted = true; // Hard lock prevents unpacking loop
+        let cached = await loadFromCache(roomData.testFile);
+        if(cached) {
+            sendLobbyProgress('Loading from Cache...', 50);
+            fileBuffer = cached;
+            await processFilePlayer(fileBuffer);
+        } else {
+            if(roomData.testUrl) {
+                sendLobbyProgress('Downloading from Web...', 10);
+                try {
+                    const res = await fetch(roomData.testUrl);
+                    if(!res.ok) throw new Error();
+                    fileBuffer = await res.arrayBuffer();
+                    await saveToCache(roomData.testFile, fileBuffer);
+                    await processFilePlayer(fileBuffer);
+                } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
+            } else {
+                sendLobbyProgress('Requesting file from Host...', 5);
+                hostConn.send({ type: 'request_file' });
+            }
+        }
+    }
+
+    if(oldStatus === 'waiting' && roomData.status === 'playing') launchGame();
+    if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
+    if(roomData.status === 'finished' && hasSubmitted) showFinalResults();
+}
+
+async function processFilePlayer(buffer) {
+    try {
+        sendLobbyProgress('Unpacking Zip...', 90);
+        const zip = await JSZip.loadAsync(buffer);
+        const jf = zip.file('data.json');
+        const data = JSON.parse(await jf.async('string'));
+        buildQuestions(data);
+        await preloadImages(zip);
+        
+        sendLobbyProgress('Ready to Start', 100);
+        el('btn-ready-up').style.display = 'block'; // Make ready button visible
+        showToast('success', 'Ready! Click the "I\'m Ready" button below.');
+    } catch(err) { sendLobbyProgress('Processing Error', 0); showToast('error', 'Failed processing file'); }
+}
+
+window.sendReady = () => {
+    el('btn-ready-up').style.display = 'none';
+    if(isHost) {
+        roomData.players[myId].ready = true;
+        roomData.players[myId].state = 'ready';
+        broadcastRoomState();
+    } else {
+        if(hostConn && hostConn.open) hostConn.send({ type: 'ready' });
+    }
+};
+
+// ── 4. LOBBY UI & CHAT ──
+function updateLobbyUI() {
+    const list = el('players-list-ui'); list.innerHTML = '';
+    const players = Object.values(roomData.players);
+    el('player-count').textContent = players.length;
+    
+    let allReady = true;
+    const requiredKickVotes = Math.max(1, players.length - 1);
+
+    players.forEach(p => {
+        if(!p.ready) allReady = false;
+        
+        let statusHtml = '';
+        if(p.state === 'ready') {
+            statusHtml = `<span style="font-size:12px; font-weight:800; color:var(--ans); background:rgba(16,185,129,0.1); padding:4px 10px; border-radius:8px;">READY</span>`;
+        } else {
+            statusHtml = `<div style="width:140px;">
+                <div class="progress-wrap"><div class="progress-fill" style="width:${p.progressPct}%"></div></div>
+                <div class="progress-text">${p.progressText}</div>
+            </div>`;
+        }
+        
+        let kickHtml = '';
+        // Find player's real ID by searching roomData
+        let pId = Object.keys(roomData.players).find(key => roomData.players[key] === p);
+        if(pId && pId !== myId && pId !== roomData.hostId) { 
+            const votesCount = roomData.kickVotes[pId]?.length || 0;
+            const hasVoted = roomData.kickVotes[pId]?.includes(myId);
+            kickHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hasVoted?'disabled':''}>🥾 Kick (${votesCount}/${requiredKickVotes})</button>`;
+        }
+
+        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
+            <div style="display:flex; align-items:center;">
+               <span style="font-weight:700; font-size:15px;">${p.name}</span>
+               ${kickHtml}
+            </div>
+            ${statusHtml}
+        </div>`;
+    });
+    if(isHost) el('btn-start-game').disabled = !allReady;
+}
+
+window.copyJoinLink = () => {
+    navigator.clipboard.writeText(window.location.href.split('?')[0] + '?join=' + roomCode); 
+    showToast('success', 'Link copied!');
+};
+
+// Chat system
+window.sendLobbyChat = () => _sendChat('lobby-chat-input');
+window.sendGameChat = () => _sendChat('game-chat-input');
+
+function _sendChat(inputId) {
+    const inp = el(inputId); const text = inp.value.trim();
+    if(!text) return;
+    inp.value = '';
+    if(isHost) broadcastChat(myName, text);
+    else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: text });
+}
+function broadcastChat(name, text) {
+    appendChatUI(name, text);
+    for(let id in connections) connections[id].send({ type: 'chat', name, text });
+}
+function appendChatUI(name, text) {
+    const html = `<div class="msg"><div class="msg-name">${name}</div>${text}</div>`;
+    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
+        const box = el(id);
+        if(box) { 
+            box.insertAdjacentHTML('beforeend', html); 
+            box.scrollTop = box.scrollHeight; 
+        }
+    });
+}
+
+// ── 5. GAME ENGINE ──
+function launchGame() {
+    el('lobby-screen').classList.add('hidden');
+    el('app').style.display = 'flex';
+    el('top-file-name').textContent = roomData.testFile;
+
+    // Filter questions
+    if (!roomData.settings.sections.includes('ALL')) {
+        let newQ = []; let newMap = {}; let qIdx = 0;
+        roomData.settings.sections.forEach(sKey => {
+            newMap[sKey] = [];
+            if(sectionMap[sKey]) sectionMap[sKey].forEach(idx => { newQ.push(allQuestions[idx]); newMap[sKey].push(qIdx++); });
+        });
+        allQuestions = newQ; sectionMap = newMap;
+    }
+
+    allQuestions.forEach(q => answers[q.id] = { status: 'not-vis' });
+
+    const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
+    Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
+    currentSection = 'ALL'; currentQIdx = 0;
+
+    startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
+    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 4000);
+}
+
+function startTimers() {
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if(hasSubmitted || !roomData.startTime) return;
+        const elapsed = Math.floor((Date.now() - roomData.startTime) / 1000);
+        const tEl = el('total-timer');
+        if (roomData.settings.timerMode === 'countdown') {
+            const rem = roomData.settings.timerDuration - elapsed;
+            if(rem <= 0) { tEl.textContent = "00:00"; forceSubmit(); } else tEl.textContent = formatTime(rem);
+        } else { tEl.textContent = formatTime(elapsed); }
+    }, 1000);
+}
+function formatTime(sec) {
+  if(sec<0)sec=0; const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = (sec%60).toString().padStart(2,'0');
+  return sec>=3600 ? `${Math.floor(sec/3600).toString().padStart(2,'0')}:${m}:${s}` : `${m}:${s}`;
+}
+
+function calculateScore() {
+    let net = 0;
+    allQuestions.forEach(q => {
+        const a = answers[q.id];
+        if(a && a.selected) {
+            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+            if(isC) net += (q.marks.cm || 4); else net -= Math.abs(q.marks.im || 1);
+        }
+    });
+    return net;
+}
+
+function pushProgressToHost(isFinal = false) {
+    const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
+    const payload = {
+        attempted: att,
+        submitted: isFinal,
+        score: isFinal ? calculateScore() : 0,
+        timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0
+    };
+    if(isHost) {
+        const p = roomData.players[myId];
+        p.attempted = payload.attempted;
+        if(isFinal) { p.submitted = true; p.score = payload.score; p.timeTaken = payload.timeTaken; }
+        broadcastRoomState(); checkAllSubmitted();
+    } else {
+        if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...payload });
+    }
+}
+
+function checkAllSubmitted() {
+    if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) {
+        roomData.status = 'finished'; broadcastRoomState(); showFinalResults();
+    }
+}
+
+window.submitQuizBtn = () => { if(confirm("Submit test? You cannot change answers after this.")) forceSubmit(); };
+
+function forceSubmit() {
+    if(hasSubmitted) return;
+    hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
+    pushProgressToHost(true);
+    
+    // Non-intrusive UI changes lock options but preserve chat/sidebar
+    if(el('btn-top-submit')) { el('btn-top-submit').disabled = true; el('btn-top-submit').textContent = "Submitted"; }
+    if(el('btn-mark')) el('btn-mark').disabled = true; 
+    if(el('btn-clear')) el('btn-clear').disabled = true; 
+    if(el('btn-save')) el('btn-save').disabled = true;
+    el('submitted-layer').classList.add('show');
+    
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    document.querySelectorAll('.nat-input').forEach(b => b.disabled = true);
+    
+    if(roomData.status === 'finished') showFinalResults();
+}
+
+// ── 6. DATA PARSING & RENDERING ──
+function buildQuestions(data) {
+  allQuestions = []; sectionMap = {}; imageCache = {};
+  const pdfData = data.pdfCropperData || data.questions || {}; 
+  const ansKey = data.testAnswerKey || data.answerKey || {}; 
+  let idx = 0;
+  for (const sub of Object.keys(pdfData)) {
+    for (const top of Object.keys(pdfData[sub])) {
+      const tqs = pdfData[sub][top] || {}; const tans = (ansKey[sub] || {})[top] || {}; 
+      const sk = `${sub} › ${top}`; sectionMap[sk] = [];
+      for (const qNum of Object.keys(tqs)) {
+        const qd = tqs[qNum] || {}; const ad = tans[qNum] || {};
+        allQuestions.push({
+          id: `${sub}__${top}__${qNum}`, globalNum: parseInt(qNum), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
+          correctAnswer: ad.correctAnswer, images: (()=>{ const imgs=[]; for(let i=1;i<=Math.max((qd.pdfData||[]).length||1,1);i++) imgs.push(`${top}__--__${qNum}__--__${i}.png`); return imgs;})()
+        });
+        sectionMap[sk].push(idx++);
+      }
+    }
+  }
+}
+async function preloadImages(zip) {
+  const files = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png'));
+  for (let i = 0; i < files.length; i++) {
+    try { const blob = await zip.files[files[i]].async('blob'); imageCache[files[i]] = URL.createObjectURL(blob); } catch(e) {}
+  }
+}
+
+// ── 7. CBT INTERACTIONS ──
+window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
+const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
+window.navigate = (dir) => { const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; if(np >= 0 && np < ind.length) { currentQIdx = ind[np]; renderSidebar(); renderQuestion(); } };
+window.goToQ = (idx) => { currentQIdx = idx; renderSidebar(); renderQuestion(); };
+
+window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; navigate(1); };
+window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'mark-ans' : 'marked'; navigate(1); };
+window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis' }; renderSidebar(); renderQuestion(); };
+
+function renderQuestion() {
+  const q = allQuestions[currentQIdx]; if (!q) return;
+  el('q-num-badge').textContent = `Question ${q.globalNum}`;
+  el('q-type-badge').textContent = q.type === 'mcq' ? 'Multiple Choice' : 'Numerical Value';
+  
+  const imgArea = el('q-image-container'); imgArea.innerHTML = '';
+  let hasImg = false;
+  for (const fname of q.images) { 
+      if (imageCache[fname]) { const img = document.createElement('img'); img.src = imageCache[fname]; imgArea.appendChild(img); hasImg = true; } 
+  }
+  if (!hasImg) imgArea.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center; font-weight:700;">📷 Image not found</div>`;
+
+  renderAnswerArea(q);
+}
+
+function renderAnswerArea(q) {
+  const area = el('answer-area'); const ans = answers[q.id];
+  if (q.type === 'mcq') {
+    const grid = document.createElement('div'); grid.className = 'opts-grid';
+    const labels = ['A','B','C','D']; const numOpts = q.answerOptions || 4; 
+    for (let i = 1; i <= numOpts; i++) {
+      const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.disabled = hasSubmitted;
+      if (ans && ans.selected === i) btn.classList.add('selected');
+      btn.innerHTML = `<div class="opt-key">${labels[i-1]}</div><span>Option ${labels[i-1]}</span>`;
+      if(!hasSubmitted) btn.onclick = () => { ans.selected = i; renderAnswerArea(q); };
+      grid.appendChild(btn);
+    }
+    area.innerHTML = ''; area.appendChild(grid);
+  } else {
+    area.innerHTML = '';
+    const input = document.createElement('input'); input.className = 'nat-input'; input.type = 'text'; input.placeholder = '0.00';
+    if (ans && ans.selected) input.value = ans.selected; input.disabled = hasSubmitted;
+    input.oninput = (e) => {
+        let val = e.target.value.replace(/[^0-9.\-]/g, '').trim(); e.target.value = val;
+        ans.selected = val || null;
+    };
+    area.appendChild(input);
+  }
+}
+
+function renderSidebar() {
+  const grid = el('q-grid'); grid.innerHTML = '';
+  getSeq().forEach(idx => {
+    const q = allQuestions[idx]; const dot = document.createElement('div'); dot.className = `dot ${answers[q.id].status}`;
+    if (idx === currentQIdx) dot.classList.add('active');
+    dot.textContent = q.globalNum;
+    
+    // Fair Play Stats Overlay
+    if (roomData && roomData.settings.showLiveStats === 'true') {
+        let cCount = 0; let wCount = 0;
+        Object.values(roomData.players).forEach(p => {
+            if (p.answers && p.answers[q.id]) { if(p.answers[q.id] === 'c') cCount++; else wCount++; }
+        });
+        if (cCount > 0 || wCount > 0) {
+            const statBar = document.createElement('div'); statBar.className = 'progress-wrap'; statBar.style.cssText = 'position:absolute; bottom:0; left:0; right:0; height:6px; margin:0; border-radius:0 0 12px 12px; display:flex; gap:1px;';
+            for(let i=0; i<cCount; i++) statBar.innerHTML += `<div style="flex:1; background:var(--ans);"></div>`;
+            for(let i=0; i<wCount; i++) statBar.innerHTML += `<div style="flex:1; background:var(--unans);"></div>`;
+            dot.appendChild(statBar);
+        }
+    }
+    
+    dot.onclick = () => window.goToQ(idx); grid.appendChild(dot);
+  });
+}
+
+function renderSidebarLeaderboard() {
+    const listUI = el('sidebar-leaderboard'); if(!listUI) return;
+    const playersArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted);
+    listUI.innerHTML = '';
+    playersArr.forEach(p => {
+        const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
+        listUI.innerHTML += `
+            <div class="lb-item ${p.name === myName ? 'me' : ''}">
+                <div class="lb-top">
+                  <span class="lb-name">${p.name} ${p.submitted?'🏁':''}</span>
+                  <span class="lb-stat">${p.attempted} / ${roomData.totalQuestions}</span>
+                </div>
+                <div class="progress-wrap" style="height:4px; margin-top:0;"><div class="progress-fill" style="width:${pct}%"></div></div>
+            </div>`;
+    });
+}
+
+function showFinalResults() {
+    gameFinished = true;
+    el('submitted-layer').classList.remove('show');
+    el('final-results-layer').classList.add('show');
+    
+    const listUI = el('final-lb-list'); listUI.innerHTML = '';
+    const pArr = Object.values(roomData.players).sort((a,b) => b.score - a.score);
+
+    pArr.forEach((p, idx) => {
+        listUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 24px; border-radius:16px; border:2px solid ${p.name === myName ? 'var(--accent)' : 'var(--border)'};">
+            <div style="display:flex; gap:20px; align-items:center;">
+                <span style="font-size:28px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${idx+1}</span>
+                <span style="font-size:20px; font-weight:700;">${p.name}</span>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:26px; color:var(--ans); font-weight:800; font-family:'Outfit';">${p.score} <span style="font-size:14px;color:var(--text2);">marks</span></div>
+                <div style="font-size:13px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>
+            </div>
+        </div>`;
+    });
+}
+</script>
+</body>
+</html>
