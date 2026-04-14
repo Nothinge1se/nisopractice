@@ -50,7 +50,7 @@
   .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 8vw, 64px); font-weight: 900; background: linear-gradient(135deg, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(99,102,241,0.2); }
   .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase; }
 
-  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
+  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: clamp(20px, 5vw, 32px); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
   .card-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1.5px; color: #fff;}
 
   .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 14px; color: white; padding: 18px; font-size: 18px; font-weight: 700; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
@@ -99,6 +99,8 @@
   .nat-input { width: 100%; max-width: 350px; font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; padding: 20px 24px; border-radius: 16px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; box-shadow: inset 0 4px 15px rgba(0,0,0,0.4);}
 
   .btm-bar { height: 90px; padding: 0 24px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10;}
+  .btm-left { display: flex; gap: 12px; }
+  .btm-right { display: flex; gap: 12px; }
   .action-btn { padding: 14px 28px; border-radius: 12px; font-weight: 800; font-size: 15px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
   .action-btn:hover:not(:disabled) { background: var(--surface3); }
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
@@ -160,28 +162,66 @@
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
   .kick-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+  /* Join Wrap - Mobile Stacked */
+  .join-wrap { display: flex; gap: 16px; width: 100%; }
+
+  /* Bold Center Room Code */
+  .room-code {
+      font-family: 'Outfit', monospace;
+      font-size: clamp(36px, 10vw, 56px);
+      font-weight: 900;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+      padding: 16px;
+      border-radius: 16px;
+      border: 3px solid var(--accent);
+      text-align: center;
+      letter-spacing: clamp(4px, 2vw, 8px);
+      cursor: pointer;
+      box-shadow: inset 0 0 20px rgba(99,102,241,0.2), 0 10px 30px rgba(0,0,0,0.3);
+      text-shadow: 0 0 15px rgba(99,102,241,0.5);
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-bottom: 8px;
+  }
+  .room-code:hover {
+      transform: scale(1.02);
+      background: rgba(99, 102, 241, 0.15);
+  }
+
   /* Mobile Specific Layout */
   .mob-menu-btn { display: none; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 10px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
   @media (max-width: 850px) {
-    .header { padding: 0 16px; }
-    .timer-center { flex: none; position: absolute; left: 50%; transform: translateX(-50%); }
-    .timer-box { font-size: 24px; padding: 6px 16px; }
+    .header { padding: 0 16px; height: 64px;}
+    .timer-center { flex: 1; position: static; transform: none; display: flex; justify-content: center; }
+    .timer-box { font-size: 20px; padding: 6px 16px; letter-spacing: 1px; }
     #top-file-name { display: none; }
     
     .mob-menu-btn { display: block; }
+    .header-right { flex: 0; }
     .header-right .btn-primary { display: none; } 
 
-    .sidebar { position: fixed; right: 0; top: 80px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 380px; box-shadow: -15px 0 40px rgba(0,0,0,0.7); }
+    .sidebar { position: fixed; right: 0; top: 64px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 380px; box-shadow: -15px 0 40px rgba(0,0,0,0.7); }
     .sidebar.open { transform: translateX(0); }
     #mob-overlay.open { display: block; }
 
-    .btm-bar { padding: 0 16px; }
-    .action-btn { padding: 12px 14px; font-size: 13px; }
-    .opts-grid { grid-template-columns: 1fr; }
+    .btm-bar { height: auto; padding: 16px; flex-direction: column; gap: 12px; }
+    .btm-left, .btm-right { width: 100%; justify-content: space-between; }
+    .action-btn { flex: 1; padding: 12px 8px; font-size: 13px; display: flex; align-items: center; justify-content: center; text-align: center; }
     
+    .opts-grid { grid-template-columns: 1fr; }
     .lobby-grid { grid-template-columns: 1fr; }
+
+    .q-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .q-badge { font-size: 18px; padding: 6px 16px; }
+    #q-type-badge { font-size: 14px; padding: 4px 12px; }
+  }
+  
+  @media (max-width: 480px) {
+    .join-wrap { flex-direction: column; gap: 12px; }
+    .join-wrap button { flex: none !important; width: 100%; }
   }
 
   /* Toast */
@@ -202,7 +242,7 @@
   <div class="glass-card">
     <div class="card-title">Join or Host Room</div>
     <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
-    <div style="display:flex; gap:16px;">
+    <div class="join-wrap">
       <input type="text" id="join-code" class="input-styled" placeholder="CODE" style="text-transform: uppercase; letter-spacing: 2px; font-weight: 900;" maxlength="6">
       <button class="btn btn-primary" id="btn-join-room" style="flex: 0 0 130px;">Join</button>
     </div>
@@ -245,14 +285,16 @@
     
     <!-- LEFT: Room Info & Settings -->
     <div class="lobby-left">
-      <div class="glass-card" style="padding: 28px;">
+      <div class="glass-card" style="padding: clamp(20px, 5vw, 32px);">
         <div class="label-title" style="text-align:center; font-size: 15px;">Invite Friends</div>
-        <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link" style="font-size: 48px; border: 2px dashed var(--accent);">------</div>
-        <div style="text-align:center; font-size:14px; color:var(--text2); margin-top:-10px; font-weight:700; font-family:'Outfit';">Click to copy join link</div>
+        <div style="width: 100%; display: flex; justify-content: center;">
+            <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
+        </div>
+        <div style="text-align:center; font-size:14px; color:var(--text2); font-weight:700; font-family:'Outfit';">Click to copy join link</div>
       </div>
 
       <!-- Host sees this -->
-      <div class="glass-card" style="padding: 28px; display:none;" id="host-controls">
+      <div class="glass-card" style="padding: clamp(20px, 5vw, 32px); display:none;" id="host-controls">
         <div class="card-title" style="font-size:22px; margin-bottom:20px; color: var(--accent2);">Test Configuration</div>
         
         <div class="config-row">
@@ -286,7 +328,7 @@
       </div>
 
       <!-- Player sees this instead of controls -->
-      <div class="glass-card" style="padding: 28px;" id="player-view-cfg">
+      <div class="glass-card" style="padding: clamp(20px, 5vw, 32px);" id="player-view-cfg">
         <div class="card-title" style="font-size:22px; margin-bottom:20px; color:var(--accent2); text-transform:uppercase; letter-spacing: 1px;">Room Settings</div>
         <div style="font-size:16px; font-weight:800; line-height:2; font-family:'Outfit'; background: var(--bg); padding: 20px; border-radius: 16px; border: 2px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
           <span style="color:var(--text2);">PAPER:</span> <span id="view-file" style="color:white; word-break: break-all;">...</span><br>
@@ -299,7 +341,7 @@
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card" style="padding: 24px; flex: 1; max-height: 450px; display:flex; flex-direction:column;">
+      <div class="glass-card" style="padding: clamp(20px, 5vw, 32px); flex: 1; max-height: 450px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <span class="label-title" style="margin:0; font-size: 16px;">Players</span>
           <span style="font-family:'Outfit'; font-weight:900; font-size:20px; color:var(--accent); background:var(--surface2); padding:6px 16px; border-radius:10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);" id="player-count">0</span>
@@ -897,7 +939,7 @@ async function processFilePlayer(buffer) {
         buildQuestions(data);
         await preloadImages(zip);
         
-        sendLobbyProgress('Ready to Start', 100);
+        sendLobbyProgress('Not Ready', 100);
         el('btn-ready-up').style.display = 'block'; // Make ready button visible
         showToast('success', 'Ready! Click the "I\'m Ready" button below.');
     } catch(err) { sendLobbyProgress('Processing Error', 0); showToast('error', 'Failed processing file'); }
