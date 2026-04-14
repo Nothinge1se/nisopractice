@@ -184,6 +184,11 @@
   #mob-chat-fab { display: none; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   #mob-chat-fab:active { transform: scale(0.9); }
 
+  /* --- INLINE PROGRESS BAR --- */
+  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 6px; margin-top: 8px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-glow); }
+  .progress-text { font-size: 12px; color: var(--text2); margin-top: 6px; font-weight: 700; text-align: right; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px;}
+
   @media (max-width: 850px) {
     .header { padding: 0 12px; height: 60px;}
     #top-file-name { display: none; }
@@ -457,10 +462,11 @@
   <div class="modal-layer" id="submit-warning-modal">
     <div class="glass-card" style="max-width: 400px; text-align:center;">
         <h2 style="font-family:'Syne'; font-size:28px; color:var(--text);">Submit Test?</h2>
-        <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); font-size:16px; margin: 10px 0;">
+        <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); font-size:16px; margin: 10px 0; line-height: 1.8;">
             Attempted: <span id="warn-att" style="color:var(--ans);">0</span><br>
             Marked: <span id="warn-mark" style="color:var(--marked);">0</span><br>
-            Unanswered: <span id="warn-unans" style="color:var(--unans);">0</span>
+            Unanswered: <span id="warn-unans" style="color:var(--unans);">0</span><br>
+            Not Visited: <span id="warn-notvis" style="color:var(--not-vis);">0</span>
         </div>
         <div style="display:flex; gap:12px; margin-top:10px;">
             <button class="btn" onclick="el('submit-warning-modal').classList.remove('show')">Cancel</button>
@@ -604,7 +610,17 @@ async function processFileHost(source, isUrl) {
             if(cached) { fileBuffer = cached; } else {
                 el('host-file-status').textContent = "Downloading Mock Paper...";
                 const res = await fetch(source); if(!res.ok) throw new Error("Fetch failed.");
-                fileBuffer = await res.arrayBuffer(); await saveToCache(source, fileBuffer);
+                
+                const contentLength = res.headers.get('content-length');
+                const total = parseInt(contentLength, 10) || 0;
+                let loaded = 0; const reader = res.body.getReader(); const chunks = [];
+                while(true) {
+                    const {done, value} = await reader.read(); if(done) break; chunks.push(value); loaded += value.length;
+                    if(total) { el('host-file-status').textContent = `Downloading... ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`; el('host-file-fill').style.width = Math.floor((loaded/total)*50) + '%'; }
+                    else { el('host-file-status').textContent = `Downloading... ${(loaded/1024/1024).toFixed(2)} MB`; }
+                }
+                fileBuffer = await new Blob(chunks).arrayBuffer();
+                await saveToCache(source, fileBuffer);
             }
         }
         el('host-file-status').textContent = "Unpacking Zip..."; el('host-file-fill').style.width = '60%';
@@ -612,8 +628,10 @@ async function processFileHost(source, isUrl) {
         if (!jf) throw new Error('No data.json');
         const data = JSON.parse(await jf.async('string')); buildQuestions(data);
         
-        el('host-file-status').textContent = "Processing Images..."; el('host-file-fill').style.width = '80%';
-        await preloadImages(zip);
+        await preloadImages(zip, (current, total) => {
+            el('host-file-status').textContent = `Processing Images... ${current} / ${total}`;
+            el('host-file-fill').style.width = (60 + Math.floor((current/total)*40)) + '%';
+        });
         
         el('host-file-status').textContent = "Ready!"; el('host-file-fill').style.width = '100%';
         const sel = el('cfg-sections'); sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
@@ -728,7 +746,18 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
         } else {
             if(roomData.testUrl) {
                 sendLobbyProgress('Downloading from Web...', 10);
-                try { const res = await fetch(roomData.testUrl); if(!res.ok) throw new Error(); fileBuffer = await res.arrayBuffer(); await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer); } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
+                try {
+                    const res = await fetch(roomData.testUrl); if(!res.ok) throw new Error();
+                    const contentLength = res.headers.get('content-length'); const total = parseInt(contentLength, 10) || 0;
+                    let loaded = 0; const reader = res.body.getReader(); const chunks = [];
+                    while(true) {
+                        const {done, value} = await reader.read(); if(done) break; chunks.push(value); loaded += value.length;
+                        if(total) { sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50)); }
+                        else { sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} MB`, 10); }
+                    }
+                    fileBuffer = await new Blob(chunks).arrayBuffer();
+                    await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
+                } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
             } else { sendLobbyProgress('Requesting file from Host...', 5); hostConn.send({ type: 'request_file' }); }
         }
     }
@@ -740,7 +769,8 @@ async function processFilePlayer(buffer) {
     try {
         sendLobbyProgress('Unpacking Zip...', 90);
         const zip = await JSZip.loadAsync(buffer); const jf = zip.file('data.json'); const data = JSON.parse(await jf.async('string'));
-        buildQuestions(data); await preloadImages(zip);
+        buildQuestions(data); 
+        await preloadImages(zip, (curr, tot) => { sendLobbyProgress(`Processing Images ${curr}/${tot}`, 90 + Math.floor((curr/tot)*10)); });
         sendLobbyProgress('Not Ready', 100); el('btn-ready-up').style.display = 'block'; 
         showToast('success', 'Ready! Click "I\'m Ready" below.');
     } catch(err) { sendLobbyProgress('Error', 0); showToast('error', 'Failed processing'); }
@@ -827,9 +857,9 @@ function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values
 
 // Submit Flow
 window.submitWarningBtn = () => {
-    let a=0, m=0, u=0;
-    Object.values(answers).forEach(ans => { if(ans.status === 'ans' || ans.status === 'mark-ans') a++; else if(ans.status === 'marked') m++; else u++; });
-    el('warn-att').textContent = a; el('warn-mark').textContent = m; el('warn-unans').textContent = u;
+    let a=0, m=0, u=0, n=0;
+    Object.values(answers).forEach(ans => { if(ans.status === 'ans' || ans.status === 'mark-ans') a++; else if(ans.status === 'marked') m++; else if(ans.status === 'unans') u++; else n++; });
+    el('warn-att').textContent = a; el('warn-mark').textContent = m; el('warn-unans').textContent = u; el('warn-notvis').textContent = n;
     el('submit-warning-modal').classList.add('show');
 };
 
@@ -861,7 +891,13 @@ function buildQuestions(data) {
     }
   }
 }
-async function preloadImages(zip) { const fs = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png')); for (let i=0; i<fs.length; i++) { try { const b = await zip.files[fs[i]].async('blob'); imageCache[fs[i]] = URL.createObjectURL(b); } catch(e) {} } }
+async function preloadImages(zip, progressCallback) { 
+    const fs = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png')); 
+    for (let i=0; i<fs.length; i++) { 
+        try { const b = await zip.files[fs[i]].async('blob'); imageCache[fs[i]] = URL.createObjectURL(b); } catch(e) {} 
+        if(progressCallback) progressCallback(i+1, fs.length);
+    } 
+}
 
 // ── 7. CBT UI ──
 window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
@@ -874,14 +910,9 @@ window.navigate = (dir, isSaveNext = false) => {
     if(np >= 0 && np < ind.length) { 
         currentQIdx = ind[np]; renderSidebar(); renderQuestion(); 
     } else if (isSaveNext && np >= ind.length && currentSection !== 'ALL') {
-        // Jump to next section if at end
-        const sections = Object.keys(sectionMap);
-        const secIdx = sections.indexOf(currentSection);
+        const sections = Object.keys(sectionMap); const secIdx = sections.indexOf(currentSection);
         if(secIdx < sections.length - 1) {
-            currentSection = sections[secIdx + 1];
-            el('section-select').value = currentSection;
-            currentQIdx = getSeq()[0];
-            renderSidebar(); renderQuestion(); 
+            currentSection = sections[secIdx + 1]; el('section-select').value = currentSection; currentQIdx = getSeq()[0]; renderSidebar(); renderQuestion(); 
         }
     }
 };
