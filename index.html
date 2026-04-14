@@ -33,7 +33,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-  body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  body { background-color: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
   
   button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: none; outline: none; }
   button:active:not(:disabled) { transform: scale(0.95); }
@@ -57,18 +57,21 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border:none;}
   .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6); }
 
-  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
-  .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.08); }
-
   .label-title { font-size: 12px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Outfit'; }
 
+  /* --- FILE PROGRESS UI --- */
+  .progress-container { display: flex; flex-direction: column; gap: 12px; padding: 20px; background: var(--bg); border-radius: 16px; border: 2px solid var(--accent); box-shadow: 0 0 20px rgba(99,102,241,0.2); }
+  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 10px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.2s linear; box-shadow: 0 0 10px var(--accent-glow); }
+  .progress-text { font-size: 14px; color: var(--text); font-weight: 800; text-align: center; font-family: 'Outfit'; letter-spacing: 0.5px;}
+  .progress-sub { font-size: 12px; color: var(--text2); font-weight: 600; text-align: center; font-family: 'Outfit';}
+
   /* --- APP LAYOUT --- */
-  #app { display: none; height: 100vh; flex-direction: column; }
+  #app { display: none; height: 100dvh; flex-direction: column; }
   
   .header { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
   .brand { font-family: 'Syne', sans-serif; font-weight: 900; font-size: clamp(20px, 4vw, 24px); color: var(--text); letter-spacing: -1px; flex: 1;}
   
-  /* BOLD TIMER REDESIGN */
   .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
   .timer-box { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 900; background: var(--surface2); padding: 6px 24px; border-radius: 20px; border: 1px solid var(--border); color: #fff; letter-spacing: 1.5px; display:flex; align-items:center; gap:8px;}
   .timer-box.ending { color: var(--unans); border-color: var(--unans); background: rgba(239,68,68,0.1); }
@@ -87,19 +90,18 @@
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
   
-  /* REVIEW BANNER */
   .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700;}
   .review-banner.show { display: flex; }
 
-  .q-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10; flex-wrap: wrap; gap: 10px;}
+  .q-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10; flex-wrap: wrap; gap: 10px; flex-shrink:0;}
   .q-top-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 18px; background: var(--surface3); padding: 6px 16px; border-radius: 10px; border: 1px solid var(--border); color: #fff; text-transform: uppercase; letter-spacing: 1px;}
   
-  .q-scroll { flex: 1; overflow-y: auto; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; }
+  .q-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; }
   .q-images { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; }
   .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
-  .ans-area { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10;}
+  .ans-area { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10; flex-shrink:0;}
   .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 800px; margin: 0 auto; }
   .opt-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 600; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
   .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface2); }
@@ -107,7 +109,6 @@
   .opt-key { width: 32px; height: 32px; border-radius: 8px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: var(--text2);}
   .opt-btn.selected .opt-key { background: var(--accent); color: white; }
   
-  /* Review Mode Colors */
   .opt-btn.correct-ans { border-color: var(--ans) !important; background: rgba(16, 185, 129, 0.15) !important; color: white;}
   .opt-btn.correct-ans .opt-key { background: var(--ans) !important; color: white; }
   .opt-btn.wrong-ans { border-color: var(--unans) !important; background: rgba(239, 68, 68, 0.15) !important; color: white;}
@@ -118,8 +119,7 @@
   .nat-input.wrong-ans { border-color: var(--unans); color: var(--unans); }
 
   .btm-bar { padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10;}
-  .btm-left { display: flex; gap: 10px; }
-  .btm-right { display: flex; gap: 10px; }
+  .btm-left, .btm-right { display: flex; gap: 10px; }
   .action-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px;}
   .action-btn:hover:not(:disabled) { background: var(--surface3); }
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
@@ -127,7 +127,7 @@
 
   /* SIDEBAR (Grid + Leaderboard + Chat) */
   .sidebar { width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3);}
-  .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); background: var(--surface2);}
+  .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 14px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
   .grid-wrap { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
@@ -139,7 +139,7 @@
   .dot.mark-ans { background: var(--mark-ans); color: #fff; }
 
   /* Minimizable Widgets */
-  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease;}
+  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0;}
   .widget-header { padding: 12px 16px; font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border);}
   .widget-body { overflow: hidden; display: flex; flex-direction: column; flex: 1; }
   .widget.minimized { height: 46px !important; flex: none !important; }
@@ -150,13 +150,11 @@
   .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
   .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); }
   .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit';}
-  .chat-input-wrap input:focus { border-color: var(--accent); }
   .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase;}
 
   /* Lobby Grid */
   .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 900px; align-items: start;}
-  .lobby-left { display: flex; flex-direction: column; gap: 20px; }
-  .lobby-right { display: flex; flex-direction: column; gap: 20px; height: 100%;}
+  .lobby-left, .lobby-right { display: flex; flex-direction: column; gap: 20px; }
   .config-row { margin-bottom: 16px; }
   .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 14px; font-family: 'Outfit';}
   
@@ -164,12 +162,10 @@
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
 
   .join-wrap { display: flex; gap: 12px; width: 100%; }
-
   .room-code { font-family: 'Outfit', monospace; font-size: clamp(32px, 8vw, 48px); font-weight: 900; color: #ffffff; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 16px; border: 2px solid var(--border); text-align: center; letter-spacing: clamp(4px, 2vw, 8px); cursor: pointer; transition: all 0.3s ease; width: 100%; margin-bottom: 8px; }
-  .room-code:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.1); border-color: var(--text2);}
 
   /* Modals */
-  .modal-layer { position: absolute; inset: 0; background: rgba(7, 8, 12, 0.9); z-index: 60; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); display: none; }
+  .modal-layer { position: absolute; inset: 0; background: rgba(7, 8, 12, 0.9); z-index: 60; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); display: none; padding: 20px;}
   .modal-layer.show { display: flex; }
 
   .medal { font-size: 28px; }
@@ -183,11 +179,6 @@
 
   #mob-chat-fab { display: none; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   #mob-chat-fab:active { transform: scale(0.9); }
-
-  /* --- INLINE PROGRESS BAR --- */
-  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 6px; margin-top: 8px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-glow); }
-  .progress-text { font-size: 12px; color: var(--text2); margin-top: 6px; font-weight: 700; text-align: right; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px;}
 
   @media (max-width: 850px) {
     .header { padding: 0 12px; height: 60px;}
@@ -207,17 +198,20 @@
     .opts-grid { grid-template-columns: 1fr; }
     .lobby-grid { grid-template-columns: 1fr; }
     .q-top { flex-direction: column; align-items: flex-start; }
-    .compact-stats-top { display: none; } /* Hide from topbar, move to q-nav */
+    .compact-stats-top { display: none; } 
     .q-badge { font-size: 16px; padding: 4px 12px; }
+    .q-scroll { padding: 16px; }
+    .ans-area { padding: 16px 12px; }
 
     /* Floating Chat Mobile */
     #wid-chat-main { display: none !important; }
     #mob-chat-fab { display: flex; }
-    #chat-core-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50vh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: flex; flex-direction: column; transition: bottom 0.3s ease; border-radius: 20px 20px 0 0;}
+    #chat-core-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: flex; flex-direction: column; transition: bottom 0.3s ease; border-radius: 20px 20px 0 0;}
     #chat-core-wrapper.show-mob { bottom: 0; }
+    #chat-core-wrapper .widget-header { display: flex !important; justify-content: space-between; border-radius: 20px 20px 0 0; }
   }
   @media (min-width: 851px) {
-    #chat-core-wrapper { display: contents; } /* Pass through on desktop */
+    #chat-core-wrapper .widget-header { display: none !important; }
   }
   @media (max-width: 480px) {
     .join-wrap { flex-direction: column; gap: 10px; }
@@ -240,7 +234,7 @@
   <div class="hero-title">NPRAQ</div>
   <div class="hero-sub">Live CBT Multiplayer</div>
   
-  <div class="glass-card">
+  <div class="glass-card" id="intro-card">
     <div class="card-title">Join or Host Room</div>
     <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
     <div class="join-wrap">
@@ -255,7 +249,7 @@
 <!-- 2. HOST SELECT FILE SCREEN -->
 <div id="host-screen" class="screen hidden">
   <div class="hero-title" style="font-size: clamp(28px, 6vw, 40px); margin-bottom: 20px;">Select Test Paper</div>
-  <div class="glass-card" style="max-width: 500px;">
+  <div class="glass-card" style="max-width: 500px;" id="file-select-card">
     <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 16px;">
       <button class="btn" onclick="window.hostSelectOnline('1D.niso')">🚀 Demo Module (NEET)</button>
       <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2021_JEE.niso')">🚀 2021 Top 200 PYQ</button>
@@ -266,10 +260,15 @@
       <div style="font-size: 13px; color: var(--text2); font-weight:600;">(.zip / .niso) - Secure P2P transfer</div>
       <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
     </div>
-    <div id="host-file-progress" style="display:none;">
-       <div class="label-title" id="host-file-status">Processing File...</div>
-       <div class="progress-wrap"><div class="progress-fill" id="host-file-fill"></div></div>
-    </div>
+  </div>
+  
+  <!-- File Processing Overridden Card -->
+  <div class="glass-card" style="max-width: 500px; display:none;" id="host-file-progress">
+       <div class="progress-container">
+           <div class="progress-text" id="host-file-status">Processing File...</div>
+           <div class="progress-wrap" style="height:12px;"><div class="progress-fill" id="host-file-fill"></div></div>
+           <div class="progress-sub" id="host-file-sub">Please wait...</div>
+       </div>
   </div>
 </div>
 
@@ -359,10 +358,10 @@
     
     <!-- Top Stats (Desktop) -->
     <div class="compact-stats-top" id="top-stats-desk">
-       <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-top">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-top">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-top">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-top">0</span></div>
+       <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
+       <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
+       <div class="st-item"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-desk">0</span></div>
+       <div class="st-item"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
     </div>
 
     <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
@@ -422,7 +421,7 @@
         </div>
         <div class="btm-right">
           <button class="action-btn" onclick="window.navigate(-1)">← Back</button>
-          <button class="action-btn save" id="btn-save" onclick="window.navigate(1, true)">Save & Next →</button>
+          <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
         </div>
       </div>
     </div>
@@ -435,12 +434,26 @@
       </div>
       <div class="grid-wrap" id="q-grid"></div>
 
-      <div class="widget" id="wid-chat-main" style="border-bottom:none;">
+      <div class="widget" id="wid-lb" style="height: 250px;">
+        <div class="widget-header" onclick="window.toggleWidget('wid-lb')">
+          <span><span style="color:var(--ans);">●</span> Live Progress</span> 
+          <span style="cursor:pointer; color:var(--text2);">↕</span>
+        </div>
+        <div class="widget-body">
+          <div class="lb-list" id="sidebar-leaderboard"></div>
+        </div>
+      </div>
+
+      <div class="widget" id="wid-chat-main" style="border-bottom:none; flex:1;">
         <div class="widget-header">
-          <span>Live Chat</span> 
-          <span onclick="window.toggleChatDock()" style="color:var(--accent2); cursor:pointer;">◧ Dock Left</span>
+          <span onclick="window.toggleWidget('wid-chat-main')">Live Chat <span style="color:var(--text2);">↕</span></span> 
+          <span onclick="window.toggleChatDock()" style="color:var(--accent2); cursor:pointer;">◧ Dock</span>
         </div>
         <div class="widget-body" id="chat-core-wrapper">
+          <div class="widget-header" style="display:none; border-bottom:1px solid var(--border);">
+            <span>Live Chat</span>
+            <span onclick="document.getElementById('chat-core-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--unans);">✕ Close</span>
+          </div>
           <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
           <div class="chat-input-wrap">
             <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
@@ -480,7 +493,7 @@
     <div class="hero-title" style="font-size:clamp(32px, 8vw, 56px); margin-bottom:8px;">Live Results 🏆</div>
     <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); text-align:center; margin-bottom:20px;" id="results-wait-text">Waiting for others to finish...</div>
     
-    <div class="glass-card" style="max-width: 650px; width: 90%; max-height:65vh; overflow-y:auto; padding:24px;">
+    <div class="glass-card" style="max-width: 650px; width: 100%; max-height:65vh; overflow-y:auto; padding:24px;">
       <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
     
@@ -532,7 +545,8 @@ let roomData = {
 let fileBuffer = null; let allQuestions = []; let sectionMap = {};
 let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};   
 let imageCache = {}; let timerInterval = null; let syncInterval = null;
-let hasSubmitted = false; let gameFinished = false; let isFileAcquisitionStarted = false;
+let hasSubmitted = false; let gameFinished = false; 
+let isFileAcquisitionStarted = false; let isLaunchPending = false;
 
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
@@ -555,6 +569,11 @@ window.toggleChatDock = () => {
         el('left-dock').style.display = 'none';
         el('wid-chat-main').style.display = 'flex';
     }
+};
+
+window.toggleWidget = (id) => {
+    const w = el(id);
+    if(w) w.classList.toggle('minimized');
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -583,7 +602,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.files[0]) {
             const file = e.target.files[0];
             roomData.testUrl = null; roomData.testFile = file.name; roomData.hasCustomFile = true;
-            el('host-file-progress').style.display = 'block'; el('host-file-status').textContent = "Reading Local File..."; el('host-file-fill').style.width = '20%';
+            
+            el('file-select-card').style.display = 'none';
+            el('host-file-progress').style.display = 'flex';
+            el('host-file-status').textContent = "Reading Local File..."; 
+            el('host-file-fill').style.width = '20%';
+            
             fileBuffer = await file.arrayBuffer();
             await saveToCache(file.name, fileBuffer);
             await processFileHost(fileBuffer, false);
@@ -600,10 +624,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (urlCode && el('join-code')) el('join-code').value = urlCode.toUpperCase();
 });
 
-window.hostSelectOnline = async (url) => { roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false; await processFileHost(url, true); };
+window.hostSelectOnline = async (url) => { 
+    roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false; 
+    el('file-select-card').style.display = 'none';
+    await processFileHost(url, true); 
+};
 
 async function processFileHost(source, isUrl) {
-    el('host-file-progress').style.display = 'block';
+    el('host-file-progress').style.display = 'flex';
     try {
         if(isUrl) {
             el('host-file-status').textContent = "Checking Cache..."; let cached = await loadFromCache(source);
@@ -616,24 +644,25 @@ async function processFileHost(source, isUrl) {
                 let loaded = 0; const reader = res.body.getReader(); const chunks = [];
                 while(true) {
                     const {done, value} = await reader.read(); if(done) break; chunks.push(value); loaded += value.length;
-                    if(total) { el('host-file-status').textContent = `Downloading... ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`; el('host-file-fill').style.width = Math.floor((loaded/total)*50) + '%'; }
-                    else { el('host-file-status').textContent = `Downloading... ${(loaded/1024/1024).toFixed(2)} MB`; }
+                    if(total) { el('host-file-status').textContent = `Downloading File...`; el('host-file-sub').textContent = `${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`; el('host-file-fill').style.width = Math.floor((loaded/total)*40) + '%'; }
+                    else { el('host-file-status').textContent = `Downloading File...`; el('host-file-sub').textContent = `${(loaded/1024/1024).toFixed(2)} MB`; }
                 }
                 fileBuffer = await new Blob(chunks).arrayBuffer();
                 await saveToCache(source, fileBuffer);
             }
         }
-        el('host-file-status').textContent = "Unpacking Zip..."; el('host-file-fill').style.width = '60%';
+        el('host-file-status').textContent = "Unpacking Zip..."; el('host-file-sub').textContent = 'Extracting data...'; el('host-file-fill').style.width = '60%';
         const zip = await JSZip.loadAsync(fileBuffer); const jf = zip.file('data.json');
-        if (!jf) throw new Error('No data.json');
+        if (!jf) throw new Error('Invalid format: No data.json');
         const data = JSON.parse(await jf.async('string')); buildQuestions(data);
         
         await preloadImages(zip, (current, total) => {
-            el('host-file-status').textContent = `Processing Images... ${current} / ${total}`;
+            el('host-file-status').textContent = `Processing Images...`;
+            el('host-file-sub').textContent = `${current} / ${total} files`;
             el('host-file-fill').style.width = (60 + Math.floor((current/total)*40)) + '%';
         });
         
-        el('host-file-status').textContent = "Ready!"; el('host-file-fill').style.width = '100%';
+        el('host-file-status').textContent = "Ready!"; el('host-file-sub').textContent = 'Opening Lobby...'; el('host-file-fill').style.width = '100%';
         const sel = el('cfg-sections'); sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
         Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
 
@@ -641,8 +670,13 @@ async function processFileHost(source, isUrl) {
             el('host-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
             el('host-controls').style.display = 'block'; el('player-view-cfg').style.display = 'none'; el('btn-ready-up').style.display = 'block'; 
             initPeerAsHost();
-        }, 500);
-    } catch(err) { showToast('error', err.message); el('host-file-progress').style.display = 'none'; }
+        }, 800);
+
+    } catch(err) { 
+        showToast('error', err.message); 
+        el('host-file-progress').style.display = 'none';
+        el('file-select-card').style.display = 'flex';
+    }
 }
 
 function initPeerAsHost() {
@@ -685,7 +719,7 @@ function attachHostSettingsListeners() {
         const sel = Array.from(el('cfg-sections').selectedOptions).map(o => o.value);
         roomData.settings.sections = sel.length ? sel : ['ALL'];
         roomData.settings.timerMode = el('cfg-timer-mode').value;
-        roomData.settings.timerDuration = parseInt(el('cfg-duration').value) * 60;
+        roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
         roomData.settings.showLiveStats = el('cfg-live-stats').value;
         if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = allQuestions.length; else { let t = 0; roomData.settings.sections.forEach(s => { if(sectionMap[s]) t += sectionMap[s].length; }); roomData.totalQuestions = t; }
         broadcastRoomState();
@@ -717,7 +751,7 @@ function initPeerAsPlayer() {
         });
         hostConn.on('close', () => showToast('error', 'Host disconnected!'));
     });
-    peer.on('error', err => showToast('error', 'Connection Error'));
+    peer.on('error', err => { showToast('error', 'Connection Error'); el('lobby-status-text').textContent = "Connection Failed. Refresh and check the code.";});
 }
 
 async function sendP2PFileChunks(conn) {
@@ -736,9 +770,8 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown'; el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
     
     if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) renderSidebarLeaderboard();
-    if(hasSubmitted) showFinalResults(false);
     
-    if(oldStatus === 'waiting' && !isFileAcquisitionStarted && roomData.testFile) {
+    if((!oldStatus || oldStatus === 'waiting') && !isFileAcquisitionStarted && roomData.testFile) {
         isFileAcquisitionStarted = true; 
         let cached = await loadFromCache(roomData.testFile);
         if(cached) {
@@ -761,7 +794,11 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
             } else { sendLobbyProgress('Requesting file from Host...', 5); hostConn.send({ type: 'request_file' }); }
         }
     }
-    if(oldStatus === 'waiting' && roomData.status === 'playing') launchGame();
+    
+    if((!oldStatus || oldStatus === 'waiting') && roomData.status === 'playing') {
+        if(allQuestions.length > 0) launchGame();
+        else isLaunchPending = true; // Wait for processing
+    }
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
 }
 
@@ -772,7 +809,8 @@ async function processFilePlayer(buffer) {
         buildQuestions(data); 
         await preloadImages(zip, (curr, tot) => { sendLobbyProgress(`Processing Images ${curr}/${tot}`, 90 + Math.floor((curr/tot)*10)); });
         sendLobbyProgress('Not Ready', 100); el('btn-ready-up').style.display = 'block'; 
-        showToast('success', 'Ready! Click "I\'m Ready" below.');
+        showToast('success', 'File Loaded! Click "I\'m Ready".');
+        if(isLaunchPending) launchGame();
     } catch(err) { sendLobbyProgress('Error', 0); showToast('error', 'Failed processing'); }
 }
 
@@ -787,7 +825,7 @@ function updateLobbyUI() {
 
     players.forEach(p => {
         if(!p.ready) allReady = false;
-        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:120px;"><div class="progress-wrap" style="height:4px;margin:0;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div class="progress-text" style="font-size:10px;">${p.progressText}</div></div>`;
+        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:120px;"><div class="progress-wrap" style="height:6px;margin:0;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div class="progress-text" style="font-size:10px;">${p.progressText}</div></div>`;
         let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
         if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
         list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
@@ -885,7 +923,7 @@ function buildQuestions(data) {
       const tq = pD[s][t] || {}; const ta = (aK[s] || {})[t] || {}; const sk = `${s} › ${t}`; sectionMap[sk] = [];
       for (const q of Object.keys(tq)) {
         const qd = tq[q] || {}; const ad = ta[q] || {};
-        allQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: ad.correctAnswer, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${i}.png`); return im;})() });
+        allQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: ad.correctAnswer, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
         sectionMap[sk].push(i++);
       }
     }
@@ -940,6 +978,7 @@ function renderQuestion() {
   const imgA = el('q-image-container'); imgA.innerHTML = ''; let hasI = false;
   for (const f of q.images) { if (imageCache[f]) { const img = document.createElement('img'); img.src = imageCache[f]; imgA.appendChild(img); hasI = true; } }
   if (!hasI) imgA.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
+
   renderAnswerArea(q); updateCompactStats();
 }
 
