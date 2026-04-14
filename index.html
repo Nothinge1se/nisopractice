@@ -9,240 +9,309 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
 
   :root {
-    --bg: #0f1115;
-    --surface: #1a1d24;
-    --surface2: #252a36;
-    --border: #333a4a;
-    --accent: #6366f1;
-    --accent-hover: #4f46e5;
+    --bg: #090a0f;
+    --surface: #13151f;
+    --surface2: #1e2233;
+    --surface3: #2a2f45;
+    --border: #313752;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-glow: rgba(79, 70, 229, 0.4);
     --accent2: #a855f7;
-    --text: #f8fafc;
+    --text: #ffffff;
     --text2: #94a3b8;
     
-    /* CBT Colors */
-    --ans: #10b981;    /* Answered - Green */
-    --unans: #ef4444;  /* Unanswered - Red */
-    --marked: #8b5cf6; /* Marked - Purple */
-    --mark-ans: #14b8a6; /* Marked & Answered - Teal */
-    --not-vis: #334155; /* Not visited - Gray */
+    /* CBT Bold Colors */
+    --ans: #10b981;    
+    --unans: #ef4444;  
+    --marked: #8b5cf6; 
+    --not-vis: #334155; 
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-  
   body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
   
-  button { cursor: pointer; transition: all 0.2s; border: none; outline: none; }
-  button:active:not(:disabled) { transform: scale(0.96); }
+  button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: none; outline: none; }
+  button:active:not(:disabled) { transform: scale(0.95); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* --- LOADING OVERLAY --- */
-  #loading-overlay { position: fixed; inset: 0; background: rgba(15, 17, 21, 0.95); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-  #loading-overlay.hidden { display: none !important; }
-  .loader-spinner { width: 48px; height: 48px; border: 4px solid var(--surface2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-  .loader-text { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 12px; }
-  .loader-bar-bg { width: 300px; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-  .loader-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
-  @keyframes spin { 100% { transform: rotate(360deg); } }
+  /* --- INLINE PROGRESS BAR --- */
+  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 6px; margin-top: 8px; width: 100%; position: relative; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
+  .progress-text { font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 600; text-align: right; font-family: 'Outfit'; }
 
-  /* --- SHARED MENUS --- */
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); z-index: 10; padding: 20px; overflow-y: auto; }
+  /* --- SHARED MENUS & CARDS --- */
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg); z-index: 10; padding: 40px 20px; overflow-y: auto; }
   .screen.hidden { display: none !important; }
   
-  .hero-title { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; text-align: center; }
-  .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 16px; font-weight: 500; text-align: center; margin-bottom: 40px; letter-spacing: 1px; text-transform: uppercase; }
+  .hero-title { font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -1px; }
+  .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; }
 
-  .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 460px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 16px; }
-  .card-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
+  .card-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
 
-  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: white; padding: 14px 16px; font-size: 16px; font-weight: 500; outline: none; width: 100%; transition: border-color 0.2s; text-align: center; }
-  .input-styled:focus { border-color: var(--accent); }
+  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 14px; color: white; padding: 16px; font-size: 18px; font-weight: 600; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; }
+  .input-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
 
-  .btn { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; padding: 14px 24px; border-radius: 12px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; }
-  .btn:hover:not(:disabled) { border-color: var(--accent); background: var(--surface); }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; padding: 16px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+  .btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface3); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5); }
 
   .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
-  .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.05); }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(79, 70, 229, 0.05); }
 
-  .room-code { font-family: monospace; font-size: 40px; font-weight: 800; color: var(--accent2); text-align: center; letter-spacing: 6px; padding: 20px; background: var(--bg); border-radius: 12px; cursor: pointer; border: 1px dashed var(--border); margin-bottom: 16px; }
+  .label-title { font-size: 12px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
 
   /* --- APP LAYOUT --- */
   #app { display: none; height: 100vh; flex-direction: column; }
   
-  .header { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
-  .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--accent); }
-  .timer-box { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; background: var(--surface2); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); color: #fff; display: flex; align-items: center; gap: 8px;}
+  .header { height: 72px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; z-index: 50; }
+  .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: var(--accent); letter-spacing: -1px; flex: 1;}
   
-  .main-stage { display: flex; flex: 1; overflow: hidden; }
+  /* BOLD TIMER CENTERED */
+  .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
+  .timer-box { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; background: var(--bg); padding: 6px 24px; border-radius: 12px; border: 2px solid var(--accent); color: var(--accent2); box-shadow: 0 0 15px var(--accent-glow); letter-spacing: 2px;}
+  
+  .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+
+  .main-stage { display: flex; flex: 1; overflow: hidden; position: relative; }
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-  .q-top { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); }
-  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 18px; background: var(--surface2); padding: 6px 16px; border-radius: 8px; border: 1px solid var(--border); }
+  .q-top { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; }
+  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 20px; background: var(--surface3); padding: 8px 20px; border-radius: 10px; border: 1px solid var(--border); color: #fff; }
   
   .q-scroll { flex: 1; overflow-y: auto; padding: 32px; display: flex; flex-direction: column; align-items: center; }
-  .q-images { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; }
-  .q-images img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+  .q-images { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 850px; }
+  .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-  .ans-area { padding: 24px; background: var(--surface); border-top: 1px solid var(--border); }
-  .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 800px; margin: 0 auto; }
-  .opt-btn { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 500; }
+  .ans-area { padding: 24px; background: var(--surface); border-top: 1px solid var(--border); position: relative; }
+  .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 850px; margin: 0 auto; }
+  .opt-btn { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-radius: 14px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 18px; font-weight: 600; }
   .opt-btn:hover:not(:disabled) { border-color: var(--accent2); }
-  .opt-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.1); }
-  .opt-key { width: 32px; height: 32px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(79, 70, 229, 0.15); box-shadow: 0 0 0 2px var(--accent-glow); }
+  .opt-key { width: 36px; height: 36px; border-radius: 10px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }
   .opt-btn.selected .opt-key { background: var(--accent); color: white; }
-  .nat-input { width: 100%; max-width: 300px; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; padding: 12px 20px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; }
+  .nat-input { width: 100%; max-width: 350px; font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; padding: 16px 24px; border-radius: 14px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; }
 
-  .btm-bar { height: 72px; padding: 0 24px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .btm-left { display: flex; gap: 12px; }
-  .btm-right { display: flex; gap: 12px; }
-  .action-btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
-  .action-btn:hover { background: var(--bg); }
+  .btm-bar { height: 80px; padding: 0 24px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;}
+  .action-btn { padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 15px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase;}
+  .action-btn:hover:not(:disabled) { background: var(--surface3); }
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
   .action-btn.save { background: var(--accent); border-color: var(--accent); color: white; }
 
-  /* SIDEBAR (Grid + Leaderboard + Chat) */
-  .sidebar { width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
-  .sec-sel { padding: 16px; border-bottom: 1px solid var(--border); }
-  .sec-sel select { width: 100%; padding: 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 500; outline: none;}
+  /* OVERLAY FOR SUBMITTED STATE */
+  .submitted-overlay { position: absolute; inset: 0; background: rgba(19, 21, 31, 0.6); z-index: 10; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(4px); display: none; }
+  .submitted-overlay.show { display: flex; }
+  .sub-badge { background: var(--ans); color: white; padding: 12px 32px; border-radius: 20px; font-family: 'Outfit'; font-weight: 800; font-size: 24px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); margin-bottom: 16px;}
 
-  .grid-wrap { padding: 16px; overflow-y: auto; max-height: 250px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); }
-  .dot { width: 42px; height: 42px; border-radius: 8px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; border: 2px solid transparent; }
-  .dot.active { border-color: white; transform: scale(1.05); }
+  /* SIDEBAR (Grid + Leaderboard + Chat) */
+  .sidebar { width: 360px; background: var(--surface); border-left: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .sec-sel { padding: 20px; border-bottom: 1px solid var(--border); }
+  .sec-sel select { width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; font-weight: 700; font-size: 16px; outline: none;}
+
+  .grid-wrap { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; border-bottom: 1px solid var(--border); }
+  .dot { width: 46px; height: 46px; border-radius: 12px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+  .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
   .dot.ans { background: var(--ans); color: #fff; }
   .dot.unans { background: var(--unans); color: #fff; }
   .dot.marked { background: var(--marked); color: #fff; }
-  .dot.mark-ans { background: var(--mark-ans); color: #fff; }
 
-  .live-lb { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-bottom: 1px solid var(--border); }
-  .lb-header { padding: 12px 16px; font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; background: var(--surface2); }
-  .lb-list { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .lb-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); }
-  .lb-item.me { border-color: var(--accent); }
-  .lb-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;}
-  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: var(--accent2); }
-
-  .chat-box { height: 220px; display: flex; flex-direction: column; background: var(--bg); }
-  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
-  .msg { background: var(--surface); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); word-break: break-word;}
-  .msg-name { font-weight: 700; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase;}
-  .chat-input-wrap { display: flex; padding: 8px; background: var(--surface2); border-top: 1px solid var(--border); }
-  .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: white; outline: none; font-size: 13px; }
-  .chat-input-wrap button { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 0 12px; margin-left: 8px; font-weight: 600; font-size: 13px;}
-
-  /* --- OVERLAYS --- */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(15,17,21,0.95); display: flex; align-items: center; justify-content: center; z-index: 9000; backdrop-filter: blur(10px); display: none; }
-  .modal-overlay.show { display: flex; }
+  /* Minimizable Widgets */
+  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease;}
+  .widget-header { padding: 16px 20px; font-size: 14px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px;}
+  .widget-body { overflow: hidden; display: flex; flex-direction: column; flex: 1; }
   
-  .wait-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; max-height: 50vh; overflow-y: auto; width: 100%;}
-  .wait-item { display: flex; justify-content: space-between; padding: 12px 16px; background: var(--surface2); border-radius: 8px; font-weight: 600; }
-  .wait-item.done { border-left: 4px solid var(--ans); }
-  .wait-item.pending { border-left: 4px solid var(--marked); opacity: 0.7; }
+  .widget.minimized { height: 50px !important; flex: none !important; }
+  .widget.minimized .widget-body { display: none; }
+
+  /* Leaderboard UI */
+  .lb-list { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; height: 200px; }
+  .lb-item { display: flex; flex-direction: column; background: var(--bg); padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); }
+  .lb-item.me { border-color: var(--accent); }
+  .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .lb-name { font-weight: 700; font-size: 15px; }
+  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
+
+  /* Chat UI */
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; height: 200px; }
+  .msg { background: var(--surface3); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); word-break: break-word;}
+  .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 12px; text-transform: uppercase;}
+  .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); }
+  .chat-input-wrap input { flex: 1; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 10px 14px; color: white; outline: none; font-size: 14px; font-weight: 500;}
+  .chat-input-wrap input:focus { border-color: var(--accent); }
+  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 10px; font-weight: 700; font-family: 'Outfit';}
+
+  /* Lobby Grid adjustments */
+  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 1000px; align-items: start;}
+  .lobby-left { display: flex; flex-direction: column; gap: 24px; }
+  .lobby-right { display: flex; flex-direction: column; gap: 24px; height: 100%;}
+  .config-row { margin-bottom: 16px; }
+  .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 15px; }
+  
+  /* Mobile Specific Layout */
+  .mob-menu-btn { display: none; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; padding: 8px; color: white; }
+  #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: none; }
+
+  @media (max-width: 850px) {
+    .header { padding: 0 16px; }
+    .brand { font-size: 20px; }
+    .timer-center { flex: none; position: absolute; left: 50%; transform: translateX(-50%); }
+    .timer-box { font-size: 20px; padding: 4px 16px; }
+    #top-file-name { display: none; }
+    
+    .mob-menu-btn { display: block; }
+    .header-right .btn-primary { display: none; } /* Move submit to sidebar on mobile */
+
+    .sidebar { position: fixed; right: 0; top: 72px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 360px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .sidebar.open { transform: translateX(0); }
+    #mob-overlay.open { display: block; }
+
+    .btm-bar { padding: 0 16px; }
+    .action-btn { padding: 10px 12px; font-size: 12px; }
+    .opts-grid { grid-template-columns: 1fr; }
+    
+    .lobby-grid { grid-template-columns: 1fr; }
+  }
 
   /* Toast */
   @keyframes slideUp { 0% { opacity: 0; transform: translate(-50%, 20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 14px 28px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; }
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay" class="hidden">
-  <div class="loader-spinner"></div>
-  <div class="loader-text" id="loading-text">Initializing...</div>
-  <div class="loader-bar-bg"><div class="loader-bar-fill" id="loading-bar-fill"></div></div>
-</div>
-
 <!-- 1. INTRO SCREEN -->
 <div id="intro-screen" class="screen">
+  <div style="margin-top: 4vh;"></div>
   <div class="hero-title">NISOPRACTICE</div>
-  <div class="hero-sub">Pro P2P Multiplayer</div>
+  <div class="hero-sub">Live CBT Multiplayer</div>
   
   <div class="glass-card">
     <div class="card-title">Join or Host Room</div>
-    <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="20">
-    <div style="display:flex; gap:12px;">
-      <input type="text" id="join-code" class="input-styled" placeholder="ROOM CODE" style="text-transform: uppercase;" maxlength="6">
+    <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
+    <div style="display:flex; gap:16px;">
+      <input type="text" id="join-code" class="input-styled" placeholder="CODE" style="text-transform: uppercase;" maxlength="6">
       <button class="btn btn-primary" id="btn-join-room" style="flex: 0 0 120px;">Join</button>
     </div>
-    <div style="text-align:center; color:var(--text2); font-size:12px; font-weight:700;">OR</div>
-    <button class="btn" id="btn-host-screen">Host a New Room</button>
+    <div style="text-align:center; color:var(--text2); font-size:14px; font-weight:800; text-transform:uppercase;">Or Create New</div>
+    <button class="btn" id="btn-host-screen">Host a Room</button>
   </div>
 </div>
 
-<!-- 2. HOST CONFIG SCREEN -->
+<!-- 2. HOST SELECT FILE SCREEN -->
 <div id="host-screen" class="screen hidden">
-  <div class="hero-title" style="font-size: 32px;">Configure Room</div>
-  <div class="glass-card" style="max-width: 500px;">
+  <div class="hero-title" style="font-size: 40px; margin-bottom: 24px;">Select Test Paper</div>
+  <div class="glass-card" style="max-width: 550px;">
     
-    <div id="host-step-1">
-      <div style="font-weight: 600; margin-bottom: 12px; color:var(--text2);">Select Test Paper</div>
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
-        <button class="btn" onclick="window.hostSelectOnline('1D.niso')">🚀 Demo Module (NEET)</button>
-        <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2021_JEE.niso')">🚀 2021 Top 200 PYQ</button>
-        <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2022_JEE.niso')">🚀 2022 Top 200 PYQ</button>
-      </div>
-      <div class="upload-zone" id="upload-zone">
-        <div style="font-weight:700; margin-bottom: 8px;">Or Upload Custom File (.zip/.niso)</div>
-        <div style="font-size: 13px; color: var(--text2);">File will be P2P transferred automatically to all players!</div>
-        <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
-      </div>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
+      <button class="btn" onclick="window.hostSelectOnline('1D.niso')">🚀 Demo Module (NEET)</button>
+      <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2021_JEE.niso')">🚀 2021 Top 200 PYQ</button>
+      <button class="btn" onclick="window.hostSelectOnline('TOP_200_PYQ_2022_JEE.niso')">🚀 2022 Top 200 PYQ</button>
+    </div>
+    
+    <div class="upload-zone" id="upload-zone">
+      <div style="font-family:'Outfit'; font-weight:800; font-size:20px; margin-bottom: 8px;">Or Upload Custom File (.zip/.niso)</div>
+      <div style="font-size: 14px; color: var(--text2); font-weight:500;">It will be securely P2P transferred to all players</div>
+      <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
     </div>
 
-    <div id="host-step-2" class="hidden">
-      <div style="color:var(--ans); font-weight:700; text-align:center; margin-bottom:20px; padding:10px; background:rgba(16,185,129,0.1); border-radius:8px;">File Loaded: <span id="host-loaded-file"></span></div>
-      
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:6px;">SECTIONS (CTRL+CLICK FOR MULTIPLE)</label>
-        <select id="host-sections" multiple style="width:100%; height:80px; background:var(--bg); color:white; border:1px solid var(--border); border-radius:8px; padding:8px; outline:none;"></select>
-      </div>
-      
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:6px;">TIMER MODE</label>
-        <select id="host-timer-mode" style="width:100%; background:var(--bg); color:white; border:1px solid var(--border); border-radius:8px; padding:10px; outline:none;">
-          <option value="countdown">Countdown (Auto-Submit)</option>
-          <option value="race">Race Mode (Fastest Wins)</option>
-        </select>
-      </div>
-      
-      <div style="margin-bottom: 24px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:6px;">DURATION (MINUTES)</label>
-        <input type="number" id="host-timer-duration" class="input-styled" value="30" min="1" style="padding:10px;">
-      </div>
-      
-      <button class="btn btn-primary" id="btn-create-room">Create Room & Open Lobby</button>
+    <!-- Inline loading for Host processing file -->
+    <div id="host-file-progress" style="display:none;">
+       <div class="label-title" id="host-file-status">Processing File...</div>
+       <div class="progress-wrap"><div class="progress-fill" id="host-file-fill"></div></div>
     </div>
   </div>
 </div>
 
-<!-- 3. LOBBY SCREEN -->
+<!-- 3. LOBBY SCREEN (Settings + Chat + Players) -->
 <div id="lobby-screen" class="screen hidden">
-  <div class="hero-title" style="font-size: 36px;" id="lobby-title">Waiting Area</div>
+  <div class="hero-title" style="font-size: 36px; margin-bottom:4px;" id="lobby-title">Room Lobby</div>
   <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2);">Connecting to Peer Network...</div>
   
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 800px;">
-    <div class="glass-card" style="max-width: 100%;">
-      <div class="card-title">Room Code</div>
-      <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy link">------</div>
-      <div style="font-size:13px; color:var(--text2); text-align:center; margin-bottom:20px;">Share this code with your friends</div>
-      
-      <button class="btn btn-primary hidden" id="btn-start-game" disabled>Start Game</button>
-    </div>
+  <div class="lobby-grid">
     
-    <div class="glass-card" style="max-width: 100%;">
-      <div class="card-title" style="display:flex; justify-content:space-between;">
-        <span>Players</span> <span id="player-count" style="color:var(--accent);">0</span>
+    <!-- LEFT: Room Info & Settings -->
+    <div class="lobby-left">
+      <div class="glass-card" style="padding: 24px;">
+        <div class="label-title" style="text-align:center;">Invite Friends</div>
+        <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
+        <div style="text-align:center; font-size:13px; color:var(--text2); margin-top:-10px; font-weight:600;">Click to copy join link</div>
       </div>
-      <div id="players-list-ui" style="background:var(--bg); border-radius:12px; border:1px solid var(--border); overflow-y:auto; height:180px; padding:12px; display:flex; flex-direction:column; gap:8px;">
-        <!-- Populated via JS -->
+
+      <div class="glass-card" style="padding: 24px; display:none;" id="host-controls">
+        <div class="card-title" style="font-size:20px; margin-bottom:16px;">Test Configuration</div>
+        
+        <div class="config-row">
+          <label class="label-title">Sections to Include</label>
+          <select id="cfg-sections" class="config-select" multiple style="height:90px;"></select>
+        </div>
+        
+        <div class="config-row" style="display:flex; gap:16px;">
+          <div style="flex:1;">
+            <label class="label-title">Timer Mode</label>
+            <select id="cfg-timer-mode" class="config-select">
+              <option value="countdown">Countdown</option>
+              <option value="race">Race (Count-up)</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label class="label-title">Mins</label>
+            <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
+          </div>
+        </div>
+
+        <div class="config-row">
+          <label class="label-title">Live Fair-Play Stats</label>
+          <select id="cfg-live-stats" class="config-select">
+            <option value="false">Hidden (Prevent Cheating)</option>
+            <option value="true">Visible (Show correct/wrong blocks)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="btn-start-game" disabled style="margin-top:8px;">Start Match</button>
+      </div>
+
+      <!-- Player sees this instead of controls -->
+      <div class="glass-card" style="padding: 24px;" id="player-view-cfg">
+        <div class="card-title" style="font-size:18px; margin-bottom:16px; color:var(--text2);">Host Configuration</div>
+        <div style="font-size:14px; font-weight:600; line-height:1.6;">
+          <span style="color:var(--text2);">Paper:</span> <span id="view-file" style="color:var(--accent2);">...</span><br>
+          <span style="color:var(--text2);">Mode:</span> <span id="view-mode">...</span><br>
+          <span style="color:var(--text2);">Time:</span> <span id="view-time">...</span>
+        </div>
       </div>
     </div>
+
+    <!-- RIGHT: Players & Chat -->
+    <div class="lobby-right">
+      <div class="glass-card" style="padding: 20px; flex: 1; max-height: 350px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span class="label-title" style="margin:0;">Players</span>
+          <span style="font-family:'Outfit'; font-weight:800; font-size:18px; color:var(--accent); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
+        </div>
+        <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
+          <!-- Players injected here -->
+        </div>
+      </div>
+
+      <!-- Lobby Chat -->
+      <div class="glass-card" style="padding: 0; flex: 1; max-height: 350px; display:flex; flex-direction:column;">
+        <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
+        <div class="chat-msgs" id="lobby-chat-msgs"></div>
+        <div class="chat-input-wrap">
+          <input type="text" id="lobby-chat-input" placeholder="Say hello..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()">
+          <button onclick="window.sendLobbyChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -250,18 +319,37 @@
 <div id="app">
   <div class="header">
     <div class="brand">NISOPRACTICE</div>
-    <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); background:var(--surface2); padding:6px 12px; border-radius:8px; border:1px solid var(--border);" id="top-file-name">Paper Name</div>
-    <div style="display:flex; align-items:center; gap:16px;">
-      <div class="timer-box">⏱️ <span id="total-timer">00:00</span></div>
-      <button class="btn btn-primary" style="padding: 8px 16px; width:auto; border-radius:8px;" onclick="window.submitQuizBtn()">Submit Test</button>
+    <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
+    
+    <div class="header-right">
+      <div style="font-family:'Outfit'; font-weight:700; color:var(--text2); background:var(--surface2); padding:8px 16px; border-radius:10px; border:1px solid var(--border);" id="top-file-name">Paper Name</div>
+      <button class="btn btn-primary" style="padding: 10px 20px; font-size: 14px; width:auto; border-radius:10px;" id="btn-top-submit" onclick="window.submitQuizBtn()">Submit</button>
+      <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
     </div>
   </div>
 
   <div class="main-stage">
+    
+    <!-- SUBMITTED OVERLAY -->
+    <div class="submitted-overlay" id="submitted-layer">
+       <div class="sub-badge">Test Submitted</div>
+       <div style="font-weight:600; font-size:16px; color:var(--text2);">Waiting for other players to finish...</div>
+       <div style="margin-top:20px; font-size:14px; color:var(--text2); max-width: 400px; text-align:center;">You can continue chatting or reviewing questions while waiting. Final ranks will appear when everyone is done.</div>
+    </div>
+
+    <!-- FINAL LEADERBOARD PANEL (Slides in when all done) -->
+    <div class="submitted-overlay" id="final-results-layer" style="background:var(--bg); z-index:20;">
+      <div class="hero-title" style="font-size:40px; margin-bottom:8px;">Final Results 🏆</div>
+      <div class="glass-card" style="max-width: 600px; width: 90%; max-height:70vh; overflow-y:auto; padding:24px;">
+        <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+        <button class="btn" style="margin-top:24px;" onclick="window.location.reload()">Back to Home</button>
+      </div>
+    </div>
+
     <div class="q-area">
       <div class="q-top">
         <div class="q-badge" id="q-num-badge">Question 1</div>
-        <div style="font-weight:600; color:var(--text2); font-size:14px;" id="q-type-badge">Single Choice Type</div>
+        <div style="font-weight:700; color:var(--text2); font-size:15px; background:var(--bg); padding:6px 16px; border-radius:8px; border:1px solid var(--border);" id="q-type-badge">Multiple Choice</div>
       </div>
       
       <div class="q-scroll">
@@ -274,63 +362,93 @@
 
       <div class="btm-bar">
         <div class="btm-left">
-          <button class="action-btn mark" onclick="window.markResponse()">Mark for Review & Next</button>
-          <button class="action-btn" onclick="window.clearResponse()">Clear Response</button>
+          <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark for Review</button>
+          <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
         </div>
         <div class="btm-right">
           <button class="action-btn" onclick="window.navigate(-1)">← Back</button>
-          <button class="action-btn save" onclick="window.saveNext()">Save & Next →</button>
+          <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
         </div>
       </div>
     </div>
 
-    <div class="sidebar">
+    <div id="mob-overlay" onclick="window.toggleMobMenu()"></div>
+    
+    <div class="sidebar" id="main-sidebar">
       <div class="sec-sel">
-        <select id="section-select" onchange="window.changeSection()">
-          <option value="ALL">All Sections</option>
-        </select>
+        <select id="section-select" onchange="window.changeSection()"><option value="ALL">All Sections</option></select>
       </div>
       
       <div class="grid-wrap" id="q-grid"></div>
 
-      <div class="live-lb">
-        <div class="lb-header" style="display:flex; justify-content:space-between;">
-          <span>Live Progress</span> <span style="color:var(--ans);">● P2P Sync</span>
+      <!-- Minimizable Leaderboard -->
+      <div class="widget" id="wid-lb" style="height: 250px;">
+        <div class="widget-header" onclick="window.toggleWidget('wid-lb')">
+          <span><span style="color:var(--ans);">●</span> Live Progress</span> <span>↕</span>
         </div>
-        <div class="lb-list" id="sidebar-leaderboard"></div>
+        <div class="widget-body">
+          <div class="lb-list" id="sidebar-leaderboard"></div>
+        </div>
       </div>
 
-      <div class="chat-box">
-        <div class="lb-header">Live Chat</div>
-        <div class="chat-msgs" id="chat-messages"></div>
-        <div class="chat-input-wrap">
-          <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendChat()">
-          <button onclick="window.sendChat()">Send</button>
+      <!-- Minimizable Chat -->
+      <div class="widget" id="wid-chat" style="height: 250px; border-bottom:none;">
+        <div class="widget-header" onclick="window.toggleWidget('wid-chat')">
+          <span>Live Chat</span> <span>↕</span>
         </div>
+        <div class="widget-body">
+          <div class="chat-msgs" id="game-chat-msgs"></div>
+          <div class="chat-input-wrap">
+            <input type="text" id="game-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
+            <button onclick="window.sendGameChat()">Send</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile Submit Button inside Sidebar -->
+      <div style="padding: 16px; background:var(--surface2); border-top:1px solid var(--border); display:none;" id="mob-submit-area">
+        <button class="btn btn-primary" style="width:100%;" onclick="window.submitQuizBtn()">Submit Test</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SUBMIT WAIT / FINAL RESULTS OVERLAY -->
-<div class="modal-overlay" id="results-modal">
-  <div class="glass-card" style="width:90%; max-width:600px;">
-    <div class="card-title" id="results-title" style="font-size:28px;">Waiting for others...</div>
-    <div style="text-align:center; color:var(--text2); font-size:14px; margin-bottom:10px;" id="results-subtitle">Your screen is locked until all players submit.</div>
-    
-    <div class="wait-list" id="final-results-list"></div>
-    
-    <button class="btn" style="margin-top:24px; display:none;" id="btn-home" onclick="window.location.reload()">Back to Home</button>
-  </div>
-</div>
-
 <script>
+// ── CACHING ENGINE (IndexedDB) ──
+const DB_NAME = 'NisoCacheDB';
+const STORE_NAME = 'files';
+
+function getDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = () => reject('IDB Error');
+    });
+}
+async function saveToCache(fileName, arrayBuffer) {
+    try {
+        const db = await getDB();
+        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(arrayBuffer, fileName);
+    } catch(e) { console.log("Cache save failed"); }
+}
+async function loadFromCache(fileName) {
+    try {
+        const db = await getDB();
+        return new Promise((resolve) => {
+            const req = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(fileName);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+        });
+    } catch(e) { return null; }
+}
+
 // ── P2P MULTIPLAYER CORE ──
 let peer = null;
 let myId = null;
 let isHost = false;
-let hostConn = null; // Players use this to talk to host
-let connections = {}; // Host uses this to track players
+let hostConn = null; 
+let connections = {}; 
 
 let myName = "";
 let roomCode = "";
@@ -341,44 +459,48 @@ let roomData = {
     testFile: null, 
     testUrl: null, 
     hasCustomFile: false,
-    sections: ['ALL'],
-    timerMode: 'countdown', 
-    timerDuration: 1800,
+    settings: {
+        sections: ['ALL'],
+        timerMode: 'countdown', 
+        timerDuration: 1800,
+        showLiveStats: 'false'
+    },
     startTime: null, 
     totalQuestions: 0,
-    players: {} // { id: {name, ready, submitted, attempted, score, timeTaken} }
+    players: {} // { id: {name, ready, state: 'downloading'|'ready', progressPct, progressText, submitted, attempted, score, timeTaken} }
 };
 
 // Local Quiz Variables
-let customFileData = null; // ArrayBuffer for P2P transfer
-let zipData = null; 
+let fileBuffer = null; 
 let allQuestions = []; 
 let sectionMap = {};
 let currentSection = 'ALL'; 
 let currentQIdx = 0; 
-// Answers format: { [id]: { selected: val, status: 'ans'|'mark'|'mark-ans'|'not-vis' } }
 let answers = {};   
 let imageCache = {}; 
 let timerInterval = null; 
 let syncInterval = null;
 let hasSubmitted = false;
+let gameFinished = false;
 
 // Helpers
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => {
   const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3500);
 };
-function updateLoading(percent, text) {
-  const overlay = el('loading-overlay');
-  overlay.classList.remove('hidden');
-  el('loading-text').innerText = text;
-  el('loading-bar-fill').style.width = percent + '%';
-  if (percent >= 100) setTimeout(() => overlay.classList.add('hidden'), 500);
-}
 const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCase();
 
-// ── 1. INITIALIZATION & P2P ──
+// UI Toggles
+window.toggleMobMenu = () => {
+    el('main-sidebar').classList.toggle('open');
+    el('mob-overlay').classList.toggle('open');
+};
+window.toggleWidget = (id) => el(id).classList.toggle('minimized');
+
+if(window.innerWidth <= 850) el('mob-submit-area').style.display = 'block';
+
+// ── 1. INTRO ──
 el('btn-host-screen').addEventListener('click', () => {
     myName = el('player-name').value.trim();
     if(!myName) return showToast('error', 'Enter your name!');
@@ -400,16 +522,97 @@ el('btn-join-room').addEventListener('click', () => {
     initPeerAsPlayer();
 });
 
+// ── 2. HOST CONFIG & FILE (Pre-Lobby) ──
+window.hostSelectOnline = async (url) => {
+    roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false;
+    await processFileHost(url, true);
+};
+
+el('upload-zone').addEventListener('click', () => el('file-input').click());
+el('file-input').addEventListener('change', async (e) => {
+    if (e.target.files[0]) {
+        const file = e.target.files[0];
+        roomData.testUrl = null; 
+        roomData.testFile = file.name;
+        roomData.hasCustomFile = true;
+        
+        el('host-file-progress').style.display = 'block';
+        el('host-file-status').textContent = "Reading Local File into Memory...";
+        el('host-file-fill').style.width = '20%';
+        
+        fileBuffer = await file.arrayBuffer();
+        await saveToCache(file.name, fileBuffer);
+        await processFileHost(fileBuffer, false);
+    }
+});
+
+async function processFileHost(source, isUrl) {
+    el('host-file-progress').style.display = 'block';
+    try {
+        if(isUrl) {
+            // Check cache
+            el('host-file-status').textContent = "Checking Cache...";
+            let cached = await loadFromCache(source);
+            if(cached) {
+                fileBuffer = cached;
+            } else {
+                el('host-file-status').textContent = "Downloading Mock Paper...";
+                const res = await fetch(source);
+                if(!res.ok) throw new Error("Fetch failed");
+                fileBuffer = await res.arrayBuffer();
+                await saveToCache(source, fileBuffer);
+            }
+        }
+        
+        el('host-file-status').textContent = "Unpacking Zip...";
+        el('host-file-fill').style.width = '60%';
+        
+        const zip = await JSZip.loadAsync(fileBuffer);
+        const jf = zip.file('data.json');
+        if (!jf) throw new Error('Invalid format: No data.json');
+        const data = JSON.parse(await jf.async('string'));
+        
+        buildQuestions(data);
+        
+        el('host-file-status').textContent = "Processing Images...";
+        el('host-file-fill').style.width = '80%';
+        await preloadImages(zip);
+        
+        el('host-file-status').textContent = "Ready!";
+        el('host-file-fill').style.width = '100%';
+        
+        // Setup Sections Dropdown
+        const sel = el('cfg-sections');
+        sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
+        Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
+
+        // Enter Lobby
+        setTimeout(() => {
+            el('host-screen').classList.add('hidden');
+            el('lobby-screen').classList.remove('hidden');
+            el('host-controls').style.display = 'block';
+            el('player-view-cfg').style.display = 'none';
+            initPeerAsHost();
+        }, 500);
+
+    } catch(err) { 
+        showToast('error', err.message); 
+        el('host-file-progress').style.display = 'none';
+    }
+}
+
+// ── 3. PEERJS NETWORKING ──
 function initPeerAsHost() {
     roomCode = generateCode();
     peer = new Peer(roomCode);
     
     peer.on('open', (id) => {
         myId = id;
-        el('lobby-status-text').textContent = "Share this code with friends";
+        el('lobby-status-text').textContent = "Waiting for players to join...";
         el('lobby-room-code').textContent = roomCode;
-        roomData.players[myId] = { name: myName, ready: true, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
+        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: '', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
         updateLobbyUI();
+        attachHostSettingsListeners();
     });
 
     peer.on('connection', (conn) => {
@@ -417,38 +620,59 @@ function initPeerAsHost() {
         
         conn.on('data', (data) => {
             if(data.type === 'join') {
-                roomData.players[conn.peer] = { name: data.name, ready: false, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
+                roomData.players[conn.peer] = { name: data.name, ready: false, state: 'downloading', progressText: 'Joining...', progressPct: 0, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
                 broadcastRoomState();
             }
-            if(data.type === 'ready') {
-                if(roomData.players[conn.peer]) roomData.players[conn.peer].ready = true;
-                broadcastRoomState();
+            if(data.type === 'lobby_progress') {
+                if(roomData.players[conn.peer]) {
+                    roomData.players[conn.peer].progressText = data.text;
+                    roomData.players[conn.peer].progressPct = data.pct;
+                    if(data.pct === 100 && data.text === 'Ready') {
+                        roomData.players[conn.peer].ready = true;
+                        roomData.players[conn.peer].state = 'ready';
+                    }
+                    broadcastRoomState();
+                }
             }
             if(data.type === 'request_file') {
-                // Send large file data chunk over WebRTC
-                conn.send({ type: 'file_transfer', fileData: customFileData, fileName: roomData.testFile });
+                sendP2PFileChunks(conn);
             }
             if(data.type === 'sync_progress') {
                 if(roomData.players[conn.peer]) {
                     const p = roomData.players[conn.peer];
                     p.attempted = data.attempted;
                     if(data.submitted) {
-                        p.submitted = true;
-                        p.score = data.score;
-                        p.timeTaken = data.timeTaken;
+                        p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken;
                     }
                     broadcastRoomState();
                     checkAllSubmitted();
                 }
             }
-            if(data.type === 'chat') {
-                broadcastChat(data.name, data.text);
-            }
+            if(data.type === 'chat') broadcastChat(data.name, data.text);
         });
 
         conn.on('close', () => { delete connections[conn.peer]; delete roomData.players[conn.peer]; broadcastRoomState(); });
     });
     peer.on('error', err => showToast('error', 'Network Error: ' + err.type));
+}
+
+function attachHostSettingsListeners() {
+    const pushCfg = () => {
+        const sel = Array.from(el('cfg-sections').selectedOptions).map(o => o.value);
+        roomData.settings.sections = sel.length ? sel : ['ALL'];
+        roomData.settings.timerMode = el('cfg-timer-mode').value;
+        roomData.settings.timerDuration = parseInt(el('cfg-duration').value) * 60;
+        roomData.settings.showLiveStats = el('cfg-live-stats').value;
+        
+        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = allQuestions.length;
+        else { let t = 0; roomData.settings.sections.forEach(s => { if(sectionMap[s]) t += sectionMap[s].length; }); roomData.totalQuestions = t; }
+        
+        broadcastRoomState();
+    };
+    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration', 'cfg-live-stats'].forEach(id => {
+        el(id).addEventListener('change', pushCfg);
+    });
+    pushCfg(); // init
 }
 
 function initPeerAsPlayer() {
@@ -463,24 +687,60 @@ function initPeerAsPlayer() {
             hostConn.send({ type: 'join', name: myName });
         });
 
-        hostConn.on('data', (data) => {
+        let receiveBuffer = [];
+        let totalSize = 0;
+        let receivedSize = 0;
+
+        hostConn.on('data', async (data) => {
             if(data.type === 'room_state') {
                 const oldStatus = roomData.status;
                 const wasReady = roomData.players && roomData.players[myId]?.ready;
                 roomData = data.state;
-                handleRoomStateUpdate(oldStatus, wasReady);
+                handleRoomStateUpdatePlayer(oldStatus, wasReady);
             }
-            if(data.type === 'file_transfer') {
-                showToast('success', 'Receiving file from Host...');
-                processZipFile(data.fileData, false, true);
+            // P2P File Receiving Logic
+            if(data.type === 'file_start') {
+                totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0;
+                sendLobbyProgress(`Receiving 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5);
             }
-            if(data.type === 'chat') {
-                appendChatUI(data.name, data.text);
+            if(data.type === 'file_chunk') {
+                receiveBuffer.push(data.chunk);
+                receivedSize += data.chunk.byteLength;
+                let pct = Math.floor((receivedSize/totalSize)*80) + 5; // scales 5% to 85%
+                if(receivedSize % (1024 * 512) < 130000) { // update UI roughly every 512kb to avoid spam
+                    sendLobbyProgress(`Receiving ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, pct);
+                }
             }
+            if(data.type === 'file_end') {
+                sendLobbyProgress(`Unpacking Data...`, 90);
+                const blob = new Blob(receiveBuffer);
+                fileBuffer = await blob.arrayBuffer();
+                await saveToCache(roomData.testFile, fileBuffer);
+                await processFilePlayer(fileBuffer);
+            }
+            if(data.type === 'chat') { appendChatUI(data.name, data.text); }
         });
         hostConn.on('close', () => showToast('error', 'Host disconnected!'));
     });
     peer.on('error', err => showToast('error', 'Connection Error: ' + err.type));
+}
+
+async function sendP2PFileChunks(conn) {
+    if(!fileBuffer) return;
+    const size = 128 * 1024; // 128KB chunks
+    let offset = 0;
+    conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
+    while(offset < fileBuffer.byteLength) {
+        const chunk = fileBuffer.slice(offset, offset + size);
+        conn.send({ type: 'file_chunk', chunk });
+        offset += size;
+        await new Promise(r => setTimeout(r, 10)); // throttle to prevent WebRTC buffer overflow
+    }
+    conn.send({ type: 'file_end' });
+}
+
+function sendLobbyProgress(text, pct) {
+    if(hostConn && hostConn.open) hostConn.send({ type: 'lobby_progress', text, pct });
 }
 
 function broadcastRoomState() {
@@ -489,112 +749,60 @@ function broadcastRoomState() {
     for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
 }
 
-function checkAllSubmitted() {
-    if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) {
-        roomData.status = 'finished';
-        broadcastRoomState();
-        showFinalResults();
-    }
-}
-
-function handleRoomStateUpdate(oldStatus, wasReady) {
+async function handleRoomStateUpdatePlayer(oldStatus, wasReady) {
     updateLobbyUI();
+    
+    // Update player's view of Host Settings
+    el('view-file').textContent = roomData.testFile;
+    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown';
+    el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
+    
     if(roomData.status === 'playing' && el('app').style.display === 'flex') renderSidebarLeaderboard();
     
-    // Trigger file download/request if new to lobby
     if(oldStatus === 'waiting' && !wasReady && roomData.testFile) {
-        if(roomData.testUrl) {
-            autoDownloadTest(roomData.testUrl);
-        } else if(roomData.hasCustomFile) {
-            updateLoading(20, 'Requesting Custom File from Host over P2P...');
-            hostConn.send({ type: 'request_file' });
+        // Trigger acquisition
+        let cached = await loadFromCache(roomData.testFile);
+        if(cached) {
+            sendLobbyProgress('Loading from Cache...', 50);
+            fileBuffer = cached;
+            await processFilePlayer(fileBuffer);
+        } else {
+            if(roomData.testUrl) {
+                // Fetch directly
+                sendLobbyProgress('Downloading from Web...', 10);
+                try {
+                    const res = await fetch(roomData.testUrl);
+                    fileBuffer = await res.arrayBuffer();
+                    await saveToCache(roomData.testFile, fileBuffer);
+                    await processFilePlayer(fileBuffer);
+                } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
+            } else {
+                // Request P2P transfer
+                sendLobbyProgress('Requesting file from Host...', 5);
+                hostConn.send({ type: 'request_file' });
+            }
         }
     }
 
     if(oldStatus === 'waiting' && roomData.status === 'playing') launchGame();
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
-    if(hasSubmitted) showFinalResults();
+    if(roomData.status === 'finished' && hasSubmitted) showFinalResults();
 }
 
-// ── 2. HOST CONFIG & FILE HANDLING ──
-window.hostSelectOnline = async (url) => {
-    roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false;
-    await processZipFile(url, true, false);
-};
-
-el('upload-zone').addEventListener('click', () => el('file-input').click());
-el('file-input').addEventListener('change', async (e) => {
-    if (e.target.files[0]) {
-        const file = e.target.files[0];
-        roomData.testUrl = null; 
-        roomData.testFile = file.name;
-        roomData.hasCustomFile = true;
-        // Read file into memory for P2P transfer
-        updateLoading(10, 'Reading local file...');
-        customFileData = await file.arrayBuffer();
-        await processZipFile(customFileData, false, false);
-    }
-});
-
-async function processZipFile(source, isUrl = false, isPlayer = false) {
-    updateLoading(30, 'Unpacking Test Data...');
+async function processFilePlayer(buffer) {
     try {
-        let zip;
-        if(isUrl) {
-            const res = await fetch(source);
-            if(!res.ok) throw new Error("File fetch failed");
-            zip = await JSZip.loadAsync(await res.blob());
-        } else {
-            zip = await JSZip.loadAsync(source); // works with ArrayBuffer
-        }
-        zipData = zip;
+        sendLobbyProgress('Unpacking Zip...', 90);
+        const zip = await JSZip.loadAsync(buffer);
         const jf = zip.file('data.json');
-        if (!jf) throw new Error('No data.json found.');
         const data = JSON.parse(await jf.async('string'));
-        
         buildQuestions(data);
         await preloadImages(zip);
-        
-        updateLoading(100, 'Ready!');
-        if(!isPlayer) {
-            el('host-step-1').classList.add('hidden');
-            el('host-step-2').classList.remove('hidden');
-            el('host-loaded-file').textContent = roomData.testFile;
-            
-            const sel = el('host-sections');
-            sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
-            Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k}</option>`);
-        } else {
-            hostConn.send({ type: 'ready' });
-            showToast('success', 'File loaded. Waiting for host to start...');
-        }
-    } catch(err) { updateLoading(100, 'Error'); showToast('error', err.message); }
+        sendLobbyProgress('Ready', 100);
+        showToast('success', 'Ready for Host to start!');
+    } catch(err) { sendLobbyProgress('Processing Error', 0); showToast('error', 'Failed processing file'); }
 }
 
-async function autoDownloadTest(url) { await processZipFile(url, true, true); }
-
-el('btn-create-room').addEventListener('click', () => {
-    isHost = true;
-    const selSections = Array.from(el('host-sections').selectedOptions).map(o => o.value);
-    roomData.sections = selSections.includes('ALL') ? ['ALL'] : selSections;
-    roomData.timerMode = el('host-timer-mode').value;
-    roomData.timerDuration = parseInt(el('host-timer-duration').value) * 60;
-    
-    // Count questions for progress tracking
-    if(roomData.sections.includes('ALL')) roomData.totalQuestions = allQuestions.length;
-    else {
-        let t = 0; roomData.sections.forEach(s => { if(sectionMap[s]) t += sectionMap[s].length; });
-        roomData.totalQuestions = t;
-    }
-
-    el('host-screen').classList.add('hidden');
-    el('lobby-screen').classList.remove('hidden');
-    el('btn-start-game').classList.remove('hidden');
-    
-    initPeerAsHost();
-});
-
-// ── 3. LOBBY & PRE-GAME ──
+// ── 4. LOBBY UI & CHAT ──
 function updateLobbyUI() {
     const list = el('players-list-ui'); list.innerHTML = '';
     const players = Object.values(roomData.players);
@@ -603,10 +811,20 @@ function updateLobbyUI() {
     let allReady = true;
     players.forEach(p => {
         if(!p.ready) allReady = false;
-        const color = p.ready ? 'var(--ans)' : 'var(--marked)';
-        list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border);">
-            <span style="font-weight:600;">${p.name}</span>
-            <span style="font-size:12px; font-weight:700; color:${color}; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px;">${p.ready ? 'READY' : 'LOADING FILE...'}</span>
+        
+        let statusHtml = '';
+        if(p.state === 'ready') {
+            statusHtml = `<span style="font-size:12px; font-weight:800; color:var(--ans); background:rgba(16,185,129,0.1); padding:4px 10px; border-radius:8px;">READY</span>`;
+        } else {
+            statusHtml = `<div style="width:140px;">
+                <div class="progress-wrap"><div class="progress-fill" style="width:${p.progressPct}%"></div></div>
+                <div class="progress-text">${p.progressText}</div>
+            </div>`;
+        }
+
+        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
+            <span style="font-weight:700; font-size:15px;">${p.name}</span>
+            ${statusHtml}
         </div>`;
     });
     if(isHost) el('btn-start-game').disabled = !allReady;
@@ -624,45 +842,45 @@ window.copyJoinLink = () => {
 };
 if (new URLSearchParams(window.location.search).get('join')) el('join-code').value = new URLSearchParams(window.location.search).get('join').toUpperCase();
 
-// ── 4. CHAT SYSTEM ──
-window.sendChat = () => {
-    const inp = el('chat-input'); const text = inp.value.trim();
+// Chat system (dual UI)
+window.sendLobbyChat = () => _sendChat('lobby-chat-input');
+window.sendGameChat = () => _sendChat('game-chat-input');
+
+function _sendChat(inputId) {
+    const inp = el(inputId); const text = inp.value.trim();
     if(!text) return;
     inp.value = '';
     if(isHost) broadcastChat(myName, text);
     else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: text });
-};
-
+}
 function broadcastChat(name, text) {
     appendChatUI(name, text);
     for(let id in connections) connections[id].send({ type: 'chat', name, text });
 }
-
 function appendChatUI(name, text) {
-    const box = el('chat-messages');
-    box.innerHTML += `<div class="msg"><div class="msg-name">${name}</div>${text}</div>`;
-    box.scrollTop = box.scrollHeight;
+    const html = `<div class="msg"><div class="msg-name">${name}</div>${text}</div>`;
+    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
+        const box = el(id);
+        if(box) { box.innerHTML += html; box.scrollTop = box.scrollHeight; }
+    });
 }
 
-// ── 5. GAME ENGINE & SYNC ──
+// ── 5. GAME ENGINE ──
 function launchGame() {
     el('lobby-screen').classList.add('hidden');
     el('app').style.display = 'flex';
     el('top-file-name').textContent = roomData.testFile;
 
-    // Filter questions based on host selection
-    if (roomData.sections && !roomData.sections.includes('ALL')) {
-        let newQuestions = []; let newMap = {}; let qIdx = 0;
-        roomData.sections.forEach(secKey => {
-            newMap[secKey] = [];
-            if(sectionMap[secKey]) {
-                sectionMap[secKey].forEach(idx => { newQuestions.push(allQuestions[idx]); newMap[secKey].push(qIdx++); });
-            }
+    // Filter questions
+    if (!roomData.settings.sections.includes('ALL')) {
+        let newQ = []; let newMap = {}; let qIdx = 0;
+        roomData.settings.sections.forEach(sKey => {
+            newMap[sKey] = [];
+            if(sectionMap[sKey]) sectionMap[sKey].forEach(idx => { newQ.push(allQuestions[idx]); newMap[sKey].push(qIdx++); });
         });
-        allQuestions = newQuestions; sectionMap = newMap;
+        allQuestions = newQ; sectionMap = newMap;
     }
 
-    // Init statuses
     allQuestions.forEach(q => answers[q.id] = { status: 'not-vis' });
 
     const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
@@ -670,21 +888,19 @@ function launchGame() {
     currentSection = 'ALL'; currentQIdx = 0;
 
     startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
-    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 3000);
+    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 4000);
 }
 
 function startTimers() {
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if(hasSubmitted || !roomData.startTime) return;
-        const elapsedSecs = Math.floor((Date.now() - roomData.startTime) / 1000);
+        const elapsed = Math.floor((Date.now() - roomData.startTime) / 1000);
         const tEl = el('total-timer');
-        
-        if (roomData.timerMode === 'countdown') {
-            const rem = roomData.timerDuration - elapsedSecs;
-            if(rem <= 0) { tEl.textContent = "00:00"; forceSubmit(); } 
-            else tEl.textContent = formatTime(rem);
-        } else { tEl.textContent = formatTime(elapsedSecs); }
+        if (roomData.settings.timerMode === 'countdown') {
+            const rem = roomData.settings.timerDuration - elapsed;
+            if(rem <= 0) { tEl.textContent = "00:00"; forceSubmit(); } else tEl.textContent = formatTime(rem);
+        } else { tEl.textContent = formatTime(elapsed); }
     }, 1000);
 }
 function formatTime(sec) {
@@ -692,46 +908,60 @@ function formatTime(sec) {
   return sec>=3600 ? `${Math.floor(sec/3600).toString().padStart(2,'0')}:${m}:${s}` : `${m}:${s}`;
 }
 
-// Calculate score (Hidden until end)
 function calculateScore() {
     let net = 0;
     allQuestions.forEach(q => {
         const a = answers[q.id];
         if(a && a.selected) {
-            const isCorrect = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
-            if(isCorrect) net += (q.marks.cm || 4); else net -= Math.abs(q.marks.im || 1);
+            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+            if(isC) net += (q.marks.cm || 4); else net -= Math.abs(q.marks.im || 1);
         }
     });
     return net;
 }
 
 function pushProgressToHost(isFinal = false) {
-    const attemptedCount = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
+    const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
     const payload = {
-        attempted: attemptedCount,
+        attempted: att,
         submitted: isFinal,
         score: isFinal ? calculateScore() : 0,
         timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0
     };
-
     if(isHost) {
         const p = roomData.players[myId];
         p.attempted = payload.attempted;
         if(isFinal) { p.submitted = true; p.score = payload.score; p.timeTaken = payload.timeTaken; }
-        broadcastRoomState();
-        checkAllSubmitted();
+        broadcastRoomState(); checkAllSubmitted();
     } else {
         if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...payload });
     }
 }
 
-window.submitQuizBtn = () => { if(confirm("Are you sure you want to final submit? You cannot change answers after this.")) forceSubmit(); };
+function checkAllSubmitted() {
+    if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) {
+        roomData.status = 'finished'; broadcastRoomState(); showFinalResults();
+    }
+}
+
+window.submitQuizBtn = () => { if(confirm("Submit test? You cannot change answers after this.")) forceSubmit(); };
 
 function forceSubmit() {
     if(hasSubmitted) return;
     hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
     pushProgressToHost(true);
-    showFinalResults();
+    
+    // UI changes for NON-INTRUSIVE wait
+    el('btn-top-submit').disabled = true;
+    el('btn-top-submit').textContent = "Submitted";
+    el('btn-mark').disabled = true; el('btn-clear').disabled = true; el('btn-save').disabled = true;
+    el('submitted-layer').classList.add('show');
+    
+    // Disable inputs
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    document.querySelectorAll('.nat-input').forEach(b => b.disabled = true);
+    
+    if(roomData.status === 'finished') showFinalResults();
 }
 
 // ── 6. DATA PARSING & RENDERING ──
@@ -759,31 +989,18 @@ async function preloadImages(zip) {
   const files = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png'));
   for (let i = 0; i < files.length; i++) {
     try { const blob = await zip.files[files[i]].async('blob'); imageCache[files[i]] = URL.createObjectURL(blob); } catch(e) {}
-    if(i%10===0) updateLoading(30 + ((i/files.length)*60), 'Processing Images...');
   }
 }
 
-// ── 7. UI INTERACTIONS ──
+// ── 7. CBT INTERACTIONS ──
 window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
 const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
 window.navigate = (dir) => { const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; if(np >= 0 && np < ind.length) { currentQIdx = ind[np]; renderSidebar(); renderQuestion(); } };
 window.goToQ = (idx) => { currentQIdx = idx; renderSidebar(); renderQuestion(); };
 
-// CBT Button Actions
-window.saveNext = () => {
-    const a = answers[allQuestions[currentQIdx].id];
-    if(a.selected) a.status = 'ans';
-    navigate(1);
-};
-window.markResponse = () => {
-    const a = answers[allQuestions[currentQIdx].id];
-    a.status = a.selected ? 'mark-ans' : 'marked';
-    navigate(1);
-};
-window.clearResponse = () => {
-    answers[allQuestions[currentQIdx].id] = { status: 'not-vis' };
-    renderSidebar(); renderQuestion();
-};
+window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; navigate(1); };
+window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'mark-ans' : 'marked'; navigate(1); };
+window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis' }; renderSidebar(); renderQuestion(); };
 
 function renderQuestion() {
   const q = allQuestions[currentQIdx]; if (!q) return;
@@ -795,14 +1012,13 @@ function renderQuestion() {
   for (const fname of q.images) { 
       if (imageCache[fname]) { const img = document.createElement('img'); img.src = imageCache[fname]; imgArea.appendChild(img); hasImg = true; } 
   }
-  if (!hasImg) imgArea.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface2); border-radius:12px; text-align:center;">📷 Image not found</div>`;
+  if (!hasImg) imgArea.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center; font-weight:700;">📷 Image not found</div>`;
 
   renderAnswerArea(q);
 }
 
 function renderAnswerArea(q) {
   const area = el('answer-area'); const ans = answers[q.id];
-  
   if (q.type === 'mcq') {
     const grid = document.createElement('div'); grid.className = 'opts-grid';
     const labels = ['A','B','C','D']; const numOpts = q.answerOptions || 4; 
@@ -810,7 +1026,7 @@ function renderAnswerArea(q) {
       const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.disabled = hasSubmitted;
       if (ans && ans.selected === i) btn.classList.add('selected');
       btn.innerHTML = `<div class="opt-key">${labels[i-1]}</div><span>Option ${labels[i-1]}</span>`;
-      btn.onclick = () => { ans.selected = i; renderAnswerArea(q); };
+      if(!hasSubmitted) btn.onclick = () => { ans.selected = i; renderAnswerArea(q); };
       grid.appendChild(btn);
     }
     area.innerHTML = ''; area.appendChild(grid);
@@ -844,44 +1060,34 @@ function renderSidebarLeaderboard() {
         const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
         listUI.innerHTML += `
             <div class="lb-item ${p.name === myName ? 'me' : ''}">
-                <div class="lb-name">${p.name} ${p.submitted?'🏁':''}</div>
-                <div class="lb-stat">${p.attempted} / ${roomData.totalQuestions} <span style="font-size:11px; color:var(--text2);">(${pct}%)</span></div>
+                <div class="lb-top">
+                  <span class="lb-name">${p.name} ${p.submitted?'🏁':''}</span>
+                  <span class="lb-stat">${p.attempted} / ${roomData.totalQuestions}</span>
+                </div>
+                <div class="progress-wrap" style="height:4px; margin-top:0;"><div class="progress-fill" style="width:${pct}%"></div></div>
             </div>`;
     });
 }
 
 function showFinalResults() {
-    el('results-modal').classList.add('show');
-    const listUI = el('final-results-list'); listUI.innerHTML = '';
+    gameFinished = true;
+    el('submitted-layer').classList.remove('show');
+    el('final-results-layer').classList.add('show');
     
-    const isFinished = roomData.status === 'finished';
-    el('results-title').textContent = isFinished ? "Final Results 🏆" : "Waiting for others...";
-    el('results-subtitle').textContent = isFinished ? "Everyone has submitted the test!" : "Your screen is locked. Wait for the host to finish.";
-    if(isFinished) el('btn-home').style.display = 'block';
-
-    const pArr = Object.values(roomData.players);
-    if(isFinished) pArr.sort((a,b) => b.score - a.score);
-    else pArr.sort((a,b) => (b.submitted?1:0) - (a.submitted?1:0)); // show submitted first
+    const listUI = el('final-lb-list'); listUI.innerHTML = '';
+    const pArr = Object.values(roomData.players).sort((a,b) => b.score - a.score);
 
     pArr.forEach((p, idx) => {
-        if(!isFinished) {
-            // Lock Screen UI
-            listUI.innerHTML += `<div class="wait-item ${p.submitted?'done':'pending'}">
-                <span>${p.name}</span> <span>${p.submitted?'Submitted':'Still Playing...'}</span>
-            </div>`;
-        } else {
-            // Final Ranking UI
-            listUI.innerHTML += `<div class="wait-item" style="border-left:4px solid var(--accent); align-items:center;">
-                <div style="display:flex; gap:16px; align-items:center;">
-                    <span style="font-size:20px; color:var(--text2);">#${idx+1}</span>
-                    <span style="font-size:18px;">${p.name}</span>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:22px; color:var(--ans);">${p.score} <span style="font-size:12px;color:var(--text2);">marks</span></div>
-                    <div style="font-size:12px; color:var(--text2);">${formatTime(p.timeTaken)}</div>
-                </div>
-            </div>`;
-        }
+        listUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 24px; border-radius:16px; border:2px solid ${p.name === myName ? 'var(--accent)' : 'var(--border)'};">
+            <div style="display:flex; gap:20px; align-items:center;">
+                <span style="font-size:28px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${idx+1}</span>
+                <span style="font-size:20px; font-weight:700;">${p.name}</span>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:26px; color:var(--ans); font-weight:800; font-family:'Outfit';">${p.score} <span style="font-size:14px;color:var(--text2);">marks</span></div>
+                <div style="font-size:13px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>
+            </div>
+        </div>`;
     });
 }
 </script>
