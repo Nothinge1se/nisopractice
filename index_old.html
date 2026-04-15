@@ -842,24 +842,6 @@
   .secret-score-box:hover .score-box-val { opacity: 1; filter: blur(0); transform: scale(1) translateX(0); }
   .secret-score-box:hover .secret-overlay { opacity: 0; }
 
-  /* ── YEAR GROUP HEADERS (Merged Mode) ── */
-  .year-group-header {
-    width: 100%;
-    font-family: var(--font-head);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: linear-gradient(90deg, rgba(108,99,255,0.12), transparent);
-    border-left: 3px solid var(--accent);
-    padding: 5px 10px;
-    margin: 8px 0 4px;
-    border-radius: 0 6px 6px 0;
-    grid-column: 1 / -1;
-  }
-  .year-group-header:first-child { margin-top: 2px; }
-
   .legend { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 14px; flex-wrap: wrap; flex-shrink: 0; background: transparent; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--font-num); font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
   .legend-box { width: 14px; height: 14px; border-radius: 4px; }
@@ -1110,11 +1092,8 @@
         <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2021_JEE.niso')">
           🚀 2021 Top 200 PYQ - EDUNITI
         </button>
-        <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
+		        <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
           🚀 2022 Top 200 PYQ - EDUNITI
-        </button>
-        <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(167,139,250,0.12)); border-color:var(--accent); color:var(--accent);" onclick="loadMergedOnline(['TOP_200_PYQ_2021_JEE.niso','TOP_200_PYQ_2022_JEE.niso'])">
-          🔀 Merge: 2021 + 2022 PYQ
         </button>
       </div>
 
@@ -1125,15 +1104,6 @@
         <h3>Drop your .niso or .zip file here</h3>
         <p>Upload any compatible CBT zip (data.json + images)</p>
         <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
-      </div>
-
-      <div class="upload-or-divider">Or merge multiple years</div>
-
-      <div class="upload-zone" id="multi-upload-zone" style="border-style:dashed; border-color:var(--accent2); opacity:0.85;">
-        <div class="upload-icon">🔀</div>
-        <h3>Select multiple .niso / .zip files</h3>
-        <p>Pick 2021, 2022, 2023… all at once — year tabs appear automatically</p>
-        <input type="file" id="multi-file-input" accept=".zip,.niso" multiple autocomplete="off">
       </div>
 
       <div class="progress-bar-wrap" id="progress-wrap">
@@ -1550,74 +1520,6 @@ async function loadOnlineTest(fileName) {
   }
 }
 
-// ── MERGED ONLINE LOAD ─────────────────────────────────
-async function loadMergedOnline(fileNames) {
-  document.getElementById('upload-screen').style.display = 'flex';
-  document.getElementById('error-msg').style.display = 'none';
-  allQuestions = []; sectionMap = {}; imageCache = {};
-  answers = {}; marked = {}; currentQIdx = 0; sessionSeconds = 0; qTimers = {};
-  currentSessionId = Date.now();
-  isMergedMode = true;
-
-  const mergedName = fileNames.map(f => f.replace(/\.(zip|niso)$/i,'')).join(' + ');
-  currentFileName = mergedName;
-
-  for (let i = 0; i < fileNames.length; i++) {
-    const fileName = fileNames[i];
-    // Extract year from filename e.g. "TOP_200_PYQ_2021_JEE" → "2021"
-    const yearMatch = fileName.match(/20\d{2}/);
-    const yearTag = yearMatch ? yearMatch[0] : fileName.replace(/\.(zip|niso)$/i,'');
-
-    showProgress(Math.round((i / fileNames.length) * 50), `Fetching ${fileName}…`);
-    let safeUrl = encodeURI(fileName);
-    try {
-      const cache = await caches.open('nisopractice-tests-v1');
-      let response = await cache.match(safeUrl);
-      if (!response) {
-        response = await fetch(safeUrl);
-        if (!response.ok) {
-          let altUrl = safeUrl.endsWith('.niso') ? safeUrl.replace('.niso', '.zip') : safeUrl + '.niso';
-          response = await fetch(altUrl);
-          if (!response.ok) throw new Error(`File not found: ${fileName}`);
-          safeUrl = altUrl;
-        }
-        cache.put(safeUrl, response.clone());
-      }
-      const blob = await response.blob();
-      const file = new File([blob], fileName);
-      const ok = await loadZip(file, null, yearTag, i > 0);
-      if (!ok) return;
-    } catch(err) { showError('Merge failed: ' + err.message); return; }
-  }
-  showProgress(100, 'All files merged!');
-  setTimeout(launchApp, 300);
-}
-
-// ── MULTI FILE LOCAL UPLOAD ─────────────────────────────
-async function handleMultipleFiles(files) {
-  if (!files || files.length === 0) return;
-  if (files.length === 1) { handleZipFile(files[0]); return; }
-
-  allQuestions = []; sectionMap = {}; imageCache = {};
-  answers = {}; marked = {}; currentQIdx = 0; sessionSeconds = 0; qTimers = {};
-  currentSessionId = Date.now();
-  isMergedMode = true;
-
-  const mergedName = Array.from(files).map(f => f.name.replace(/\.(zip|niso)$/i,'')).join(' + ');
-  currentFileName = mergedName;
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const yearMatch = file.name.match(/20\d{2}/);
-    const yearTag = yearMatch ? yearMatch[0] : file.name.replace(/\.(zip|niso)$/i,'');
-    showProgress(Math.round((i / files.length) * 80), `Loading ${file.name}…`);
-    const ok = await loadZip(file, null, yearTag, i > 0);
-    if (!ok) return;
-  }
-  showProgress(100, 'All files merged!');
-  setTimeout(launchApp, 300);
-}
-
 // ── STATE ──────────────────────────────────────────────
 let zipData        = null;
 let allQuestions   = [];
@@ -1640,9 +1542,6 @@ let sessionSeconds = 0;
 let qTimers = {}; 
 let timerInterval = null;
 let currentSessionId = null;
-
-// ── MERGED MODE ─────────────────────────────────────────
-let isMergedMode = false;  // true when multiple files are loaded together
 
 function formatTime(sec) {
   if (isNaN(sec) || sec < 0) sec = 0; 
@@ -1798,23 +1697,6 @@ uploadZone.addEventListener('drop', (e) => {
 
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) { handleZipFile(fileInput.files[0]); } });
 
-// ── MULTI FILE ZONE ────────────────────────────────────
-const multiUploadZone = document.getElementById('multi-upload-zone');
-const multiFileInput  = document.getElementById('multi-file-input');
-
-multiUploadZone.addEventListener('click', () => multiFileInput.click());
-multiUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); multiUploadZone.style.transform = 'scale(1.05)'; });
-multiUploadZone.addEventListener('dragleave', () => { multiUploadZone.style.transform = 'none'; });
-multiUploadZone.addEventListener('drop', (e) => {
-  e.preventDefault(); multiUploadZone.style.transform = 'none';
-  const validFiles = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().match(/\.(zip|niso)$/i));
-  if (validFiles.length > 0) handleMultipleFiles(validFiles);
-  else showError('Please drop .zip or .niso files only');
-});
-multiFileInput.addEventListener('change', () => {
-  if (multiFileInput.files.length > 0) handleMultipleFiles(multiFileInput.files);
-});
-
 function handleZipFile(file) {
 const name = file.name.replace(/\.(zip|niso)$/i, '');
   const existing = getSessions()[name];
@@ -1843,8 +1725,7 @@ const name = file.name.replace(/\.(zip|niso)$/i, '');
   } else {
     pendingZipFile = null; 
     currentSessionId = null;
-    isMergedMode = false;
-    loadZip(file, null).then(ok => { if(ok) { showProgress(100, 'Done!'); setTimeout(launchApp, 300); } });
+    loadZip(file, null);
   }
 }
 
@@ -1866,73 +1747,65 @@ function resumeSession() {
     }
     
     currentSessionId = sessionToLoad.id;
-    isMergedMode = false;
-    loadZip(pendingZipFile, sessionToLoad).then(ok => { if(ok) { showProgress(100, 'Done!'); setTimeout(launchApp, 300); } }); 
+    loadZip(pendingZipFile, sessionToLoad); 
 }
 
 function clearAndStart() { 
     document.getElementById('resume-modal').classList.remove('show'); 
     currentSessionId = Date.now(); // Start fresh with new ID
-    isMergedMode = false;
-    loadZip(pendingZipFile, null).then(ok => { if(ok) { showProgress(100, 'Done!'); setTimeout(launchApp, 300); } }); 
+    loadZip(pendingZipFile, null); 
 }
 
 function showProgress(pct, msg) { document.getElementById('progress-wrap').style.display = 'block'; document.getElementById('loading-text').style.display = 'block'; document.getElementById('progress-bar').style.width = pct + '%'; document.getElementById('loading-text').textContent = msg; }
 function showError(msg) { document.getElementById('error-msg').textContent = msg; document.getElementById('error-msg').style.display = 'block'; document.getElementById('progress-wrap').style.display = 'none'; document.getElementById('loading-text').style.display = 'none'; }
 
-async function loadZip(file, session, yearTag, accumulate) {
+async function loadZip(file, session) {
   document.getElementById('error-msg').style.display = 'none'; showProgress(10, 'Reading ZIP…');
   try {
-    const zip = await JSZip.loadAsync(file); 
-    if (!accumulate) zipData = zip; else zipData = zip; // always keep last zip ref; images cached by prefix
+    const zip = await JSZip.loadAsync(file); zipData = zip;
     showProgress(30, 'Parsing data.json…');
     const jf = zip.file('data.json');
     if (!jf) throw new Error('No data.json found in ZIP.');
     const data = JSON.parse(await jf.async('string'));
 
     showProgress(60, 'Building questions…'); 
-    if (!accumulate) currentFileName = file.name.replace(/\.(zip|niso)$/i, '');
-    buildQuestions(data, yearTag, accumulate);
+    currentFileName = file.name.replace(/\.(zip|niso)$/i, '');
+    buildQuestions(data);
 
-    if (!accumulate) {
-      if (session) {
-        answers = session.answers || {}; marked = session.marked || {}; 
-        currentQIdx = Math.min(session.lastQIdx || 0, allQuestions.length - 1);
-        sessionSeconds = parseInt(session.sessionSeconds) || 0; qTimers = session.qTimers || {};
-      } else { 
-          answers = {}; marked = {}; currentQIdx = 0; sessionSeconds = 0; qTimers = {}; 
-          if(!currentSessionId) currentSessionId = Date.now();
-      }
+    if (session) {
+      answers = session.answers || {}; marked = session.marked || {}; 
+      currentQIdx = Math.min(session.lastQIdx || 0, allQuestions.length - 1);
+      sessionSeconds = parseInt(session.sessionSeconds) || 0; qTimers = session.qTimers || {};
+    } else { 
+        answers = {}; marked = {}; currentQIdx = 0; sessionSeconds = 0; qTimers = {}; 
+        if(!currentSessionId) currentSessionId = Date.now();
     }
 
-    showProgress(85, 'Loading images…'); await preloadImages(zip, yearTag);
-    return true;
-  } catch(err) { showError('Error: ' + err.message); console.error(err); return false; }
+    showProgress(85, 'Loading images…'); await preloadImages(zip);
+    showProgress(100, 'Done!'); setTimeout(launchApp, 300);
+  } catch(err) { showError('Error: ' + err.message); console.error(err); }
 }
 
-function buildQuestions(data, yearTag, accumulate) {
-  if (!accumulate) { allQuestions = []; sectionMap = {}; imageCache = {}; }
-  const startIdx = allQuestions.length;
+function buildQuestions(data) {
+  allQuestions = []; sectionMap = {}; imageCache = {};
   const pdfData = data.pdfCropperData || data.questions || {}; 
   const ansKey = data.testAnswerKey || data.answerKey || {}; 
-  let idx = startIdx;
+  let idx = 0;
 
   for (const subject of Object.keys(pdfData)) {
     for (const topic of Object.keys(pdfData[subject])) {
       const tqs = pdfData[subject][topic] || {}; 
       const tans = (ansKey[subject] || {})[topic] || {}; 
       const sk = `${subject} › ${topic}`;
-      if (!sectionMap[sk]) sectionMap[sk] = [];
+      sectionMap[sk] = [];
 
       for (const qNum of Object.keys(tqs)) {
         const qd = tqs[qNum] || {}; 
         const ad = tans[qNum] || {};
-        const yearStr = yearTag || '';
         allQuestions.push({
-          id: `${yearStr}__${subject}__${topic}__${qNum}`, globalNum: parseInt(qNum), subject: subject, topic: topic, sectionKey: sk,
+          id: `${subject}__${topic}__${qNum}`, globalNum: parseInt(qNum), subject: subject, topic: topic, sectionKey: sk,
           type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
-          correctAnswer: ad.correctAnswer, images: buildImageNames(topic, qNum, (qd.pdfData || []).length || 1, yearStr), globalIdx: idx,
-          year: yearStr,
+          correctAnswer: ad.correctAnswer, images: buildImageNames(topic, qNum, (qd.pdfData || []).length || 1), globalIdx: idx,
         });
         sectionMap[sk].push(idx); idx++;
       }
@@ -1940,16 +1813,14 @@ function buildQuestions(data, yearTag, accumulate) {
   }
 }
 
-function buildImageNames(topic, qNum, count, yearTag) {
-    const prefix = yearTag ? `${yearTag}__` : '';
-    const imgs = []; for(let i=1; i<=Math.max(count,1); i++) { imgs.push(`${prefix}${topic}__--__${qNum}__--__${i}.png`); } return imgs;
+function buildImageNames(topic, qNum, count) {
+    const imgs = []; for(let i=1; i<=Math.max(count,1); i++) { imgs.push(`${topic}__--__${qNum}__--__${i}.png`); } return imgs;
 }
 
-async function preloadImages(zip, yearTag) {
-  const prefix = yearTag ? `${yearTag}__` : '';
+async function preloadImages(zip) {
   const files = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png'));
   for (let i = 0; i < files.length; i++) {
-    try { const blob = await zip.files[files[i]].async('blob'); imageCache[prefix + files[i]] = URL.createObjectURL(blob); } catch(e) {}
+    try { const blob = await zip.files[files[i]].async('blob'); imageCache[files[i]] = URL.createObjectURL(blob); } catch(e) {}
     if (i % 8 === 0 || i === files.length - 1) { showProgress(85 + ((i + 1) / files.length) * 14, `Images ${i+1}/${files.length}…`); }
   }
 }
@@ -1965,7 +1836,7 @@ function launchApp() {
   const ms = document.getElementById('mob-section-select');
   if(ms){ ms.innerHTML='<option value="ALL">All Sections</option>'; for(const key of Object.keys(sectionMap)){const o=document.createElement('option');o.value=key;o.textContent=key;ms.appendChild(o);} }
   
-  document.getElementById('file-name-display').textContent = isMergedMode ? '🔀 ' + currentFileName : currentFileName;
+  document.getElementById('file-name-display').textContent = currentFileName;
   document.getElementById('topbar-section-wrap').title = currentFileName;
   
   currentSection = 'ALL'; document.getElementById('topbar-section').textContent = 'All Sections';
@@ -1981,7 +1852,7 @@ function resetApp() {
   if (autoSaveTimer) clearInterval(autoSaveTimer); if (timerInterval) clearInterval(timerInterval);
   for (const url of Object.values(imageCache)) { URL.revokeObjectURL(url); }
   
-  imageCache = {}; zipData = null; allQuestions = []; sectionMap = {}; answers = {}; marked = {}; currentFileName = ''; pendingZipFile = null; sessionSeconds = 0; qTimers = {}; currentSessionId = null; isMergedMode = false;
+  imageCache = {}; zipData = null; allQuestions = []; sectionMap = {}; answers = {}; marked = {}; currentFileName = ''; pendingZipFile = null; sessionSeconds = 0; qTimers = {}; currentSessionId = null;
   document.getElementById('file-input').value = '';
   document.getElementById('upload-screen').style.display = 'flex'; document.getElementById('app').style.display = 'none'; document.getElementById('progress-wrap').style.display = 'none'; document.getElementById('loading-text').style.display = 'none'; document.getElementById('progress-bar').style.width = '0%'; document.getElementById('error-msg').style.display = 'none';
   renderRecentSessions();
@@ -2159,21 +2030,6 @@ function renderQuestion() {
   
   const tb = document.getElementById('q-type-badge'); tb.textContent = q.type === 'nat' ? 'Numerical' : 'MCQ'; tb.className = 'q-type-badge ' + (q.type === 'nat' ? 'nat' : 'mcq');
   document.getElementById('marks-info').textContent = `+${q.marks.cm} / −${Math.abs(q.marks.im)}`;
-
-  // Year badge in merged mode
-  let yearBadge = document.getElementById('q-year-badge');
-  if (isMergedMode && q.year) {
-    if (!yearBadge) {
-      yearBadge = document.createElement('div');
-      yearBadge.id = 'q-year-badge';
-      yearBadge.style.cssText = 'font-family:var(--font-num);font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(167,139,250,0.15));border:1.5px solid var(--accent);color:var(--accent);letter-spacing:0.05em;';
-      document.getElementById('q-num-badge').after(yearBadge);
-    }
-    yearBadge.textContent = q.year;
-    yearBadge.style.display = '';
-  } else if (yearBadge) {
-    yearBadge.style.display = 'none';
-  }
   
   syncMarkBtn(q);
   document.getElementById('q-timer').textContent = formatTime(qTimers[q.id] || 0);
@@ -2273,51 +2129,21 @@ function checkCurrentAnswer() {
 function renderSidebar() {
   const grid = document.getElementById('q-grid'); grid.innerHTML = ''; const indices = getSectionQuestions();
   let sc = 0; let sw = 0; let sa = 0; let ss = 0; let sm = 0;
-
-  if (isMergedMode) {
-    // Group indices by year
-    const yearGroups = {};
-    const yearOrder = [];
-    for (const idx of indices) {
-      const q = allQuestions[idx];
-      const y = q.year || 'Unknown';
-      if (!yearGroups[y]) { yearGroups[y] = []; yearOrder.push(y); }
-      yearGroups[y].push(idx);
-    }
-
-    for (const year of yearOrder) {
-      // Year header
-      const hdr = document.createElement('div');
-      hdr.className = 'year-group-header';
-      hdr.textContent = year;
-      grid.appendChild(hdr);
-
-      for (const idx of yearGroups[year]) {
-        const q = allQuestions[idx]; const dot = document.createElement('div'); dot.className = 'q-dot';
-        if (idx === currentQIdx) dot.classList.add('active');
-        const ans = answers[q.id];
-        if (ans) { 
-          if(ans.isChecked) { dot.classList.add(ans.correct ? 'correct' : 'wrong'); if(ans.correct) sc++; else sw++; } 
-          else { dot.classList.add('attempted'); sa++; } 
-        } else { ss++; }
-        if (marked[q.id]) { dot.classList.add('marked'); sm++; }
-        dot.textContent = q.globalNum; dot.title = `Q${q.globalNum} · ${year} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}`;
-        dot.addEventListener('click', () => goToQuestion(idx)); grid.appendChild(dot);
-      }
-    }
-  } else {
-    for (const idx of indices) {
-      const q = allQuestions[idx]; const dot = document.createElement('div'); dot.className = 'q-dot';
-      if (idx === currentQIdx) dot.classList.add('active');
-      const ans = answers[q.id];
-      if (ans) { 
+  
+  for (const idx of indices) {
+    const q = allQuestions[idx]; const dot = document.createElement('div'); dot.className = 'q-dot';
+    if (idx === currentQIdx) dot.classList.add('active');
+    
+    const ans = answers[q.id];
+    if (ans) { 
         if(ans.isChecked) { dot.classList.add(ans.correct ? 'correct' : 'wrong'); if(ans.correct) sc++; else sw++; } 
         else { dot.classList.add('attempted'); sa++; } 
-      } else { ss++; }
-      if (marked[q.id]) { dot.classList.add('marked'); sm++; }
-      dot.textContent = q.globalNum; dot.title = `Q${q.globalNum} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}`;
-      dot.addEventListener('click', () => goToQuestion(idx)); grid.appendChild(dot);
-    }
+    } else { ss++; }
+    
+    if (marked[q.id]) { dot.classList.add('marked'); sm++; }
+    
+    dot.textContent = q.globalNum; dot.title = `Q${q.globalNum} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}`;
+    dot.addEventListener('click', () => goToQuestion(idx)); grid.appendChild(dot);
   }
   
   document.getElementById('section-stats-box').innerHTML = `
@@ -2410,7 +2236,7 @@ function renderMobDrawer() {
   const indices = getSectionQuestions();
   let sc=0, sw=0, sa=0, ss=0, sm=0;
 
-  const renderDot = (idx) => {
+  for (const idx of indices) {
     const q = allQuestions[idx];
     const dot = document.createElement('div');
     dot.className = 'q-dot';
@@ -2424,27 +2250,7 @@ function renderMobDrawer() {
     if (marked[q.id]) { dot.classList.add('marked'); sm++; }
     dot.textContent = q.globalNum;
     dot.addEventListener('click', () => { goToQuestion(idx); closeMobDrawer(); });
-    return dot;
-  };
-
-  if (isMergedMode) {
-    const yearGroups = {};
-    const yearOrder = [];
-    for (const idx of indices) {
-      const y = allQuestions[idx].year || 'Unknown';
-      if (!yearGroups[y]) { yearGroups[y] = []; yearOrder.push(y); }
-      yearGroups[y].push(idx);
-    }
-    for (const year of yearOrder) {
-      const hdr = document.createElement('div');
-      hdr.className = 'year-group-header';
-      hdr.style.cssText = 'width:100%;';
-      hdr.textContent = year;
-      grid.appendChild(hdr);
-      for (const idx of yearGroups[year]) grid.appendChild(renderDot(idx));
-    }
-  } else {
-    for (const idx of indices) grid.appendChild(renderDot(idx));
+    grid.appendChild(dot);
   }
 
   const st = document.getElementById('mob-drawer-stats');
