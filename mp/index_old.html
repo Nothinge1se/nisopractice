@@ -540,56 +540,6 @@
 </div>
 
 <script>
-// ── PARALLEL DOWNLOADER ──
-// Splits file into N parallel Range requests for max speed on GitHub/CDN.
-// Falls back to single stream if server doesn't support Range requests.
-async function parallelFetch(url, onProgress, numStreams = 4) {
-    let total = 0, supportsRange = false;
-    try {
-        const head = await fetch(url, { method: 'HEAD' });
-        total = parseInt(head.headers.get('content-length') || '0', 10);
-        supportsRange = head.headers.get('accept-ranges') === 'bytes' && total > 0;
-    } catch(e) {}
-
-    if (!supportsRange || total < 2 * 1024 * 1024) {
-        // Fallback: single stream
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Download failed');
-        let loaded = 0; const reader = res.body.getReader(); const chunks = [];
-        while(true) {
-            const {done, value} = await reader.read(); if(done) break;
-            chunks.push(value); loaded += value.length;
-            if(onProgress) onProgress(loaded, total || 0);
-        }
-        return await new Blob(chunks).arrayBuffer();
-    }
-
-    // Parallel Range download
-    const chunkSize = Math.ceil(total / numStreams);
-    let loaded = 0;
-    const ranges = Array.from({ length: numStreams }, (_, i) => ({
-        start: i * chunkSize, end: Math.min((i + 1) * chunkSize - 1, total - 1)
-    }));
-
-    const buffers = await Promise.all(ranges.map(async ({ start, end }) => {
-        const res = await fetch(url, { headers: { Range: `bytes=${start}-${end}` } });
-        if (!res.ok) throw new Error(`Range request failed: ${res.status}`);
-        const reader = res.body.getReader(); const chunks = [];
-        while(true) {
-            const {done, value} = await reader.read(); if(done) break;
-            chunks.push(value); loaded += value.length;
-            if(onProgress) onProgress(loaded, total);
-        }
-        return await new Blob(chunks).arrayBuffer();
-    }));
-
-    // Stitch parts together in order
-    const combined = new Uint8Array(total);
-    let offset = 0;
-    for(const buf of buffers) { combined.set(new Uint8Array(buf), offset); offset += buf.byteLength; }
-    return combined.buffer;
-}
-
 // ── CACHING ENGINE (IndexedDB) ──
 const DB_NAME = 'NisoCacheDB'; const STORE_NAME = 'files';
 function getDB() {
@@ -749,14 +699,18 @@ async function processFileHost(source, isUrl) {
         if(isUrl) {
             el('host-file-status').textContent = "Checking Cache..."; let cached = await loadFromCache(source);
             if(cached) { fileBuffer = cached; } else {
-                el('host-file-status').textContent = "Downloading Paper...";
-                fileBuffer = await parallelFetch(source, (loaded, total) => {
-                    el('host-file-status').textContent = `Downloading File...`;
-                    el('host-file-sub').textContent = total
-                        ? `${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`
-                        : `${(loaded/1024/1024).toFixed(2)} MB`;
-                    if(total) el('host-file-fill').style.width = Math.floor((loaded/total)*40) + '%';
-                });
+                el('host-file-status').textContent = "Downloading Mock Paper...";
+                const res = await fetch(source); if(!res.ok) throw new Error("Fetch failed. Paper might not exist on this server.");
+                
+                const contentLength = res.headers.get('content-length');
+                const total = parseInt(contentLength, 10) || 0;
+                let loaded = 0; const reader = res.body.getReader(); const chunks = [];
+                while(true) {
+                    const {done, value} = await reader.read(); if(done) break; chunks.push(value); loaded += value.length;
+                    if(total) { el('host-file-status').textContent = `Downloading File...`; el('host-file-sub').textContent = `${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`; el('host-file-fill').style.width = Math.floor((loaded/total)*40) + '%'; }
+                    else { el('host-file-status').textContent = `Downloading File...`; el('host-file-sub').textContent = `${(loaded/1024/1024).toFixed(2)} MB`; }
+                }
+                fileBuffer = await new Blob(chunks).arrayBuffer();
                 await saveToCache(source, fileBuffer);
             }
         }
@@ -864,19 +818,9 @@ function initPeerAsPlayer() {
 }
 
 async function sendP2PFileChunks(conn) {
-    if (!fileBuffer) return;
-    const CHUNK_SIZE = 256 * 1024;   // 256 KB per chunk
-    const MAX_BUFFERED = 4 * 1024 * 1024; // pause if buffer > 4 MB
-    let offset = 0;
-    conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
-    while (offset < fileBuffer.byteLength) {
-        // Backpressure: wait until the DataChannel drains before sending more
-        while (conn.dataChannel && conn.dataChannel.bufferedAmount > MAX_BUFFERED) {
-            await new Promise(r => setTimeout(r, 30));
-        }
-        conn.send({ type: 'file_chunk', chunk: fileBuffer.slice(offset, offset + CHUNK_SIZE) });
-        offset += CHUNK_SIZE;
-    }
+    if(!fileBuffer) return;
+    const size = 128 * 1024; let offset = 0; conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
+    while(offset < fileBuffer.byteLength) { conn.send({ type: 'file_chunk', chunk: fileBuffer.slice(offset, offset + size) }); offset += size; await new Promise(r => setTimeout(r, 10)); }
     conn.send({ type: 'file_end' });
 }
 
@@ -899,10 +843,15 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
             if(roomData.testUrl) {
                 sendLobbyProgress('Downloading from Web...', 10);
                 try {
-                    fileBuffer = await parallelFetch(roomData.testUrl, (loaded, total) => {
-                        if(total) sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50));
-                        else sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} MB`, 10);
-                    });
+                    const res = await fetch(roomData.testUrl); if(!res.ok) throw new Error();
+                    const contentLength = res.headers.get('content-length'); const total = parseInt(contentLength, 10) || 0;
+                    let loaded = 0; const reader = res.body.getReader(); const chunks = [];
+                    while(true) {
+                        const {done, value} = await reader.read(); if(done) break; chunks.push(value); loaded += value.length;
+                        if(total) { sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50)); }
+                        else { sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} MB`, 10); }
+                    }
+                    fileBuffer = await new Blob(chunks).arrayBuffer();
                     await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
                 } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
             } else { sendLobbyProgress('Requesting file from Host...', 5); hostConn.send({ type: 'request_file' }); }
