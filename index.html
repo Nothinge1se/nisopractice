@@ -568,60 +568,76 @@
   button { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; }
   button:active:not(:disabled) { transform: scale(0.93) !important; transition: transform 0.1s ease-out; }
 
-/* ══ UPLOAD SCREEN ══ */
-  #upload-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; z-index: 10; padding: 40px; }
+  /* ══ UPLOAD SCREEN - TOTALLY REDESIGNED FOR MOBILE/DESKTOP FLUIDITY ══ */
+  #upload-screen { 
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      overflow-y: auto; overflow-x: hidden;
+      background: var(--bg);
+  }
+  /* Magic centering flex hack without top clipping */
+  #upload-screen::before, #upload-screen::after { content: ''; flex: auto; }
   
-  /* NEW HEADER: Stays dead center */
-  .upload-header { text-align: center; margin-bottom: 40px; }
+  .upload-content-wrapper {
+      width: 100%; max-width: 900px;
+      padding: 40px 20px; margin: auto;
+      display: flex; flex-direction: column; align-items: center;
+      flex: none;
+  }
+
+  .upload-header { text-align: center; margin-bottom: 20px; }
   .logo { font-family: var(--font-head); font-size: 64px; font-weight: 800; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; line-height: 1.1; }
   .tagline { font-size: 15px; color: var(--text2); letter-spacing: 0.07em; font-family: var(--font-num); font-weight: 600; text-transform: uppercase;}
   
-  /* NEW BODY: Holds the Left & Right columns */
-  .upload-body { display: flex; flex-direction: row; gap: 60px; align-items: flex-start; justify-content: center; }
+  /* Progress moved UP */
+  .progress-bar-wrap { width: 100%; max-width: 400px; background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; display: none; backdrop-filter: blur(10px); margin: 0 auto 16px auto; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
+  .loading-text { font-family: var(--font-num); font-size: 14px; color: var(--text2); display: none; font-weight: 500; text-align: center; margin-bottom: 20px; }
+  .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; text-align: center; margin-bottom: 20px; }
+
+  /* Body scaled down slightly for better fit */
+  .upload-body { display: flex; flex-direction: row; gap: 40px; align-items: flex-start; justify-content: center; width: 100%; }
   
-  .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 500px; }
+  .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 400px; }
   
-  .upload-zone { width: 100%; border: 2px dashed var(--border); border-radius: 24px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-  .upload-zone:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-  .upload-icon { font-size: 52px; margin-bottom: 14px; display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .upload-zone { width: 100%; border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .upload-zone:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+  .upload-icon { font-size: 36px; margin-bottom: 8px; display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .upload-zone:hover .upload-icon { transform: scale(1.15) rotate(8deg); }
-  .upload-zone h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-  .upload-zone p { font-size: 14px; color: var(--text2); }
+  .upload-zone h3 { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .upload-zone p { font-size: 13px; color: var(--text2); }
   #file-input { display: none; }
   
   /* ONLINE MOCKS SECTION */
-  .online-mocks { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
-  .online-mocks-label { width: 100%; text-align: center; font-family: var(--font-num); color: var(--text2); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-  .online-mocks .modal-btn { flex: 1; padding: 14px; font-size: 15px; background: var(--surface); backdrop-filter: blur(10px); }
-  .online-mocks .modal-btn:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+  .online-mocks { display: flex; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap; }
+  .online-mocks-label { width: 100%; text-align: center; font-family: var(--font-num); color: var(--text2); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .online-mocks .modal-btn { flex: 1; padding: 12px; font-size: 14px; background: var(--surface); backdrop-filter: blur(10px); }
+  .online-mocks .modal-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
 
   /* THE "OR" DIVIDER */
-  .upload-or-divider { display: flex; align-items: center; width: 100%; font-family: var(--font-num); font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin: 5px 0; }
+  .upload-or-divider { display: flex; align-items: center; width: 100%; font-family: var(--font-num); font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin: 4px 0; }
   .upload-or-divider::before, .upload-or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); margin: 0 15px; }
 
   /* Menu Credits */
-  .menu-credits { width: 100%; text-align: center; font-family: var(--font-num); font-size: 13px; color: var(--text2); display: flex; flex-direction: column; gap: 6px; background: var(--surface); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
+  .menu-credits { width: 100%; text-align: center; font-family: var(--font-num); font-size: 12px; color: var(--text2); display: flex; flex-direction: column; gap: 6px; background: var(--surface); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
   .menu-credits a { color: var(--accent2); text-decoration: none; font-weight: 700; transition: color 0.2s; }
   .menu-credits a:hover { color: var(--text); text-decoration: underline; }
 
-  .progress-bar-wrap { width: 100%; background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; display: none; backdrop-filter: blur(10px); }
-  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.3s ease; }
-  .loading-text { font-family: var(--font-num); font-size: 14px; color: var(--text2); display: none; font-weight: 500; }
-  .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; }
-
-  /* RECENT PANEL (RIGHT SIDE) */
-  .recent-panel { grid-column: 3; justify-self: center; display: none; flex-direction: column; width: 100%; max-width: 400px; max-height: 550px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }.clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
+  /* RECENT PANEL */
+  .recent-panel { justify-self: center; display: none; flex-direction: column; width: 100%; max-width: 340px; max-height: 500px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .recent-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-head); font-weight: 800; font-size: 16px; background: rgba(0,0,0,0.1); }
+  .clear-sessions-btn { font-family: var(--font-num); font-size: 12px; color: var(--wrong); background: none; border: none; cursor: pointer; opacity: 0.6; font-weight: 700; transition: opacity 0.2s; }
   .clear-sessions-btn:hover { opacity: 1; }
   .recent-list { overflow-y: auto; flex: 1; }
   .recent-list::-webkit-scrollbar { width: 6px; }
   .recent-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .recent-item { display: flex; align-items: center; padding: 16px 20px; gap: 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .recent-item { display: flex; align-items: center; padding: 12px 16px; gap: 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .recent-item:last-child { border-bottom: none; }
-  .recent-item:hover { background: var(--surface2); padding-left: 24px; }
+  .recent-item:hover { background: var(--surface2); padding-left: 20px; }
   .recent-info { flex: 1; min-width: 0; }
-  .recent-name { font-family: var(--font-head); font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-  .recent-meta { font-family: var(--font-num); font-size: 12px; color: var(--text2); margin-top: 4px; font-weight: 500; }
-  .recent-score { font-family: var(--font-num); font-size: 16px; font-weight: 800; flex-shrink: 0; }
+  .recent-name { font-family: var(--font-head); font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .recent-meta { font-family: var(--font-num); font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+  .recent-score { font-family: var(--font-num); font-size: 15px; font-weight: 800; flex-shrink: 0; }
   .recent-score.pos { color: var(--correct); }
   .recent-score.neg { color: var(--wrong); }
   .recent-score.zero { color: var(--text2); }
@@ -975,17 +991,30 @@
 
   @media (max-width: 768px) {
 
-    /* ── Upload screen ── */
-    #upload-screen { padding: 16px; justify-content: flex-start; overflow-y: auto; height: 100dvh; }
-    .upload-header { margin-bottom: 20px; margin-top: 12px; }
-    .logo { font-size: 40px; }
-    .tagline { font-size: 11px; }
-    .upload-body { flex-direction: column; gap: 16px; align-items: stretch; }
-    .upload-left-col { width: 100%; }
-    .online-mocks { flex-direction: column; }
-    .online-mocks .modal-btn { flex: none; width: 100%; }
-    .recent-panel { grid-column: unset; max-width: 100%; max-height: 260px; width: 100% !important; display: flex !important; }
-    .menu-credits { font-size: 11px; padding: 10px 14px; }
+    /* ── Upload screen mobile tweaks ── */
+    #upload-screen { padding: 0; }
+    .upload-content-wrapper { padding: 20px 16px; margin: 0; width: 100%; justify-content: flex-start; min-height: 100vh; }
+    .upload-header { margin-bottom: 16px; margin-top: 10px; }
+    .logo { font-size: 36px; }
+    .tagline { font-size: 11px; margin-bottom: 10px; }
+    
+    .upload-body { flex-direction: column; gap: 16px; align-items: stretch; width: 100%; }
+    .upload-left-col { width: 100%; gap: 12px; }
+    .online-mocks { flex-direction: column; gap: 8px; }
+    .online-mocks .modal-btn { flex: none; width: 100%; font-size: 13px; padding: 10px; }
+    .upload-zone { padding: 16px 12px; border-radius: 12px; }
+    .upload-icon { font-size: 28px; margin-bottom: 4px; }
+    .upload-zone h3 { font-size: 14px; }
+    .upload-zone p { font-size: 11px; }
+
+    .recent-panel { grid-column: unset; max-width: 100%; max-height: 250px; width: 100% !important; display: flex !important; }
+    .recent-header { font-size: 14px; padding: 12px 16px; }
+    .recent-item { padding: 10px 12px; gap: 10px; }
+    .recent-name { font-size: 14px; }
+    .recent-meta { font-size: 10px; }
+    .recent-score { font-size: 14px; }
+
+    .menu-credits { font-size: 11px; padding: 8px 12px; }
 
     /* ── Modal ── */
     .modal-box { width: calc(100vw - 32px); padding: 20px; }
@@ -1093,69 +1122,77 @@
 <div id="bg-anim-layer"></div>
 
 <div id="upload-screen">
-  
-  <div class="upload-header">
-    <div class="logo">NISOPRACTICE</div>
-  <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
-  </div>
-
-  <div class="upload-body">
+  <div class="upload-content-wrapper">
     
-    <div class="upload-left-col">
-      <div class="online-mocks">
-        <div class="online-mocks-label">Load Online Sample Tests</div>
-        <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
-          🚀 1D Module - NEET
-        </button>
-        <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2021_JEE.niso')">
-          🚀 2021 Top 200 PYQ - EDUNITI
-        </button>
-        <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
-          🚀 2022 Top 200 PYQ - EDUNITI
-        </button>
-        <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(167,139,250,0.12)); border-color:var(--accent); color:var(--accent);" onclick="loadMergedOnline(['TOP_200_PYQ_2021_JEE.niso','TOP_200_PYQ_2022_JEE.niso'])">
-          🔀 Merge: 2021 + 2022 PYQ
-        </button>
-      </div>
+    <div class="upload-header">
+      <div class="logo">NISOPRACTICE</div>
+      <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
+    </div>
 
-      <div class="upload-or-divider">Or load your own tests</div>
+    <!-- Move Progress bar HIGHER up -->
+    <div class="progress-bar-wrap" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="loading-text" id="loading-text"></div>
+    <div class="error-msg" id="error-msg"></div>
 
-      <div class="upload-zone" id="upload-zone">
-        <div class="upload-icon">📦</div>
-        <h3>Drop your .niso or .zip file here</h3>
-        <p>Upload any compatible CBT zip (data.json + images)</p>
-        <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
-      </div>
-
-      <div class="upload-or-divider">Or merge multiple years</div>
-
-      <div class="upload-zone" id="multi-upload-zone" style="border-style:dashed; border-color:var(--accent2); opacity:0.85;">
-        <div class="upload-icon">🔀</div>
-        <h3>Select multiple .niso / .zip files</h3>
-        <p>Pick 2021, 2022, 2023… all at once — year tabs appear automatically</p>
-        <input type="file" id="multi-file-input" accept=".zip,.niso" multiple autocomplete="off">
-      </div>
-
-      <div class="progress-bar-wrap" id="progress-wrap">
-        <div class="progress-bar" id="progress-bar"></div>
-      </div>
-      <div class="loading-text" id="loading-text"></div>
-      <div class="error-msg" id="error-msg"></div>
+    <div class="upload-body">
       
-      <div class="menu-credits">
-          <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
-          <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
-      </div>
-    </div>
+      <div class="upload-left-col">
+        <div class="online-mocks">
+          <div class="online-mocks-label">Load Online Sample Tests</div>
+          <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
+            🚀 1D Module - NEET
+          </button>
+          <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2021_JEE.niso')">
+            🚀 2021 Top 200 PYQ - EDUNITI
+          </button>
+          <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
+            🚀 2022 Top 200 PYQ - EDUNITI
+          </button>
+          <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(167,139,250,0.12)); border-color:var(--accent); color:var(--accent);" onclick="loadMergedOnline(['TOP_200_PYQ_2021_JEE.niso','TOP_200_PYQ_2022_JEE.niso'])">
+            🔀 Merge: 2021 + 2022 PYQ
+          </button>
+          
+          <div class="online-mocks-label" style="margin-top: 8px;">Multiplayer / Co-op</div>
+          <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(52,211,153,0.12)); border-color:#10b981; color:#10b981;" onclick="window.location.href='https://nisopractice.vercel.app/mp'">
+            🌐 Multiplayer Session
+          </button>
+        </div>
 
-    <div class="recent-panel" id="recent-panel">
-      <div class="recent-header">
-        <span>,. Recent Sessions</span>
-        <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
+        <div class="upload-or-divider">Or load your own tests</div>
+
+        <div class="upload-zone" id="upload-zone">
+          <div class="upload-icon">📦</div>
+          <h3>Drop your .niso or .zip file here</h3>
+          <p>Upload any compatible CBT zip (data.json + images)</p>
+          <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
+        </div>
+
+        <div class="upload-or-divider">Or merge multiple years</div>
+
+        <div class="upload-zone" id="multi-upload-zone" style="border-style:dashed; border-color:var(--accent2); opacity:0.85;">
+          <div class="upload-icon">🔀</div>
+          <h3>Select multiple .niso / .zip files</h3>
+          <p>Pick 2021, 2022, 2023… all at once</p>
+          <input type="file" id="multi-file-input" accept=".zip,.niso" multiple autocomplete="off">
+        </div>
+
+        <div class="menu-credits">
+            <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
+            <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
+        </div>
       </div>
-      <div class="recent-list" id="recent-list"></div>
+
+      <div class="recent-panel" id="recent-panel">
+        <div class="recent-header">
+          <span>,. Recent Sessions</span>
+          <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
+        </div>
+        <div class="recent-list" id="recent-list"></div>
+      </div>
+      
     </div>
-    
   </div>
 </div>
 
@@ -1788,7 +1825,7 @@ const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('file-input');
 
 uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.transform = 'scale(1.05)'; });
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.transform = 'translateY(-4px)'; });
 uploadZone.addEventListener('dragleave', () => { uploadZone.style.transform = 'none'; });
 uploadZone.addEventListener('drop', (e) => {
   e.preventDefault(); uploadZone.style.transform = 'none';
@@ -1803,7 +1840,7 @@ const multiUploadZone = document.getElementById('multi-upload-zone');
 const multiFileInput  = document.getElementById('multi-file-input');
 
 multiUploadZone.addEventListener('click', () => multiFileInput.click());
-multiUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); multiUploadZone.style.transform = 'scale(1.05)'; });
+multiUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); multiUploadZone.style.transform = 'translateY(-4px)'; });
 multiUploadZone.addEventListener('dragleave', () => { multiUploadZone.style.transform = 'none'; });
 multiUploadZone.addEventListener('drop', (e) => {
   e.preventDefault(); multiUploadZone.style.transform = 'none';
