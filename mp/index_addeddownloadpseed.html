@@ -239,74 +239,6 @@
   .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase;}
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
-
-  /* ── GHOST LETTERS ON DOTS ── */
-  .dot { position: relative; }
-  .dot-ghosts { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; pointer-events: none; }
-  .dot-ghost-letter { font-size: 7px; font-weight: 900; opacity: 0.55; line-height: 1; font-family: 'Outfit'; color: #fff; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
-
-  /* ── TOGGLE SWITCHES ── */
-  .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .toggle-row:last-child { border-bottom: none; }
-  .toggle-label { font-family: 'Outfit'; font-size: 13px; font-weight: 700; color: var(--text); }
-  .toggle-label small { display: block; color: var(--text2); font-size: 11px; font-weight: 500; margin-top: 2px; }
-  .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-track { position: absolute; inset: 0; background: var(--surface3); border-radius: 24px; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); }
-  .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--text2); top: 2px; left: 2px; transition: 0.2s; }
-  .toggle-switch input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
-  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: white; }
-
-  /* ── DOWNLOAD PROGRESS DETAIL ── */
-  .dl-detail { font-family: 'Outfit'; font-size: 11px; color: var(--accent2); font-weight: 700; text-align: center; letter-spacing: 0.5px; }
-
-  /* ── ANALYSIS MODAL ── */
-  #analysis-layer { position: fixed; inset: 0; background: rgba(7,8,12,0.97); z-index: 200; display: none; flex-direction: column; }
-  #analysis-layer.show { display: flex; }
-  .analysis-header { padding: 16px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-  .analysis-scroll { flex: 1; overflow: auto; padding: 20px; }
-  .analysis-table { border-collapse: collapse; width: 100%; font-family: 'Outfit'; font-size: 13px; min-width: 600px; }
-  .analysis-table th { background: var(--surface2); padding: 10px 12px; text-align: center; font-weight: 800; color: var(--text2); border: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; }
-  .analysis-table th:first-child { text-align: left; position: sticky; left: 0; top: 0; z-index: 3; }
-  .analysis-table td { padding: 8px 10px; text-align: center; border: 1px solid var(--border); color: var(--text); vertical-align: middle; }
-  .analysis-table td:first-child { text-align: left; font-weight: 700; background: var(--surface); position: sticky; left: 0; z-index: 1; white-space: nowrap; }
-  .analysis-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-  .analysis-table tr:nth-child(even) td:first-child { background: var(--surface2); }
-  .cell-correct { background: rgba(16,185,129,0.15) !important; color: var(--ans); font-weight: 800; }
-  .cell-wrong { background: rgba(239,68,68,0.15) !important; color: var(--unans); font-weight: 800; }
-  .cell-skip { color: var(--text2); }
-  .analysis-tabs { display: flex; gap: 8px; padding: 0 20px 0; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
-  .analysis-tab { font-family: 'Outfit'; font-size: 13px; font-weight: 700; padding: 12px 16px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
-  .analysis-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* ── MOBILE SCROLL FIXES ── */
-  .screen { -webkit-overflow-scrolling: touch; }
-  .q-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-  .grid-wrap { -webkit-overflow-scrolling: touch; }
-  
-  /* ── MOBILE APP LAYOUT FIXES ── */
-  @media (max-width: 850px) {
-    #app { height: 100dvh; overflow: hidden; }
-    .q-area { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .q-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .ans-area { flex-shrink: 0; max-height: 45vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .btm-bar { flex-shrink: 0; }
-    .opts-grid { grid-template-columns: 1fr; gap: 8px; }
-    .opt-btn { padding: 10px 12px; font-size: 14px; }
-    .header { height: 52px; }
-    .timer-box { font-size: 18px; padding: 4px 14px; }
-    .q-badge { font-size: 14px; padding: 4px 10px; }
-    .sidebar { top: 52px; }
-  }
-
-  /* ── DRAGGABLE FAB ── */
-  #mob-chat-fab { touch-action: none; user-select: none; }
-
-  /* ── LOBBY MOBILE SCROLL FIX ── */
-  @media (max-width: 850px) {
-    #lobby-screen { overflow-y: auto !important; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
-    .lobby-grid { grid-template-columns: 1fr; }
-  }
 </style>
 </head>
 <body>
@@ -392,39 +324,12 @@
             <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
           </div>
         </div>
-        <!-- Feature Toggles -->
-        <div style="background:var(--bg); border-radius:12px; padding:12px 16px; border:1px solid var(--border); margin-bottom:12px;">
-          <div class="label-title" style="margin-bottom:10px;">🎮 Features</div>
-          <div class="toggle-row">
-            <div class="toggle-label">Live Fair-Play Stats
-              <small>Show correct/wrong fractions on dots</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Show Who's On Each Q
-              <small>Ghost initials on navigator dots</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Detailed Time Analysis
-              <small>Post-game per-question time breakdown</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Surprise Streak Bombs 💣
-              <small>Random power-ups for long streaks</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Speed Bonus Score
-              <small>Extra marks for quick correct answers</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
+        <div class="config-row">
+          <label class="label-title">Live Fair-Play Stats</label>
+          <select id="cfg-live-stats" class="config-select">
+            <option value="false">Hidden (Fair)</option>
+            <option value="true">Visible (Fractions)</option>
+          </select>
         </div>
         <button class="btn btn-primary" id="btn-start-game" disabled style="margin-top:8px;">Start Match</button>
       </div>
@@ -599,33 +504,6 @@
       <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
   <button id="mob-chat-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
-<script>
-(function(){
-  const fab = document.getElementById('mob-chat-fab');
-  if(!fab) return;
-  let dragging=false, startX, startY, origX, origY, moved=false;
-  fab.addEventListener('touchstart', e=>{
-    const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
-    const r=fab.getBoundingClientRect(); origX=r.left; origY=r.top;
-    dragging=true; moved=false; fab.style.transition='none';
-  },{passive:true});
-  document.addEventListener('touchmove', e=>{
-    if(!dragging) return;
-    const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
-    if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true;
-    if(!moved) return;
-    let nx=origX+dx; let ny=origY+dy;
-    nx=Math.max(8,Math.min(nx,window.innerWidth-fab.offsetWidth-8));
-    ny=Math.max(8,Math.min(ny,window.innerHeight-fab.offsetHeight-8));
-    fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener('touchend', e=>{
-    if(dragging && moved) e.preventDefault();
-    dragging=false; fab.style.transition='';
-  },{passive:false});
-})();
-</script>
 
   <!-- SUBMIT WARNING MODAL -->
   <div class="modal-layer" id="submit-warning-modal">
@@ -653,28 +531,12 @@
       <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
     
-    <div style="display:flex; gap:16px; margin-top:24px; flex-wrap:wrap; justify-content:center;">
+    <div style="display:flex; gap:16px; margin-top:24px;">
         <button class="btn" style="width:auto; padding: 12px 24px;" onclick="window.enterReviewMode()">👀 See Answers</button>
-        <button class="btn" id="btn-open-analysis" style="width:auto; padding: 12px 24px; display:none; border-color:var(--accent2); color:var(--accent2);" onclick="window.openAnalysis()">📊 Time Analysis</button>
         <button class="btn btn-primary" style="width:auto; padding: 12px 24px;" onclick="window.location.reload()">Home</button>
     </div>
   </div>
 
-</div>
-
-<!-- ANALYSIS LAYER -->
-<div id="analysis-layer">
-  <div class="analysis-header">
-    <div style="font-family:'Syne'; font-size:20px; font-weight:900;">📊 Detailed Analysis</div>
-    <button class="btn" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.closeAnalysis()">✕ Close</button>
-  </div>
-  <div class="analysis-tabs">
-    <div class="analysis-tab active" id="atab-time" onclick="window.switchAnalysisTab('time')">⏱ Time per Q</div>
-    <div class="analysis-tab" id="atab-summary" onclick="window.switchAnalysisTab('summary')">📋 Summary</div>
-  </div>
-  <div class="analysis-scroll" id="analysis-body">
-    <!-- Rendered by JS -->
-  </div>
 </div>
 
 <script>
@@ -771,9 +633,6 @@ let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};
 let imageCache = {}; let timerInterval = null; let syncInterval = null;
 let hasSubmitted = false; let gameFinished = false; 
 let isFileAcquisitionStarted = false; let isLaunchPending = false;
-// New feature vars
-let questionTimes = {}; let questionEnterTime = Date.now();
-let correctStreak = 0;
 
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
@@ -943,7 +802,7 @@ function initPeerAsHost() {
             if(data.type === 'lobby_progress') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].progressText = data.text; roomData.players[conn.peer].progressPct = data.pct; broadcastRoomState(); } }
             if(data.type === 'toggle_ready') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].ready = data.ready; roomData.players[conn.peer].state = data.ready ? 'ready' : 'downloading'; roomData.players[conn.peer].progressText = data.ready ? 'Ready' : 'Not Ready'; roomData.players[conn.peer].progressPct = 100; broadcastRoomState(); } }
             if(data.type === 'request_file') { sendP2PFileChunks(conn); }
-            if(data.type === 'sync_progress') { if(roomData.players[conn.peer]) { const p = roomData.players[conn.peer]; p.attempted = data.attempted; p.currentQ = data.currentQ; if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } broadcastRoomState(); checkAllSubmitted(); } }
+            if(data.type === 'sync_progress') { if(roomData.players[conn.peer]) { const p = roomData.players[conn.peer]; p.attempted = data.attempted; if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; } broadcastRoomState(); checkAllSubmitted(); } }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
         });
@@ -965,21 +824,17 @@ function handleVoteKick(targetId, voterId) {
 window.voteKick = (targetId) => { if (isHost) handleVoteKick(targetId, myId); else if(hostConn && hostConn.open) hostConn.send({ type: 'vote_kick', target: targetId }); };
 
 function attachHostSettingsListeners() {
-    window.pushCfg = () => {
+    const pushCfg = () => {
         const sel = Array.from(el('cfg-sections').selectedOptions).map(o => o.value);
         roomData.settings.sections = sel.length ? sel : ['ALL'];
         roomData.settings.timerMode = el('cfg-timer-mode').value;
         roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
-        roomData.settings.showLiveStats = el('cfg-live-stats-tog').checked ? 'true' : 'false';
-        roomData.settings.showGhosts = el('cfg-ghost-tog').checked ? 'true' : 'false';
-        roomData.settings.showAnalysis = el('cfg-analysis-tog').checked ? 'true' : 'false';
-        roomData.settings.bombs = el('cfg-bombs-tog').checked ? 'true' : 'false';
-        roomData.settings.speedBonus = el('cfg-speed-tog').checked ? 'true' : 'false';
+        roomData.settings.showLiveStats = el('cfg-live-stats').value;
         if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length; else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
         broadcastRoomState();
     };
-    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration'].forEach(id => el(id).addEventListener('change', window.pushCfg));
-    window.pushCfg();
+    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration', 'cfg-live-stats'].forEach(id => el(id).addEventListener('change', pushCfg));
+    pushCfg();
 }
 
 function initPeerAsPlayer() {
@@ -1084,7 +939,7 @@ function updateLobbyUI() {
 
     players.forEach(p => {
         if(!p.ready) allReady = false;
-        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:150px;"><div class="progress-wrap" style="height:6px;margin:0 0 4px;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</span><span class="dl-detail">${p.progressPct>0&&p.progressPct<100?p.progressPct+'%':''}</span></div></div>`;
+        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:120px;"><div class="progress-wrap" style="height:6px;margin:0;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div class="progress-text" style="font-size:10px; color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</div></div>`;
         let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
         if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
         list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
@@ -1130,8 +985,6 @@ function launchGame() {
     const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
-    questionTimes = {}; questionEnterTime = Date.now(); lastAnswerQId = null;
-    correctStreak = 0;
     
     startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
     syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 3000);
@@ -1155,28 +1008,13 @@ function startTimers() {
 function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
 
 function calculateScore() {
-    let net = 0;
-    allQuestions.forEach(q => {
-        const a = answers[q.id]; if(a && a.selected) {
-            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
-            if(isC) {
-                let bonus = q.marks.cm || 4;
-                if(roomData.settings.speedBonus === 'true') {
-                    const t = questionTimes[q.id] || 999;
-                    if(t <= 15) bonus += 2; else if(t <= 30) bonus += 1;
-                }
-                net += bonus;
-            } else { net -= Math.abs(q.marks.im || 1); }
-        }
-    });
-    return net;
+    let net = 0; allQuestions.forEach(q => { const a = answers[q.id]; if(a && a.selected) { const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected); if(isC) net += (q.marks.cm || 4); else net -= Math.abs(q.marks.im || 1); } }); return net;
 }
 
 function pushProgressToHost(isFinal = false) {
     const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
-    const curQ = allQuestions[currentQIdx] ? allQuestions[currentQIdx].id : null;
-    const pay = { attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined };
-    if(isHost) { const p = roomData.players[myId]; p.attempted = pay.attempted; p.currentQ = pay.currentQ; if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } broadcastRoomState(); checkAllSubmitted(); } 
+    const pay = { attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0 };
+    if(isHost) { const p = roomData.players[myId]; p.attempted = pay.attempted; if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; } broadcastRoomState(); checkAllSubmitted(); } 
     else { if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); }
 }
 function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) { roomData.status = 'finished'; broadcastRoomState(); showFinalResults(true); } }
@@ -1191,10 +1029,7 @@ window.submitWarningBtn = () => {
 
 window.forceSubmit = () => {
     el('submit-warning-modal').classList.remove('show');
-    if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
-    // Record time on last question
-    if(allQuestions[currentQIdx]) { const qId = allQuestions[currentQIdx].id; const spent = Math.round((Date.now()-questionEnterTime)/1000); questionTimes[qId]=(questionTimes[qId]||0)+spent; }
-    pushProgressToHost(true);
+    if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval); pushProgressToHost(true);
     
     // UI changes lock options
     if(el('btn-top-submit')) { el('btn-top-submit').disabled = true; el('btn-top-submit').textContent = "Submitted"; }
@@ -1232,13 +1067,7 @@ async function preloadImages(zip, progressCallback) {
 window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
 const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
 window.navigate = (dir, isSaveNext = false) => { 
-    if(!hasSubmitted) {
-        const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
-        const qId = allQuestions[currentQIdx].id;
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[qId] = (questionTimes[qId] || 0) + spent;
-        questionEnterTime = Date.now();
-    }
+    if(!hasSubmitted) { const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans'; }
     
     const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; 
     
@@ -1252,37 +1081,11 @@ window.navigate = (dir, isSaveNext = false) => {
     }
 };
 window.goToQ = (idx) => { 
-    if(!hasSubmitted) {
-        const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
-        // Track time on this question
-        const qId = allQuestions[currentQIdx].id;
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[qId] = (questionTimes[qId] || 0) + spent;
-        questionEnterTime = Date.now();
-    }
+    if(!hasSubmitted) { const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans'; }
     currentQIdx = idx; renderSidebar(); renderQuestion(); 
 };
 
-window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; else a.status = 'unans'; checkStreakBomb(); navigate(1, true); };
-function checkStreakBomb() {
-    if(roomData.settings.bombs !== 'true') return;
-    const q = allQuestions[currentQIdx]; const a = answers[q.id];
-    if(!a || !a.selected) { correctStreak = 0; return; }
-    const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
-    if(isC) { correctStreak++; } else { correctStreak = 0; }
-    if(correctStreak > 0 && correctStreak % 5 === 0) {
-        const msgs = ['🔥 5-streak! You're on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
-        const idx = Math.min(Math.floor(correctStreak/5)-1, msgs.length-1);
-        showStreakBomb(msgs[idx]);
-    }
-}
-function showStreakBomb(msg) {
-    const d = document.createElement('div');
-    d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-family:Syne,sans-serif;font-size:clamp(20px,5vw,28px);font-weight:900;padding:20px 40px;border-radius:24px;z-index:9999;text-align:center;box-shadow:0 20px 60px rgba(99,102,241,0.6);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;pointer-events:none;';
-    d.textContent = msg; document.body.appendChild(d);
-    requestAnimationFrame(() => { d.style.transform = 'translate(-50%,-50%) scale(1)'; });
-    setTimeout(() => { d.style.transform = 'translate(-50%,-50%) scale(0)'; d.style.opacity='0'; setTimeout(()=>d.remove(), 350); }, 2000);
-}
+window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; else a.status = 'unans'; navigate(1, true); };
 window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'mark-ans' : 'marked'; navigate(1, true); };
 window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis', selected: null }; renderSidebar(); renderQuestion(); };
 
@@ -1360,20 +1163,6 @@ function renderSidebar() {
             for(let i=0;i<c;i++) b.innerHTML += `<div style="flex:1; background:var(--ans);"></div>`; for(let i=0;i<w;i++) b.innerHTML += `<div style="flex:1; background:var(--unans);"></div>`; d.appendChild(b);
         }
     }
-
-    // Ghost initials – who is on this question
-    if (!hasSubmitted && roomData && roomData.settings.showGhosts === 'true') {
-        const ghosts = Object.values(roomData.players).filter(p => p.currentQ === q.id && p.name !== myName);
-        if (ghosts.length) {
-            const gWrap = document.createElement('div'); gWrap.className = 'dot-ghosts';
-            ghosts.slice(0,4).forEach(p => {
-                const span = document.createElement('span'); span.className = 'dot-ghost-letter';
-                span.textContent = p.name.charAt(0).toUpperCase(); gWrap.appendChild(span);
-            });
-            d.appendChild(gWrap);
-        }
-    }
-
     // Review Mode Dot Colors
     if (hasSubmitted && answers[q.id].selected) {
         const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(answers[q.id].selected)) : String(q.correctAnswer).trim() === String(answers[q.id].selected);
@@ -1424,7 +1213,7 @@ window.showFinalResults = (forceShow = false) => {
     
     const pArr = Object.values(roomData.players).sort((a,b) => {
         if(a.submitted && b.submitted) return b.score - a.score;
-        return a.submitted ? -1 : 1;
+        return a.submitted ? -1 : 1; // Submitted first
     });
 
     const medals = ['🥇', '🥈', '🥉'];
@@ -1433,10 +1222,9 @@ window.showFinalResults = (forceShow = false) => {
     pArr.forEach((p, idx) => {
         if(p.submitted) {
             const med = rank <= 3 ? `<span class="medal">${medals[rank-1]}</span>` : `<span style="font-size:24px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${rank}</span>`;
-            const speedTag = roomData.settings.speedBonus === 'true' ? `<div style="font-size:11px; color:var(--accent2); font-weight:700;">⚡ Speed Bonus Active</div>` : '';
             list.innerHTML += `<div class="lb-result-item ${p.name === myName ? 'me' : ''}">
                 <div style="display:flex; gap:16px; align-items:center;">${med}<span style="font-size:20px; font-weight:800;">${p.name}</span></div>
-                <div style="text-align:right;"><div style="font-size:24px; color:var(--ans); font-weight:900; font-family:'Outfit';">${p.score} <span style="font-size:12px;color:var(--text2);">marks</span></div><div style="font-size:12px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>${speedTag}</div>
+                <div style="text-align:right;"><div style="font-size:24px; color:var(--ans); font-weight:900; font-family:'Outfit';">${p.score} <span style="font-size:12px;color:var(--text2);">marks</span></div><div style="font-size:12px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div></div>
             </div>`;
             rank++;
         } else {
@@ -1446,82 +1234,6 @@ window.showFinalResults = (forceShow = false) => {
             </div>`;
         }
     });
-
-    // Show analysis button if enabled
-    const anaBtn = el('btn-open-analysis');
-    if(anaBtn) anaBtn.style.display = roomData.settings.showAnalysis === 'true' && isAllDone ? 'flex' : 'none';
-}
-
-// ── ANALYSIS ENGINE ──
-window.openAnalysis = () => {
-    const layer = el('analysis-layer'); layer.classList.add('show');
-    renderAnalysis('time');
-};
-window.closeAnalysis = () => el('analysis-layer').classList.remove('show');
-window.switchAnalysisTab = (tab) => {
-    document.querySelectorAll('.analysis-tab').forEach(t => t.classList.remove('active'));
-    el('atab-'+tab).classList.add('active');
-    renderAnalysis(tab);
-};
-
-function renderAnalysis(mode) {
-    const body = el('analysis-body'); if(!body) return;
-    const players = Object.values(roomData.players).filter(p => p.submitted);
-    if(!players.length) { body.innerHTML = '<p style="color:var(--text2);padding:20px;font-family:Outfit;">No submitted players yet.</p>'; return; }
-
-    if(mode === 'time') {
-        let html = '<div style="overflow-x:auto;"><table class="analysis-table"><thead><tr><th>Question</th>';
-        players.forEach(p => html += `<th>${p.name}</th>`);
-        html += '</tr></thead><tbody>';
-        allQuestions.forEach(q => {
-            // Find fastest for this question
-            const times = players.map(p => (p.questionTimes||{})[q.id]).filter(t => t!=null);
-            const minT = times.length ? Math.min(...times) : null;
-            html += `<tr><td>Q${q.globalNum}</td>`;
-            players.forEach(p => {
-                const t = (p.questionTimes||{})[q.id];
-                if(t == null) { html += `<td class="cell-skip">—</td>`; return; }
-                const isFastest = t === minT && times.length > 1;
-                const cls = t <= 20 ? 'cell-correct' : t >= 120 ? 'cell-wrong' : '';
-                html += `<td class="${cls}" ${isFastest?'title="⚡ Fastest!"':''}>${isFastest?'⚡':''}${t}s</td>`;
-            });
-            html += '</tr>';
-        });
-        html += '</tbody></table></div>';
-        body.innerHTML = html;
-    } else if(mode === 'summary') {
-        let html = '<div style="display:flex; flex-direction:column; gap:16px; max-width:700px; margin: 0 auto;">';
-        players.sort((a,b) => b.score - a.score).forEach((p, ri) => {
-            const totalTime = Object.values(p.questionTimes||{}).reduce((a,b)=>a+b,0);
-            const avgTime = Object.keys(p.questionTimes||{}).length ? Math.round(totalTime/Object.keys(p.questionTimes).length) : 0;
-            const fastest = Object.entries(p.questionTimes||{}).sort((a,b)=>a[1]-b[1])[0];
-            const slowest = Object.entries(p.questionTimes||{}).sort((a,b)=>b[1]-a[1])[0];
-            const medals = ['🥇','🥈','🥉'];
-            html += `<div style="background:var(--surface2);border-radius:16px;border:2px solid ${p.name===myName?'var(--accent)':'var(--border)'};padding:20px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                    <div style="font-family:'Outfit';font-size:18px;font-weight:800;">${ri<3?medals[ri]:'#'+(ri+1)} ${p.name}</div>
-                    <div style="font-family:'Outfit';font-size:20px;font-weight:900;color:var(--ans);">${p.score} marks</div>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-family:'Outfit';">
-                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
-                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Avg Time/Q</div>
-                        <div style="font-size:18px;font-weight:900;">${avgTime}s</div>
-                    </div>
-                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
-                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚡ Fastest Q</div>
-                        <div style="font-size:18px;font-weight:900;color:var(--ans);">${fastest?fastest[1]+'s':'—'}</div>
-                    </div>
-                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
-                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🐢 Slowest Q</div>
-                        <div style="font-size:18px;font-weight:900;color:var(--unans);">${slowest?slowest[1]+'s':'—'}</div>
-                    </div>
-                </div>
-                <div style="margin-top:10px;font-size:12px;color:var(--text2);font-weight:600;font-family:'Outfit';">Total time tracked: ${formatTime(totalTime)} | Questions attempted: ${p.attempted}</div>
-            </div>`;
-        });
-        html += '</div>';
-        body.innerHTML = html;
-    }
 }
 </script>
 </body>
