@@ -1271,7 +1271,7 @@ function checkStreakBomb() {
     const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
     if(isC) { correctStreak++; } else { correctStreak = 0; }
     if(correctStreak > 0 && correctStreak % 5 === 0) {
-        const msgs = ['🔥 5-streak! You're on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
+        const msgs = ['🔥 5-streak! Youre on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
         const idx = Math.min(Math.floor(correctStreak/5)-1, msgs.length-1);
         showStreakBomb(msgs[idx]);
     }
