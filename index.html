@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NISOPRACTICE – JEE CBT Practice</title>
 <link rel="icon" type="image/ico" href="favicon.ico">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -524,14 +524,14 @@
   @keyframes fallDown { 0% { background-position: 0 -100px; } 100% { background-position: 50px 100px; } }
   @keyframes snowFall { 0% { background-position: 0 0, 0 0; } 100% { background-position: 100px 200px, -50px 150px; } }
   @keyframes wavePan { 0% { background-position: 0 100%; } 100% { background-position: 400px 100%; } }
-  @keyframes fogMove { 0% { background-position: -300px 50px; } 100% { background-position: 100vw 50px; } }
+  @keyframes fogMove { 0% { background-position: -300px 50px; } 100% { background-position: 125vw 50px; } }
   @keyframes bambooSway { 0% { transform: skewX(-2deg); } 100% { transform: skewX(2deg); } }
   @keyframes pulseGlow { 0% { opacity: 0.6; } 100% { opacity: 1; } }
-  @keyframes cloudsMove { 0% { background-position: -400px 20px; } 100% { background-position: 100vw 20px; } }
+  @keyframes cloudsMove { 0% { background-position: -400px 20px; } 100% { background-position: 125vw 20px; } }
   @keyframes galaxySpin { 0% { transform: scale(1.5) rotate(0deg); } 100% { transform: scale(1.5) rotate(360deg); } }
   @keyframes pureRain { 0% { background-position: 0 0; } 100% { background-position: -50px 100px; } }
-  @keyframes batFly { 0% { background-position: -200px 100px; } 100% { background-position: 120vw -50px; } }
-  @keyframes tumbleRoll { 0% { background-position: -150px 85vh; transform: rotate(0deg); } 100% { background-position: 110vw 85vh; transform: rotate(360deg); } }
+  @keyframes batFly { 0% { background-position: -200px 100px; } 100% { background-position: 150vw -50px; } }
+  @keyframes tumbleRoll { 0% { background-position: -150px 85%; transform: rotate(0deg); } 100% { background-position: 150vw 85%; transform: rotate(360deg); } }
   @keyframes sunsetPulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.2); } }
   @keyframes twinkleStars { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
   @keyframes gradientPan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -543,21 +543,35 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+  }
+
   body {
     font-family: var(--font-main);
-    background-color: var(--bg);
     color: var(--text);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
     font-size: 15px; 
     transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  /* ══ MASTER GLOBAL SCALE WRAPPER ══ */
+  #global-scale-wrapper {
+      width: 125%;
+      height: 125%;
+      transform: scale(0.8);
+      transform-origin: top left;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
   }
   
   /* Animated Background Layer */
   #bg-anim-layer {
-      position: fixed; inset: -15%; z-index: -1;
+      position: absolute; inset: -15%; z-index: -1;
       background-image: var(--anim-bg);
       background-size: var(--bg-size);
       animation: var(--bg-anim);
@@ -568,19 +582,18 @@
   button { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; }
   button:active:not(:disabled) { transform: scale(0.93) !important; transition: transform 0.1s ease-out; }
 
-  /* ══ UPLOAD SCREEN - TOTALLY REDESIGNED FOR MOBILE/DESKTOP FLUIDITY ══ */
+  /* ══ UPLOAD SCREEN ══ */
   #upload-screen { 
       position: absolute; inset: 0; z-index: 10;
       display: flex; flex-direction: column;
       overflow-y: auto; overflow-x: hidden;
       background: var(--bg);
   }
-  /* Magic centering flex hack without top clipping */
-  #upload-screen::before, #upload-screen::after { content: ''; flex: auto; }
   
   .upload-content-wrapper {
       width: 100%; max-width: 900px;
-      padding: 40px 20px; margin: auto;
+      padding: 40px 20px; 
+      margin: auto; /* Absolute magic that completely prevents scroll bugs and clipping */
       display: flex; flex-direction: column; align-items: center;
       flex: none;
   }
@@ -595,18 +608,19 @@
   .loading-text { font-family: var(--font-num); font-size: 14px; color: var(--text2); display: none; font-weight: 500; text-align: center; margin-bottom: 20px; }
   .error-msg { font-family: var(--font-num); font-size: 14px; color: var(--wrong); display: none; text-align: center; margin-bottom: 20px; }
 
-  /* Body scaled down slightly for better fit */
   .upload-body { display: flex; flex-direction: row; gap: 40px; align-items: flex-start; justify-content: center; width: 100%; }
   
   .upload-left-col { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 400px; }
   
-  .upload-zone { width: 100%; border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .upload-zones-row { display: flex; gap: 12px; width: 100%; }
+  .upload-zone { flex: 1; border: 2px dashed var(--border); border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--surface); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .upload-zone.multi-zone { border-color: var(--accent2); opacity: 0.85; }
   .upload-zone:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-  .upload-icon { font-size: 36px; margin-bottom: 8px; display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .upload-icon { font-size: 32px; margin-bottom: 6px; display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .upload-zone:hover .upload-icon { transform: scale(1.15) rotate(8deg); }
-  .upload-zone h3 { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-  .upload-zone p { font-size: 13px; color: var(--text2); }
-  #file-input { display: none; }
+  .upload-zone h3 { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
+  .upload-zone p { font-size: 12px; color: var(--text2); line-height: 1.3; }
+  #file-input, #multi-file-input { display: none; }
   
   /* ONLINE MOCKS SECTION */
   .online-mocks { display: flex; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap; }
@@ -646,7 +660,7 @@
   .recent-del:hover { background: rgba(239,68,68,0.2); color: var(--wrong); }
 
   /* ══ MODALS ══ */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); display: none; }
+  .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); display: none; }
   .modal-overlay.show { display: flex; }
   .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 440px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); backdrop-filter: blur(16px); }
   .modal-title { font-family: var(--font-head); font-size: 22px; font-weight: 800; }
@@ -666,7 +680,7 @@
   .modal-btn.cancel:hover { background: var(--surface2); color: var(--text); }
 
   /* ══ MAIN APP ══ */
-  #app { display: none; flex-direction: column; height: 100vh; background: transparent; }
+  #app { display: none; flex-direction: column; height: 100%; width: 100%; background: transparent; }
 
   /* TOP BAR */
   .topbar { height: 72px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; flex-shrink: 0; z-index: 20; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
@@ -887,7 +901,7 @@
 
   /* Toast */
   @keyframes flashIn { 0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.9); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
-  .feedback-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); padding: 14px 30px; border-radius: 16px; font-family: var(--font-head); font-size: 16px; font-weight: 700; z-index: 9999; animation: flashIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); }
+  .feedback-toast { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); padding: 14px 30px; border-radius: 16px; font-family: var(--font-head); font-size: 16px; font-weight: 700; z-index: 9999; animation: flashIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); }
   .feedback-toast.correct { background: var(--correct); color: #fff; }
   .feedback-toast.wrong { background: var(--wrong); color: #fff; }
   .feedback-toast.cleared { background: var(--unattempted); color: #fff; }
@@ -895,11 +909,11 @@
   
   /* ══ SLIDING PDF SIDEBAR ══ */
   #pdf-modal {
-    position: fixed;
+    position: absolute;
     top: 0;
     right: -50%; /* Start hidden off-screen */
     width: 50%;
-    height: 100vh;
+    height: 100%;
     background: var(--surface);
     border-left: 2px solid var(--border);
     z-index: 2000;
@@ -946,7 +960,7 @@
 
   /* Mob drawer backdrop */
   .mob-nav-backdrop {
-    display: none; position: fixed; inset: 0; z-index: 400;
+    display: none; position: absolute; inset: 0; z-index: 400;
     background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px); opacity: 0;
     transition: opacity 0.3s ease;
@@ -955,8 +969,8 @@
 
   /* Drawer panel */
   .mob-drawer {
-    position: fixed; top: 0; right: 0;
-    width: min(340px, 88vw); height: 100dvh;
+    position: absolute; top: 0; right: 0;
+    width: min(340px, 88%); height: 100%;
     background: var(--surface); border-left: 1px solid var(--border);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     z-index: 500; display: flex; flex-direction: column;
@@ -993,7 +1007,7 @@
 
     /* ── Upload screen mobile tweaks ── */
     #upload-screen { padding: 0; }
-    .upload-content-wrapper { padding: 20px 16px; margin: 0; width: 100%; justify-content: flex-start; min-height: 100vh; }
+    .upload-content-wrapper { padding: 24px 16px; margin: 0 auto; width: 100%; justify-content: flex-start; }
     .upload-header { margin-bottom: 16px; margin-top: 10px; }
     .logo { font-size: 36px; }
     .tagline { font-size: 11px; margin-bottom: 10px; }
@@ -1002,10 +1016,13 @@
     .upload-left-col { width: 100%; gap: 12px; }
     .online-mocks { flex-direction: column; gap: 8px; }
     .online-mocks .modal-btn { flex: none; width: 100%; font-size: 13px; padding: 10px; }
+    
+    /* Ensure the single file and merge UI stacks on small phones */
+    .upload-zones-row { flex-direction: column; gap: 16px; }
     .upload-zone { padding: 16px 12px; border-radius: 12px; }
-    .upload-icon { font-size: 28px; margin-bottom: 4px; }
-    .upload-zone h3 { font-size: 14px; }
-    .upload-zone p { font-size: 11px; }
+    .upload-icon { font-size: 24px; margin-bottom: 4px; }
+    .upload-zone h3 { font-size: 13px; }
+    .upload-zone p { font-size: 10px; }
 
     .recent-panel { grid-column: unset; max-width: 100%; max-height: 250px; width: 100% !important; display: flex !important; }
     .recent-header { font-size: 14px; padding: 12px 16px; }
@@ -1019,9 +1036,6 @@
     /* ── Modal ── */
     .modal-box { width: calc(100vw - 32px); padding: 20px; }
     .modal-btn { font-size: 13px; padding: 10px; }
-
-    /* ── App ── */
-    #app { height: 100dvh; }
 
     /* ── Topbar ── */
     .topbar { height: 52px; padding: 0 10px; gap: 6px; }
@@ -1119,273 +1133,312 @@
 </head>
 <body>
 
-<div id="bg-anim-layer"></div>
+<!-- ══ GLOBAL 80% SCALE WRAPPER ══ -->
+<div id="global-scale-wrapper">
 
-<div id="upload-screen">
-  <div class="upload-content-wrapper">
-    
-    <div class="upload-header">
-      <div class="logo">NISOPRACTICE</div>
-      <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
-    </div>
+  <div id="bg-anim-layer"></div>
 
-    <!-- Move Progress bar HIGHER up -->
-    <div class="progress-bar-wrap" id="progress-wrap">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-    <div class="loading-text" id="loading-text"></div>
-    <div class="error-msg" id="error-msg"></div>
-
-    <div class="upload-body">
+  <div id="upload-screen">
+    <div class="upload-content-wrapper">
       
-      <div class="upload-left-col">
-        <div class="online-mocks">
-          <div class="online-mocks-label">Load Online Sample Tests</div>
-          <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
-            🚀 1D Module - NEET
-          </button>
-          <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2021_JEE.niso')">
-            🚀 2021 Top 200 PYQ - EDUNITI
-          </button>
-          <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
-            🚀 2022 Top 200 PYQ - EDUNITI
-          </button>
-          <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(167,139,250,0.12)); border-color:var(--accent); color:var(--accent);" onclick="loadMergedOnline(['TOP_200_PYQ_2021_JEE.niso','TOP_200_PYQ_2022_JEE.niso'])">
-            🔀 Merge: 2021 + 2022 PYQ
-          </button>
-          
-          <div class="online-mocks-label" style="margin-top: 8px;">Multiplayer / Co-op</div>
-          <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(52,211,153,0.12)); border-color:#10b981; color:#10b981;" onclick="window.location.href='https://nisopractice.vercel.app/mp'">
-            🌐 Multiplayer Session
-          </button>
-        </div>
-
-        <div class="upload-or-divider">Or load your own tests</div>
-
-        <div class="upload-zone" id="upload-zone">
-          <div class="upload-icon">📦</div>
-          <h3>Drop your .niso or .zip file here</h3>
-          <p>Upload any compatible CBT zip (data.json + images)</p>
-          <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
-        </div>
-
-        <div class="upload-or-divider">Or merge multiple years</div>
-
-        <div class="upload-zone" id="multi-upload-zone" style="border-style:dashed; border-color:var(--accent2); opacity:0.85;">
-          <div class="upload-icon">🔀</div>
-          <h3>Select multiple .niso / .zip files</h3>
-          <p>Pick 2021, 2022, 2023… all at once</p>
-          <input type="file" id="multi-file-input" accept=".zip,.niso" multiple autocomplete="off">
-        </div>
-
-        <div class="menu-credits">
-            <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
-            <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
-        </div>
+      <div class="upload-header">
+        <div class="logo">NISOPRACTICE</div>
+        <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
       </div>
 
-      <div class="recent-panel" id="recent-panel">
-        <div class="recent-header">
-          <span>,. Recent Sessions</span>
-          <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
-        </div>
-        <div class="recent-list" id="recent-list"></div>
+      <!-- Move Progress bar HIGHER up -->
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
       </div>
-      
-    </div>
-  </div>
-</div>
+      <div class="loading-text" id="loading-text"></div>
+      <div class="error-msg" id="error-msg"></div>
 
-<div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
-  <div class="modal-box">
-    <div class="modal-title">📋 Session Found</div>
-    <div class="modal-sub" id="resume-modal-sub">A previous session exists. Resume or start fresh?</div>
-    
-    <div class="modal-btns" style="flex-direction: column;">
-      <select id="session-select-dropdown" class="session-select-dropdown"></select>
-      <div style="display: flex; gap: 12px; width: 100%;">
-          <button class="modal-btn danger" onclick="clearAndStart()">🗑 Start Fresh</button>
-          <button class="modal-btn primary" onclick="resumeSession()">▶ Resume</button>
-      </div>
-      <button class="modal-btn cancel" onclick="document.getElementById('resume-modal').classList.remove('show')">✕ Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div id="pdf-modal">
-  <div class="pdf-toolbar">
-    <div class="modal-title" style="font-size: 16px;">📄 Solution Viewer</div>
-    <input type="text" id="pdf-url-input" class="session-select-dropdown" placeholder="Paste link if auto-load fails..." style="margin: 0; font-size: 12px; height: 34px;">
-    <button class="modal-btn primary" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="loadPDFIframe()">Load</button>
-    <button class="modal-btn danger" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="closePDF()">✕</button>
-  </div>
-  <iframe id="pdf-iframe" src=""></iframe>
-</div>
-
-<div id="app">
-
-  <div class="topbar">
-    <div class="topbar-logo">NISOPRACTICE</div>
-    
-    <div class="topbar-section-wrap" id="topbar-section-wrap" title="Current File">
-      <div class="chip-progress-bg" id="chip-progress-bg">
-         <div class="prog-segment" id="chip-seg-1"></div>
-         <div class="prog-segment" id="chip-seg-2"></div>
-         <div class="prog-segment" id="chip-seg-3"></div>
-      </div>
-      <div class="topbar-section-chip" id="topbar-section">All Sections</div>
-    </div>
-    
-    <div class="file-name-display" id="file-name-display">--</div>
-    
-    <div class="overall-stats" id="overall-stats">
-        Overall: 0/0 
-        <div class="dash-sep"></div>
-        <span class="stat-hl c" title="Correct">✓0</span> 
-        <span class="stat-hl w" title="Wrong">✗0</span> 
-        <span class="stat-hl a" title="Attempted (Unchecked)">A:0</span>
-        <span class="stat-hl s" title="Skipped">○0</span>
-        <span class="stat-hl m" title="Marked">🔖0</span>
-    </div>
-
-    <div class="top-right-controls">
-      <div class="timer-pill main-time" title="Total Session Time">⏳ <span id="total-timer">00:00</span></div>
-      
-      <button class="mode-btn" id="mode-btn" onclick="toggleMode()" title="Toggle Light/Dark Mode">☀️</button>
-      
-      <select class="theme-sel" id="theme-sel" onchange="changeTheme(this.value)">
-        <option value="default">✨ Default Glass</option>
-        <option value="liquid2">💧 Liquid Glass</option>
-        <option value="dracula">🧛 Dracula</option>
-        <option value="win11">🪟 Windows 11</option>
-        <option value="material">📱 Material You</option>
-        <option value="nta">📝 NTA Style</option>
-        <option value="hacker">📟 Hacker Term</option>
-        <option value="cyberpunk">🦾 Cyberpunk</option>
-        <option value="watchdogs">💻 Watch_Dogs</option>
-        <option value="unbound">🏎️ NFS Unbound</option>
-        <option value="gta">🌴 Vice City</option>
-        <option value="shrine">⛩️ Kyoto Shrine</option>
-        <option value="rdr">🤠 Wild West</option>
-        <option value="sakura">🌸 Sakura Petals</option>
-        <option value="spring">🍃 Spring Breeze</option>
-        <option value="autumn">🍂 Autumn Whisper</option>
-        <option value="winter">❄️ Winter Snow</option>
-        <option value="dawn">🌅 Dawn Horizon</option>
-        <option value="sunset">🌇 Sunset Glow</option>
-        <option value="starry">🌃 Starry Night</option>
-        <option value="galaxy">🌌 Galaxy Spin</option>
-        <option value="aurora">✨ Midnight Aurora</option>
-        <option value="ocean">🏖️ Ocean Waves</option>
-        <option value="underwater">🌊 Deep Sea</option>
-        <option value="rain">🌧️ Rain Shower</option>
-        <option value="fog">🌫️ Foggy Morning</option>
-        <option value="zen">🎋 Zen Garden</option>
-        <option value="dusk">🌆 Lofi Dusk</option>
-        <option value="nebula">🔮 Deep Nebula</option>
-        <option value="summer">☁️ Summer Monsoon</option>
-      </select>
-      
-      <button class="tb-btn" onclick="resetApp()">↑ New ZIP</button>
-      <button class="mob-nav-btn" onclick="openMobDrawer()" title="Question Navigator">☰</button>
-    </div>
-  </div>
-
-  <div class="content-area">
-
-    <div class="question-panel">
-      <div class="q-header">
-        <div class="q-header-left">
-          <div class="q-num-badge" id="q-num-badge">Q1</div>
-          <div class="q-type-badge mcq" id="q-type-badge">MCQ</div>
-          <div class="marks-info" id="marks-info">+4 / −1</div>
-          <div class="timer-pill q-time" title="Time spent on this question">⏱ <span id="q-timer">00:00</span></div>
-        </div>
-
-        <div class="header-right">
-          <div class="track-controls">
-            <div class="carousel-toggle">
-              <button onclick="cycleMode(-1)">&#9664;</button>
-              <span id="mode-label">Total</span>
-              <button onclick="cycleMode(1)">&#9654;</button>
-            </div>
-            <div class="dash-sep"></div>
-            <button class="colorize-btn active" id="colorize-btn" onclick="toggleColorize()">🎨 Colorize</button>
+      <div class="upload-body">
+        
+        <div class="upload-left-col">
+          <div class="online-mocks">
+            <div class="online-mocks-label">Load Online Sample Tests</div>
+            <button class="modal-btn primary" onclick="loadOnlineTest('1D.niso')">
+              🚀 1D Module - NEET
+            </button>
+            <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2021_JEE.niso')">
+              🚀 2021 Top 200 PYQ - EDUNITI
+            </button>
+            <button class="modal-btn primary" onclick="loadOnlineTest('TOP_200_PYQ_2022_JEE.niso')">
+              🚀 2022 Top 200 PYQ - EDUNITI
+            </button>
+            <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(167,139,250,0.12)); border-color:var(--accent); color:var(--accent);" onclick="loadMergedOnline(['TOP_200_PYQ_2021_JEE.niso','TOP_200_PYQ_2022_JEE.niso'])">
+              🔀 Merge: 2021 + 2022 PYQ
+            </button>
+            
+            <div class="online-mocks-label" style="margin-top: 8px;">Multiplayer / Co-op</div>
+            <button class="modal-btn" style="flex:1 1 100%; background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(52,211,153,0.12)); border-color:#10b981; color:#10b981;" onclick="window.location.href='https://nisopractice.vercel.app/mp'">
+              🌐 Multiplayer Session
+            </button>
           </div>
 
-          <button class="hdr-btn fit-btn" id="img-fit-btn" onclick="toggleImageFit()">
-            🔍 Fit Screen
-          </button>
-          <button class="hdr-btn ai-btn" onclick="generateAIPrompt()">
-            🤖 Ask AI Prompt
-          </button>
-		  <button class="hdr-btn" style="border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.1);" onclick="openPDF()">
-            📄 Solutions PDF
-          </button>
+          <div class="upload-or-divider">Or load your own tests</div>
+
+          <div class="upload-zones-row">
+            <div class="upload-zone" id="upload-zone">
+              <div class="upload-icon">📦</div>
+              <h3>Single File</h3>
+              <p>Drop your .niso / .zip</p>
+              <input type="file" id="file-input" accept=".zip,.niso" autocomplete="off">
+            </div>
+
+            <div class="upload-zone multi-zone" id="multi-upload-zone">
+              <div class="upload-icon">🔀</div>
+              <h3>Merge Multiple</h3>
+              <p>Pick 2021, 2022... at once</p>
+              <input type="file" id="multi-file-input" accept=".zip,.niso" multiple autocomplete="off">
+            </div>
+          </div>
+
+          <div class="menu-credits">
+              <div>~ By <a href="https://gemini.google.com" target="_blank">gemini</a>, <a href="https://claude.ai" target="_blank">claude</a> and <a href="https://www.reddit.com/user/nothinge1se/" target="_blank">u/nothinge1se</a></div>
+              <div>Create your ZIP files using: <a href="https://pdf2cbt.vercel.app/" target="_blank">TheMoonVyy's pdf2cbt</a></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Mobile stat bar — only shown on phones -->
-      <div class="mob-stat-bar" id="mob-stat-bar">
-        <span id="mob-q-pos" style="color:var(--text2);font-size:11px;">Q1 · 1/200</span>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span class="stat-hl c">✓<span id="mob-sc">0</span></span>
-          <span class="stat-hl w">✗<span id="mob-sw">0</span></span>
-          <span class="stat-hl a" style="color:var(--accent2);">A:<span id="mob-sa">0</span></span>
-          <span class="stat-hl s">○<span id="mob-ss">0</span></span>
-        </div>
-        <span id="mob-score" style="font-weight:800;">+0</span>
-      </div>
-
-      <div class="q-image-area" id="main-img-area">
-        <div class="q-image-container" id="q-image-container"></div>
-      </div>
-
-      <div class="answer-area" id="answer-area">
-        <div class="answer-label">Your Answer</div>
-      </div>
-
-      <div class="q-nav">
-        <div class="fluid-nav-bg" id="fluid-nav-bg">
-           <div class="prog-segment" id="nav-seg-1"></div>
-           <div class="prog-segment" id="nav-seg-2"></div>
-           <div class="prog-segment" id="nav-seg-3"></div>
+        <div class="recent-panel" id="recent-panel">
+          <div class="recent-header">
+            <span>,. Recent Sessions</span>
+            <button class="clear-sessions-btn" onclick="clearAllSessions()">Clear all</button>
+          </div>
+          <div class="recent-list" id="recent-list"></div>
         </div>
         
-        <button class="nav-btn clear-nav-btn" id="clear-response-btn" onclick="clearCurrentResponse()" disabled>
-          ✕ Clear
-        </button>
-        <button class="nav-btn" onclick="navigate(-1)">← Prev</button>
-        <button class="nav-btn mark-next" onclick="markAndNext()">🔖 Mark &amp; Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="resume-modal" onclick="if(event.target === this) this.classList.remove('show')">
+    <div class="modal-box">
+      <div class="modal-title">📋 Session Found</div>
+      <div class="modal-sub" id="resume-modal-sub">A previous session exists. Resume or start fresh?</div>
+      
+      <div class="modal-btns" style="flex-direction: column;">
+        <select id="session-select-dropdown" class="session-select-dropdown"></select>
+        <div style="display: flex; gap: 12px; width: 100%;">
+            <button class="modal-btn danger" onclick="clearAndStart()">🗑 Start Fresh</button>
+            <button class="modal-btn primary" onclick="resumeSession()">▶ Resume</button>
+        </div>
+        <button class="modal-btn cancel" onclick="document.getElementById('resume-modal').classList.remove('show')">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pdf-modal">
+    <div class="pdf-toolbar">
+      <div class="modal-title" style="font-size: 16px;">📄 Solution Viewer</div>
+      <input type="text" id="pdf-url-input" class="session-select-dropdown" placeholder="Paste link if auto-load fails..." style="margin: 0; font-size: 12px; height: 34px;">
+      <button class="modal-btn primary" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="loadPDFIframe()">Load</button>
+      <button class="modal-btn danger" style="flex: 0 0 auto; width: 60px; padding: 0; height: 34px;" onclick="closePDF()">✕</button>
+    </div>
+    <iframe id="pdf-iframe" src=""></iframe>
+  </div>
+
+  <div id="app">
+
+    <div class="topbar">
+      <div class="topbar-logo">NISOPRACTICE</div>
+      
+      <div class="topbar-section-wrap" id="topbar-section-wrap" title="Current File">
+        <div class="chip-progress-bg" id="chip-progress-bg">
+           <div class="prog-segment" id="chip-seg-1"></div>
+           <div class="prog-segment" id="chip-seg-2"></div>
+           <div class="prog-segment" id="chip-seg-3"></div>
+        </div>
+        <div class="topbar-section-chip" id="topbar-section">All Sections</div>
+      </div>
+      
+      <div class="file-name-display" id="file-name-display">--</div>
+      
+      <div class="overall-stats" id="overall-stats">
+          Overall: 0/0 
+          <div class="dash-sep"></div>
+          <span class="stat-hl c" title="Correct">✓0</span> 
+          <span class="stat-hl w" title="Wrong">✗0</span> 
+          <span class="stat-hl a" title="Attempted (Unchecked)">A:0</span>
+          <span class="stat-hl s" title="Skipped">○0</span>
+          <span class="stat-hl m" title="Marked">🔖0</span>
+      </div>
+
+      <div class="top-right-controls">
+        <div class="timer-pill main-time" title="Total Session Time">⏳ <span id="total-timer">00:00</span></div>
         
-        <button class="nav-btn check-btn" id="check-ans-btn" onclick="checkCurrentAnswer()" disabled>
-          ✓ Check Answer
-        </button>
-        <button class="nav-btn primary" onclick="navigate(1)">Next →</button>
+        <button class="mode-btn" id="mode-btn" onclick="toggleMode()" title="Toggle Light/Dark Mode">☀️</button>
+        
+        <select class="theme-sel" id="theme-sel" onchange="changeTheme(this.value)">
+          <option value="default">✨ Default Glass</option>
+          <option value="liquid2">💧 Liquid Glass</option>
+          <option value="dracula">🧛 Dracula</option>
+          <option value="win11">🪟 Windows 11</option>
+          <option value="material">📱 Material You</option>
+          <option value="nta">📝 NTA Style</option>
+          <option value="hacker">📟 Hacker Term</option>
+          <option value="cyberpunk">🦾 Cyberpunk</option>
+          <option value="watchdogs">💻 Watch_Dogs</option>
+          <option value="unbound">🏎️ NFS Unbound</option>
+          <option value="gta">🌴 Vice City</option>
+          <option value="shrine">⛩️ Kyoto Shrine</option>
+          <option value="rdr">🤠 Wild West</option>
+          <option value="sakura">🌸 Sakura Petals</option>
+          <option value="spring">🍃 Spring Breeze</option>
+          <option value="autumn">🍂 Autumn Whisper</option>
+          <option value="winter">❄️ Winter Snow</option>
+          <option value="dawn">🌅 Dawn Horizon</option>
+          <option value="sunset">🌇 Sunset Glow</option>
+          <option value="starry">🌃 Starry Night</option>
+          <option value="galaxy">🌌 Galaxy Spin</option>
+          <option value="aurora">✨ Midnight Aurora</option>
+          <option value="ocean">🏖️ Ocean Waves</option>
+          <option value="underwater">🌊 Deep Sea</option>
+          <option value="rain">🌧️ Rain Shower</option>
+          <option value="fog">🌫️ Foggy Morning</option>
+          <option value="zen">🎋 Zen Garden</option>
+          <option value="dusk">🌆 Lofi Dusk</option>
+          <option value="nebula">🔮 Deep Nebula</option>
+          <option value="summer">☁️ Summer Monsoon</option>
+        </select>
+        
+        <button class="tb-btn" onclick="resetApp()">↑ New ZIP</button>
+        <button class="mob-nav-btn" onclick="openMobDrawer()" title="Question Navigator">☰</button>
       </div>
     </div>
 
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <select class="section-select" id="section-select" onchange="changeSection()">
-          <option value="ALL">All Sections</option>
-        </select>
-        
-        <div class="section-stats-box" id="section-stats-box"></div>
-      </div>
+    <div class="content-area">
 
-      <div class="sidebar-title">Question Navigator</div>
-      <div class="q-grid" id="q-grid"></div>
+      <div class="question-panel">
+        <div class="q-header">
+          <div class="q-header-left">
+            <div class="q-num-badge" id="q-num-badge">Q1</div>
+            <div class="q-type-badge mcq" id="q-type-badge">MCQ</div>
+            <div class="marks-info" id="marks-info">+4 / −1</div>
+            <div class="timer-pill q-time" title="Time spent on this question">⏱ <span id="q-timer">00:00</span></div>
+          </div>
 
-      <div class="sidebar-score-area">
-        <div class="secret-score-box">
-            <div class="score-box-label">Net Score</div>
-            <div class="secret-overlay">Hover to reveal</div>
-            <div class="score-box-val" id="score-total">0</div>
+          <div class="header-right">
+            <div class="track-controls">
+              <div class="carousel-toggle">
+                <button onclick="cycleMode(-1)">&#9664;</button>
+                <span id="mode-label">Total</span>
+                <button onclick="cycleMode(1)">&#9654;</button>
+              </div>
+              <div class="dash-sep"></div>
+              <button class="colorize-btn active" id="colorize-btn" onclick="toggleColorize()">🎨 Colorize</button>
+            </div>
+
+            <button class="hdr-btn fit-btn" id="img-fit-btn" onclick="toggleImageFit()">
+              🔍 Fit Screen
+            </button>
+            <button class="hdr-btn ai-btn" onclick="generateAIPrompt()">
+              🤖 Ask AI Prompt
+            </button>
+        <button class="hdr-btn" style="border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.1);" onclick="openPDF()">
+              📄 Solutions PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile stat bar — only shown on phones -->
+        <div class="mob-stat-bar" id="mob-stat-bar">
+          <span id="mob-q-pos" style="color:var(--text2);font-size:11px;">Q1 · 1/200</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="stat-hl c">✓<span id="mob-sc">0</span></span>
+            <span class="stat-hl w">✗<span id="mob-sw">0</span></span>
+            <span class="stat-hl a" style="color:var(--accent2);">A:<span id="mob-sa">0</span></span>
+            <span class="stat-hl s">○<span id="mob-ss">0</span></span>
+          </div>
+          <span id="mob-score" style="font-weight:800;">+0</span>
+        </div>
+
+        <div class="q-image-area" id="main-img-area">
+          <div class="q-image-container" id="q-image-container"></div>
+        </div>
+
+        <div class="answer-area" id="answer-area">
+          <div class="answer-label">Your Answer</div>
+        </div>
+
+        <div class="q-nav">
+          <div class="fluid-nav-bg" id="fluid-nav-bg">
+             <div class="prog-segment" id="nav-seg-1"></div>
+             <div class="prog-segment" id="nav-seg-2"></div>
+             <div class="prog-segment" id="nav-seg-3"></div>
+          </div>
+          
+          <button class="nav-btn clear-nav-btn" id="clear-response-btn" onclick="clearCurrentResponse()" disabled>
+            ✕ Clear
+          </button>
+          <button class="nav-btn" onclick="navigate(-1)">← Prev</button>
+          <button class="nav-btn mark-next" onclick="markAndNext()">🔖 Mark &amp; Next</button>
+          
+          <button class="nav-btn check-btn" id="check-ans-btn" onclick="checkCurrentAnswer()" disabled>
+            ✓ Check Answer
+          </button>
+          <button class="nav-btn primary" onclick="navigate(1)">Next →</button>
         </div>
       </div>
 
-      <div class="legend">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <select class="section-select" id="section-select" onchange="changeSection()">
+            <option value="ALL">All Sections</option>
+          </select>
+          
+          <div class="section-stats-box" id="section-stats-box"></div>
+        </div>
+
+        <div class="sidebar-title">Question Navigator</div>
+        <div class="q-grid" id="q-grid"></div>
+
+        <div class="sidebar-score-area">
+          <div class="secret-score-box">
+              <div class="score-box-label">Net Score</div>
+              <div class="secret-overlay">Hover to reveal</div>
+              <div class="score-box-val" id="score-total">0</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><div class="legend-box c"></div>Correct</div>
+          <div class="legend-item"><div class="legend-box w"></div>Wrong</div>
+          <div class="legend-item"><div class="legend-box a"></div>Attempted</div>
+          <div class="legend-item"><div class="legend-box s"></div>Skip</div>
+          <div class="legend-item"><div class="legend-box m"></div>Marked</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ MOBILE NAVIGATOR DRAWER ══ -->
+  <div class="mob-nav-backdrop" id="mob-backdrop" onclick="closeMobDrawer()"></div>
+  <div class="mob-drawer" id="mob-drawer">
+    <div class="mob-drawer-header">
+      <div class="mob-drawer-title">Question Navigator</div>
+      <button class="mob-drawer-close" onclick="closeMobDrawer()">✕</button>
+    </div>
+    <div class="mob-drawer-body">
+      <div class="mob-drawer-section-row">
+        <select id="mob-section-select" onchange="mobChangeSection()">
+          <option value="ALL">All Sections</option>
+        </select>
+      </div>
+      <div class="mob-drawer-stats" id="mob-drawer-stats"></div>
+      <div class="mob-drawer-grid-wrap">
+        <div class="mob-drawer-grid" id="mob-q-grid"></div>
+      </div>
+      <div class="mob-drawer-score">
+        <div class="secret-score-box" onclick="this.classList.toggle('revealed')" style="padding:12px 16px;">
+          <div class="score-box-label" style="font-size:13px;">Net Score</div>
+          <div class="secret-overlay" style="font-size:11px;">Tap to reveal</div>
+          <div class="score-box-val" id="mob-score-total" style="font-size:20px;">0</div>
+        </div>
+      </div>
+      <div class="mob-drawer-legend">
         <div class="legend-item"><div class="legend-box c"></div>Correct</div>
         <div class="legend-item"><div class="legend-box w"></div>Wrong</div>
         <div class="legend-item"><div class="legend-box a"></div>Attempted</div>
@@ -1393,42 +1446,8 @@
         <div class="legend-item"><div class="legend-box m"></div>Marked</div>
       </div>
     </div>
+  </div>
 
-  </div>
-</div>
-
-<!-- ══ MOBILE NAVIGATOR DRAWER ══ -->
-<div class="mob-nav-backdrop" id="mob-backdrop" onclick="closeMobDrawer()"></div>
-<div class="mob-drawer" id="mob-drawer">
-  <div class="mob-drawer-header">
-    <div class="mob-drawer-title">Question Navigator</div>
-    <button class="mob-drawer-close" onclick="closeMobDrawer()">✕</button>
-  </div>
-  <div class="mob-drawer-body">
-    <div class="mob-drawer-section-row">
-      <select id="mob-section-select" onchange="mobChangeSection()">
-        <option value="ALL">All Sections</option>
-      </select>
-    </div>
-    <div class="mob-drawer-stats" id="mob-drawer-stats"></div>
-    <div class="mob-drawer-grid-wrap">
-      <div class="mob-drawer-grid" id="mob-q-grid"></div>
-    </div>
-    <div class="mob-drawer-score">
-      <div class="secret-score-box" onclick="this.classList.toggle('revealed')" style="padding:12px 16px;">
-        <div class="score-box-label" style="font-size:13px;">Net Score</div>
-        <div class="secret-overlay" style="font-size:11px;">Tap to reveal</div>
-        <div class="score-box-val" id="mob-score-total" style="font-size:20px;">0</div>
-      </div>
-    </div>
-    <div class="mob-drawer-legend">
-      <div class="legend-item"><div class="legend-box c"></div>Correct</div>
-      <div class="legend-item"><div class="legend-box w"></div>Wrong</div>
-      <div class="legend-item"><div class="legend-box a"></div>Attempted</div>
-      <div class="legend-item"><div class="legend-box s"></div>Skip</div>
-      <div class="legend-item"><div class="legend-box m"></div>Marked</div>
-    </div>
-  </div>
 </div>
 
 <script>
