@@ -240,6 +240,9 @@
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 
+  /* ── LIGHT MODE ── */
+  body.light { --bg:#f0f2f8; --surface:#ffffff; --surface2:#e8eaf2; --surface3:#d8dce8; --border:#c4c8da; --text:#0f172a; --text2:#64748b; --not-vis:#94a3b8; }
+
   /* ── GHOST LETTERS ON DOTS ── */
   .dot { position: relative; }
   .dot-ghosts { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; pointer-events: none; }
@@ -286,17 +289,25 @@
   
   /* ── MOBILE APP LAYOUT FIXES ── */
   @media (max-width: 850px) {
-    #app { height: 100dvh; overflow: hidden; }
-    .q-area { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .q-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .ans-area { flex-shrink: 0; max-height: 45vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .btm-bar { flex-shrink: 0; }
-    .opts-grid { grid-template-columns: 1fr; gap: 8px; }
-    .opt-btn { padding: 10px 12px; font-size: 14px; }
-    .header { height: 52px; }
-    .timer-box { font-size: 18px; padding: 4px 14px; }
-    .q-badge { font-size: 14px; padding: 4px 10px; }
-    .sidebar { top: 52px; }
+    #app { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+    .main-stage { flex: 1; min-height: 0; overflow: hidden; }
+    .q-area { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+    .q-scroll { flex: 1; min-height: 0; overflow-y: scroll !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 12px; }
+    .ans-area { flex-shrink: 0; padding: 10px 10px 4px; overflow-y: auto; max-height: 42dvh; -webkit-overflow-scrolling: touch; }
+    .btm-bar { flex-shrink: 0; padding: 8px 10px; gap: 6px; }
+    .action-btn { padding: 8px 6px; font-size: 11px; }
+    .opts-grid { grid-template-columns: 1fr 1fr; gap: 6px; max-width: 100%; }
+    .opt-btn { padding: 8px 10px; font-size: 13px; gap: 8px; }
+    .opt-key { width: 26px; height: 26px; font-size: 13px; }
+    .header { height: 50px; padding: 0 10px; }
+    .timer-box { font-size: 17px; padding: 4px 12px; }
+    .q-badge { font-size: 13px; padding: 3px 8px; }
+    .sidebar { top: 50px; }
+    .q-top { padding: 8px 10px; gap: 6px; }
+    .q-images img { border-radius: 8px; }
+    .btm-bar { flex-direction: row; flex-wrap: wrap; }
+    .btm-left, .btm-right { flex: none; gap: 6px; }
+    .nat-input { font-size: 20px; padding: 10px 16px; }
   }
 
   /* ── DRAGGABLE FAB ── */
@@ -304,8 +315,9 @@
 
   /* ── LOBBY MOBILE SCROLL FIX ── */
   @media (max-width: 850px) {
-    #lobby-screen { overflow-y: auto !important; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
-    .lobby-grid { grid-template-columns: 1fr; }
+    #lobby-screen { overflow-y: scroll !important; -webkit-overflow-scrolling: touch; padding-bottom: 60px; height: 100dvh; }
+    .lobby-grid { grid-template-columns: 1fr !important; }
+    .glass-card { max-height: none !important; }
   }
 </style>
 </head>
@@ -373,60 +385,114 @@
         <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click to copy join link</div>
       </div>
 
-      <div class="glass-card" style="padding: 20px; display:none;" id="host-controls">
-        <div class="card-title" style="font-size:18px; margin-bottom:16px; color: var(--accent2);">Test Configuration</div>
+      <div class="glass-card" style="padding: 16px; display:none;" id="host-controls">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div class="card-title" style="font-size:17px; margin:0; color:var(--accent2);">⚙️ Configuration</div>
+        </div>
+
+        <!-- Sections: All or Custom -->
         <div class="config-row">
           <label class="label-title">Sections</label>
-          <select id="cfg-sections" class="config-select" multiple style="height:80px;"></select>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button id="sec-mode-all" onclick="window.setSectionMode('all')" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--accent); border:2px solid var(--accent); color:white;">ALL</button>
+            <button id="sec-mode-custom" onclick="window.setSectionMode('custom')" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--surface2); border:2px solid var(--border); color:var(--text);">CUSTOM</button>
+          </div>
+          <select id="cfg-sections" class="config-select" multiple style="height:72px; display:none;"></select>
         </div>
-        <div class="config-row" style="display:flex; gap:12px;">
-          <div style="flex:1;">
-            <label class="label-title">Timer</label>
+
+        <!-- Timer row -->
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <div style="flex:1.5;">
+            <label class="label-title">Timer Mode</label>
             <select id="cfg-timer-mode" class="config-select">
-              <option value="countdown">Countdown</option>
-              <option value="race">Race (Up)</option>
+              <option value="countdown">⏳ Countdown</option>
+              <option value="race">🏁 Race (Up)</option>
             </select>
           </div>
           <div style="flex:1;">
-            <label class="label-title">Mins</label>
+            <label class="label-title">Minutes</label>
             <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
           </div>
         </div>
-        <!-- Feature Toggles -->
-        <div style="background:var(--bg); border-radius:12px; padding:12px 16px; border:1px solid var(--border); margin-bottom:12px;">
-          <div class="label-title" style="margin-bottom:10px;">🎮 Features</div>
-          <div class="toggle-row">
-            <div class="toggle-label">Live Fair-Play Stats
-              <small>Show correct/wrong fractions on dots</small>
+
+        <!-- Toggles in two collapsible groups -->
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+
+          <!-- GROUP: Gameplay Features -->
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🎮 Gameplay <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 14px 10px;">
+              <div class="toggle-row">
+                <div class="toggle-label">Live Fair-Play Stats <small>Correct/wrong fraction bars on dots</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Who's On Each Q? <small>Ghost initials on navigator dots</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row" id="cfg-ghost-live-row" style="padding-left:14px; display:none;">
+                <div class="toggle-label" style="font-size:11px; color:var(--text2);">Full Live (1s) vs Semi-Live<small>Full = auto-refresh every 1s</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-full-live" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Streak Bombs 💣 <small>Popup after 5/10/15/20 streak</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Speed Bonus ⚡ <small>+2 if ≤15s, +1 if ≤30s correct</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
             </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Show Who's On Each Q
-              <small>Ghost initials on navigator dots</small>
+          </details>
+
+          <!-- GROUP: Display Addons -->
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🧩 Addons <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 14px 10px;">
+              <div class="toggle-row">
+                <div class="toggle-label">Live Progress Sidebar <small>Player attempt bars in sidebar</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Race Progress Bar 🏎️ <small>Slim glowing bar in top header</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Live Chat 💬 <small>In-game chat panel</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-chat" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Per-Question Timer ⏱ <small>Shows time spent on current Q</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-qtimer" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">NTA Section Tabs <small>Horizontal tabs instead of dropdown</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-tabs" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Photo in Chat 📷 <small>Send images in game chat</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-photo" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+              </div>
             </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Detailed Time Analysis
-              <small>Post-game per-question time breakdown</small>
+          </details>
+
+          <!-- GROUP: Post-Game -->
+          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">📊 Post-Game <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 14px 10px;">
+              <div class="toggle-row">
+                <div class="toggle-label">Detailed Time Analysis <small>Per-Q time breakdown table</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Auto-show Results <small>Jump to results on submit</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-auto-results" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+              </div>
             </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Surprise Streak Bombs 💣
-              <small>Random power-ups for long streaks</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-label">Speed Bonus Score
-              <small>Extra marks for quick correct answers</small>
-            </div>
-            <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-          </div>
+          </details>
+
         </div>
-        <button class="btn btn-primary" id="btn-start-game" disabled style="margin-top:8px;">Start Match</button>
+        <button class="btn btn-primary" id="btn-start-game" disabled>🚀 Start Match</button>
       </div>
 
       <div class="glass-card" style="padding: 20px;" id="player-view-cfg">
@@ -465,22 +531,43 @@
 
 <!-- 4. MAIN APP SCREEN -->
 <div id="app">
-  <div class="header">
-    <div class="brand">NPRAQ</div>
-    
-    <!-- Top Stats (Desktop) -->
-    <div class="compact-stats-top" id="top-stats-desk">
-       <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-desk">0</span></div>
-       <div class="st-item"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+  <div class="header" style="height:auto; flex-direction:column; padding:0;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 10px; height:50px; width:100%; gap:8px;">
+      <div style="display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden;">
+        <div class="brand" style="font-size:clamp(13px,3vw,18px); letter-spacing:-0.5px;" id="header-brand">NPRAQ</div>
+        <div id="header-paper-name" style="font-size:9px; color:var(--text2); font-weight:700; font-family:'Outfit'; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:none;"></div>
+      </div>
+      <div class="timer-center" style="flex:0 0 auto;"><div class="timer-box" id="total-timer" style="font-size:clamp(15px,3vw,21px); padding:4px 14px;">00:00</div></div>
+      <div class="header-right" style="flex:1; gap:6px;">
+        <div class="compact-stats-top" id="top-stats-desk" style="gap:5px; padding:4px 7px; font-size:12px;">
+          <div class="st-item" title="Answered"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
+          <div class="st-item" title="Mark+Ans"><div class="st-dot" style="background:var(--mark-ans); border-radius:50%;"></div><span id="st-mark-ans-desk">0</span></div>
+          <div class="st-item" title="Marked"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
+          <div class="st-item" title="Unanswered"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-desk">0</span></div>
+          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        </div>
+        <button onclick="document.body.classList.toggle('light')" title="Light/Dark" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 7px; font-size:13px; color:var(--text); flex-shrink:0;">☀️</button>
+        <button class="btn btn-primary" style="padding:7px 12px; font-size:12px; width:auto; border-radius:9px; flex-shrink:0;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
+        <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
+      </div>
     </div>
-
-    <div class="timer-center"><div class="timer-box" id="total-timer">00:00</div></div>
-    
-    <div class="header-right">
-      <button class="btn btn-primary" style="padding: 10px 20px; font-size: 14px; width:auto; border-radius:10px;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
-      <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
+    <div id="header-row2" style="display:none; width:100%; padding:2px 10px 6px; gap:8px; align-items:center; flex-wrap:wrap;">
+      <div id="per-q-timer-wrap" style="display:none; font-family:'Outfit'; font-size:11px; font-weight:800; color:var(--accent2); background:var(--surface2); padding:2px 8px; border-radius:7px; border:1px solid var(--border);">⏱ <span id="per-q-timer">0s</span></div>
+      <div id="race-bar-wrap" style="display:none; flex:1; min-width:100px;">
+        <div style="position:relative; height:8px; background:var(--surface3); border-radius:8px; overflow:visible; box-shadow:0 0 6px var(--accent-glow);">
+          <div id="race-bar-fill" style="height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:8px; transition:width 0.5s ease; box-shadow:0 0 8px var(--accent);"></div>
+        </div>
+        <div id="race-bar-names" style="font-size:9px; color:var(--text2); font-family:'Outfit'; font-weight:700; margin-top:2px; display:flex; gap:4px; flex-wrap:wrap;"></div>
+      </div>
+      <div id="top-stats-mob" style="display:none; gap:5px; flex-wrap:wrap; font-size:11px;" class="compact-stats-top">
+        <div class="st-item" title="Ans"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-mob">0</span></div>
+        <div class="st-item" title="M+A"><div class="st-dot" style="background:var(--mark-ans); border-radius:50%;"></div><span id="st-mark-ans-mob">0</span></div>
+        <div class="st-item" title="Marked"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-mob">0</span></div>
+        <div class="st-item" title="Unans"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-mob">0</span></div>
+        <div class="st-item" title="NV"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-mob">0</span></div>
+        <div class="st-item" style="border-left:1px solid var(--border); padding-left:4px;"><span id="st-overall-mob" style="color:var(--text2);">0/0</span></div>
+      </div>
     </div>
   </div>
 
@@ -522,8 +609,11 @@
         </div>
       </div>
       
-      <div class="q-scroll">
-        <div class="q-images" id="q-image-container"></div>
+      <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column;">
+        <div class="q-scroll" id="q-scroll-area">
+          <div class="q-images" id="q-image-container"></div>
+        </div>
+        <button id="btn-img-fit" onclick="window.toggleImgFit()" title="Fit/Free image" style="position:absolute; top:8px; right:8px; z-index:5; background:rgba(17,19,28,0.85); border:1px solid var(--border); border-radius:8px; color:var(--text2); padding:4px 8px; font-size:12px; font-family:'Outfit'; font-weight:700; backdrop-filter:blur(4px);">⤢ FIT</button>
       </div>
 
       <div class="ans-area" id="answer-area">
@@ -532,7 +622,7 @@
 
       <div class="btm-bar">
         <div class="btm-left">
-          <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark for Review</button>
+          <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
           <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
         </div>
         <div class="btm-right">
@@ -545,8 +635,11 @@
     <div id="mob-overlay" onclick="window.toggleMobMenu()"></div>
     
     <div class="sidebar" id="main-sidebar">
-      <div class="sec-sel">
-        <select id="section-select" onchange="window.changeSection()"><option value="ALL">All Sections</option></select>
+      <div class="sec-sel" id="sec-sel-wrap">
+        <!-- dropdown mode -->
+        <select id="section-select" onchange="window.changeSection()" style="width:100%;padding:10px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:white;font-weight:800;font-size:13px;outline:none;font-family:'Outfit';display:block;"><option value="ALL">All Sections</option></select>
+        <!-- NTA tab mode (hidden by default) -->
+        <div id="section-tabs" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-bottom:4px;"></div>
       </div>
       <div class="grid-wrap" id="q-grid"></div>
 
@@ -588,9 +681,11 @@
           <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
       </div>
       <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
-      <div class="chat-input-wrap">
-        <input type="text" id="game-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.sendGameChat()">
-        <button onclick="window.sendGameChat()">Send</button>
+      <div class="chat-input-wrap" style="gap:6px;">
+        <input type="text" id="game-chat-input" placeholder="Message..." onkeypress="if(event.key==='Enter') window.sendGameChat()" style="flex:1; min-width:0;">
+        <input type="file" id="chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendChatPhoto(this)">
+        <button id="btn-chat-photo" onclick="el('chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
+        <button onclick="window.sendGameChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
       </div>
   </div>
 
@@ -833,8 +928,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(window.innerWidth <= 850) { 
         const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
-        el('top-stats-desk').style.display = 'none';
-        el('top-stats-mob').style.display = 'flex';
     }
     
     el('btn-host-screen').addEventListener('click', () => {
@@ -913,8 +1006,8 @@ async function processFileHost(source, isUrl) {
         });
         
         el('host-file-status').textContent = "Ready!"; el('host-file-sub').textContent = 'Opening Lobby...'; el('host-file-fill').style.width = '100%';
-        const sel = el('cfg-sections'); sel.innerHTML = '<option value="ALL" selected>All Sections</option>';
-        Object.keys(masterSectionMap).forEach(k => sel.innerHTML += `<option value="${k}" selected>${k}</option>`);
+        const sel = el('cfg-sections'); sel.innerHTML = '';
+        Object.keys(masterSectionMap).forEach(k => { const o = document.createElement('option'); o.value=k; o.textContent=k; o.selected=true; sel.appendChild(o); });
 
         setTimeout(() => {
             el('host-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
@@ -945,6 +1038,7 @@ function initPeerAsHost() {
             if(data.type === 'request_file') { sendP2PFileChunks(conn); }
             if(data.type === 'sync_progress') { if(roomData.players[conn.peer]) { const p = roomData.players[conn.peer]; p.attempted = data.attempted; p.currentQ = data.currentQ; if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } broadcastRoomState(); checkAllSubmitted(); } }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
+            if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
             if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
         });
         conn.on('close', () => { delete connections[conn.peer]; delete roomData.players[conn.peer]; if(roomData.kickVotes[conn.peer]) delete roomData.kickVotes[conn.peer]; broadcastRoomState(); });
@@ -965,20 +1059,50 @@ function handleVoteKick(targetId, voterId) {
 window.voteKick = (targetId) => { if (isHost) handleVoteKick(targetId, myId); else if(hostConn && hostConn.open) hostConn.send({ type: 'vote_kick', target: targetId }); };
 
 function attachHostSettingsListeners() {
+    window.setSectionMode = (mode) => {
+        const allBtn = el('sec-mode-all'); const custBtn = el('sec-mode-custom');
+        const sel = el('cfg-sections');
+        if(mode === 'all') {
+            allBtn.style.background='var(--accent)'; allBtn.style.borderColor='var(--accent)'; allBtn.style.color='white';
+            custBtn.style.background='var(--surface2)'; custBtn.style.borderColor='var(--border)'; custBtn.style.color='var(--text)';
+            sel.style.display = 'none';
+            roomData.settings.sections = ['ALL']; roomData.totalQuestions = masterQuestions.length;
+        } else {
+            custBtn.style.background='var(--accent)'; custBtn.style.borderColor='var(--accent)'; custBtn.style.color='white';
+            allBtn.style.background='var(--surface2)'; allBtn.style.borderColor='var(--border)'; allBtn.style.color='var(--text)';
+            sel.style.display = 'block';
+        }
+        broadcastRoomState();
+    };
+
     window.pushCfg = () => {
-        const sel = Array.from(el('cfg-sections').selectedOptions).map(o => o.value);
-        roomData.settings.sections = sel.length ? sel : ['ALL'];
+        const selEl = el('cfg-sections');
+        if(selEl.style.display !== 'none') {
+            const chosen = Array.from(selEl.selectedOptions).map(o => o.value).filter(v => v !== 'ALL');
+            roomData.settings.sections = chosen.length ? chosen : ['ALL'];
+        } else { roomData.settings.sections = ['ALL']; }
         roomData.settings.timerMode = el('cfg-timer-mode').value;
         roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
         roomData.settings.showLiveStats = el('cfg-live-stats-tog').checked ? 'true' : 'false';
         roomData.settings.showGhosts = el('cfg-ghost-tog').checked ? 'true' : 'false';
+        roomData.settings.ghostFullLive = el('cfg-ghost-full-live').checked ? 'true' : 'false';
         roomData.settings.showAnalysis = el('cfg-analysis-tog').checked ? 'true' : 'false';
         roomData.settings.bombs = el('cfg-bombs-tog').checked ? 'true' : 'false';
         roomData.settings.speedBonus = el('cfg-speed-tog').checked ? 'true' : 'false';
-        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length; else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
+        roomData.settings.addonProgress = el('cfg-addon-progress').checked ? 'true' : 'false';
+        roomData.settings.addonRace = el('cfg-addon-race').checked ? 'true' : 'false';
+        roomData.settings.addonChat = el('cfg-addon-chat').checked ? 'true' : 'false';
+        roomData.settings.addonQtimer = el('cfg-addon-qtimer').checked ? 'true' : 'false';
+        roomData.settings.addonTabs = el('cfg-addon-tabs').checked ? 'true' : 'false';
+        roomData.settings.addonPhoto = el('cfg-addon-photo').checked ? 'true' : 'false';
+        roomData.settings.autoResults = el('cfg-auto-results').checked ? 'true' : 'false';
+        // Ghost suboption visibility
+        el('cfg-ghost-live-row').style.display = el('cfg-ghost-tog').checked ? 'flex' : 'none';
+        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length;
+        else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
         broadcastRoomState();
     };
-    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration'].forEach(id => el(id).addEventListener('change', window.pushCfg));
+    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration'].forEach(id => { const e = el(id); if(e) e.addEventListener('change', window.pushCfg); });
     window.pushCfg();
 }
 
@@ -1002,6 +1126,7 @@ function initPeerAsPlayer() {
                 await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
             }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
+            if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
         });
         hostConn.on('close', () => showToast('error', 'Host disconnected!'));
     });
@@ -1026,7 +1151,15 @@ async function sendP2PFileChunks(conn) {
 }
 
 function sendLobbyProgress(text, pct) { if(hostConn && hostConn.open) hostConn.send({ type: 'lobby_progress', text, pct }); }
-function broadcastRoomState() { updateLobbyUI(); if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) renderSidebarLeaderboard(); for(let id in connections) connections[id].send({ type: 'room_state', state: roomData }); }
+function broadcastRoomState() {
+    updateLobbyUI();
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
+        renderSidebarLeaderboard();
+        updateRaceBar();
+    }
+    if(el('final-results-layer').classList.contains('show')) showFinalResults(false); // live refresh results
+    for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
+}
 
 async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
@@ -1059,6 +1192,9 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
         else isLaunchPending = true; // Wait for processing
     }
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
+    // Live results refresh
+    if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
+    if(roomData.status === 'playing' && el('app').style.display === 'flex') { updateRaceBar(); }
 }
 
 async function processFilePlayer(buffer) {
@@ -1102,11 +1238,39 @@ window.copyJoinLink = () => { navigator.clipboard.writeText(window.location.href
 
 window.sendLobbyChat = () => _sendChat('lobby-chat-input');
 window.sendGameChat = () => _sendChat('game-chat-input');
-function _sendChat(id) { const i = el(id); const t = i.value.trim(); if(!t) return; i.value = ''; if(isHost) broadcastChat(myName, t); else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: t }); }
+function _sendChat(id) {
+    const i = el(id); const t = i.value.trim(); if(!t) return; i.value = '';
+    if(isHost) broadcastChat(myName, t); else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: t });
+}
 function broadcastChat(n, t) { appendChatUI(n, t); for(let id in connections) connections[id].send({ type: 'chat', name:n, text:t }); }
-function appendChatUI(n, t) {
-    const h = `<div class="msg"><div class="msg-name">${n}</div>${t}</div>`;
-    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => { const b = el(id); if(b) { b.insertAdjacentHTML('beforeend', h); b.scrollTop = b.scrollHeight; } });
+function appendChatUI(n, t, isPhoto = false) {
+    const isMe = n === myName;
+    const content = isPhoto ? `<img src="${t}" style="max-width:180px; border-radius:8px; margin-top:4px; display:block;" loading="lazy">` : t;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'msg';
+    msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
+    msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
+    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
+        const b = el(id); if(!b) return;
+        const clone = id === 'lobby-chat-msgs' ? msgDiv : (id === 'game-chat-msgs' ? msgDiv : msgDiv.cloneNode(true));
+        b.appendChild(msgDiv); b.scrollTop = b.scrollHeight;
+        requestAnimationFrame(() => { msgDiv.style.transform = 'scale(1) translateY(0)'; msgDiv.style.opacity = '1'; });
+    });
+}
+window.sendChatPhoto = async (input) => {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const dataUrl = e.target.result;
+        if(isHost) broadcastChatPhoto(myName, dataUrl);
+        else if(hostConn && hostConn.open) hostConn.send({ type: 'chat_photo', name: myName, dataUrl });
+    };
+    reader.readAsDataURL(input.files[0]);
+    input.value = '';
+};
+function broadcastChatPhoto(n, dataUrl) {
+    appendChatUI(n, dataUrl, true);
+    for(let id in connections) connections[id].send({ type: 'chat_photo', name:n, dataUrl });
 }
 
 // ── 5. GAME ENGINE ──
@@ -1130,10 +1294,84 @@ function launchGame() {
     const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
+
+function buildSectionTabs() {
+    const tabsEl = el('section-tabs'); if(!tabsEl) return;
+    tabsEl.innerHTML = '';
+    el('section-select').style.display = 'none';
+    tabsEl.style.display = 'block';
+    const allKeys = ['ALL', ...Object.keys(sectionMap)];
+    allKeys.forEach(k => {
+        const t = document.createElement('button');
+        t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap; transition:0.2s;';
+        t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
+        t.dataset.key = k;
+        t.onclick = () => {
+            el('section-select').value = k; window.changeSection();
+            tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
+            t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
+        };
+        if(k === 'ALL') { t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white'; }
+        tabsEl.appendChild(t);
+    });
+}
     questionTimes = {}; questionEnterTime = Date.now(); lastAnswerQId = null;
     correctStreak = 0;
     
+    // Apply addons
+    if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
+    else el('wid-lb').style.display = 'none';
+    
+    if(roomData.settings.addonChat !== 'false') {
+        el('wid-chat-desk') && (el('wid-chat-desk').style.display = '');
+        el('mob-chat-fab') && (el('mob-chat-fab').style.display = '');
+    } else {
+        el('wid-chat-desk') && (el('wid-chat-desk').style.display = 'none');
+        el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
+    }
+
+    // Show photo button only if enabled
+    const photoBtn = el('btn-chat-photo');
+    if(photoBtn) photoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
+
+    // Race bar
+    if(roomData.settings.addonRace === 'true') {
+        el('race-bar-wrap').style.display = '';
+        el('header-row2').style.display = 'flex';
+    }
+
+    // Per-Q timer
+    if(roomData.settings.addonQtimer === 'true') {
+        el('per-q-timer-wrap').style.display = '';
+        el('header-row2').style.display = 'flex';
+    }
+
+    // NTA tabs
+    if(roomData.settings.addonTabs === 'true') buildSectionTabs();
+
+    // Set paper name in header
+    if(roomData.testFile) {
+        const nm = roomData.testFile.split('/').pop().replace('.niso','').replace('.zip','');
+        el('header-paper-name').textContent = nm; el('header-paper-name').style.display = 'block';
+    }
+
+    // Mobile stats row2
+    if(window.innerWidth <= 850) {
+        el('header-row2').style.display = 'flex';
+        el('top-stats-mob').style.display = 'flex';
+    }
+
     startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
+    
+    // Ghost full-live polling
+    if(roomData.settings.showGhosts === 'true' && roomData.settings.ghostFullLive === 'true') {
+        setInterval(() => { if(!hasSubmitted) renderSidebar(); }, 1000);
+    }
+    // Live results polling (always on when results shown)
+    setInterval(() => {
+        if(el('final-results-layer').classList.contains('show')) showFinalResults(false);
+    }, 1000);
+    
     syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 3000);
 }
 
@@ -1287,21 +1525,54 @@ window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a
 window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis', selected: null }; renderSidebar(); renderQuestion(); };
 
 function updateCompactStats() {
-    let a=0, m=0, u=0, n=0;
-    Object.values(answers).forEach(ans => { if(ans.status === 'ans' || ans.status === 'mark-ans') a++; else if(ans.status === 'marked') m++; else if(ans.status === 'unans') u++; else n++; });
-    ['desk', 'mob'].forEach(pf => {
-        if(el('st-ans-'+pf)) el('st-ans-'+pf).textContent = a; if(el('st-marked-'+pf)) el('st-marked-'+pf).textContent = m; 
-        if(el('st-unans-'+pf)) el('st-unans-'+pf).textContent = u; if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+    let a=0, ma=0, m=0, u=0, n=0;
+    Object.values(answers).forEach(ans => {
+        if(ans.status === 'ans') a++;
+        else if(ans.status === 'mark-ans') ma++;
+        else if(ans.status === 'marked') m++;
+        else if(ans.status === 'unans') u++;
+        else n++;
     });
+    const total = allQuestions.length;
+    const overall = `${a+ma}/${total}`;
+    ['desk', 'mob'].forEach(pf => {
+        if(el('st-ans-'+pf)) el('st-ans-'+pf).textContent = a;
+        if(el('st-mark-ans-'+pf)) el('st-mark-ans-'+pf).textContent = ma;
+        if(el('st-marked-'+pf)) el('st-marked-'+pf).textContent = m;
+        if(el('st-unans-'+pf)) el('st-unans-'+pf).textContent = u;
+        if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+        if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = overall;
+    });
+    // Per-Q timer update
+    if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true' && !hasSubmitted) {
+        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+        if(el('per-q-timer')) el('per-q-timer').textContent = spent + 's';
+    }
 }
+
+let imgFitMode = false;
+window.toggleImgFit = () => {
+    imgFitMode = !imgFitMode;
+    const btn = el('btn-img-fit'); if(btn) btn.textContent = imgFitMode ? '⤡ FREE' : '⤢ FIT';
+    document.querySelectorAll('#q-image-container img').forEach(img => {
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 260px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        else { img.style.maxHeight = ''; img.style.objectFit = ''; img.style.width = ''; }
+    });
+};
 
 function renderQuestion() {
   const q = allQuestions[currentQIdx]; if (!q) return;
   el('q-num-badge').textContent = `Q${q.globalNum}`; el('q-type-badge').textContent = q.type === 'mcq' ? 'MCQ' : 'NUM';
   const imgA = el('q-image-container'); imgA.innerHTML = ''; let hasI = false;
-  for (const f of q.images) { if (imageCache[f]) { const img = document.createElement('img'); img.src = imageCache[f]; imgA.appendChild(img); hasI = true; } }
+  for (const f of q.images) {
+    if (imageCache[f]) {
+        const img = document.createElement('img'); img.src = imageCache[f];
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 260px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        imgA.appendChild(img); hasI = true;
+    }
+  }
   if (!hasI) imgA.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
-
+  questionEnterTime = Date.now(); // reset per-Q timer on each render
   renderAnswerArea(q); updateCompactStats();
 }
 
@@ -1354,10 +1625,24 @@ function renderSidebar() {
     if (idx === currentQIdx) d.classList.add('active'); d.textContent = q.globalNum;
     
     if (!hasSubmitted && roomData && roomData.settings.showLiveStats === 'true') {
-        let c=0, w=0; Object.values(roomData.players).forEach(p => { if (p.answers && p.answers[q.id]) { if(p.answers[q.id] === 'c') c++; else w++; } });
-        if (c > 0 || w > 0) {
-            const b = document.createElement('div'); b.className = 'progress-wrap'; b.style.cssText = 'position:absolute; bottom:0; left:0; right:0; height:4px; margin:0; border-radius:0 0 10px 10px; display:flex; gap:1px; box-shadow:none;';
-            for(let i=0;i<c;i++) b.innerHTML += `<div style="flex:1; background:var(--ans);"></div>`; for(let i=0;i<w;i++) b.innerHTML += `<div style="flex:1; background:var(--unans);"></div>`; d.appendChild(b);
+        // Count players who attempted this q (proxy: we track by p.attempted vs q position)
+        // Use currentQ tracking: if any player's currentQ matches or they've passed this q
+        const players = Object.values(roomData.players).filter(p => p.name !== myName);
+        const total = players.length;
+        if(total > 0) {
+            // Show fraction of players who have attempted at least up to this question
+            const qSeqIdx = getSeq().indexOf(idx);
+            const done = players.filter(p => {
+                const theirQ = allQuestions.findIndex(aq => aq.id === p.currentQ);
+                return theirQ > idx || (answers[q.id] && answers[q.id].status !== 'not-vis');
+            }).length;
+            const skipped = total - done;
+            if(total > 0) {
+                const b = document.createElement('div');
+                b.style.cssText = 'position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 10px 10px; display:flex; overflow:hidden;';
+                b.innerHTML = `<div style="flex:${done}; background:rgba(16,185,129,0.7);"></div><div style="flex:${skipped}; background:rgba(255,255,255,0.1);"></div>`;
+                d.appendChild(b);
+            }
         }
     }
 
@@ -1384,6 +1669,24 @@ function renderSidebar() {
     d.onclick = () => window.goToQ(idx); g.appendChild(d);
   });
   updateCompactStats();
+}
+
+function updateRaceBar() {
+    if(!roomData || roomData.settings.addonRace !== 'true') return;
+    const players = Object.values(roomData.players);
+    const total = roomData.totalQuestions || 1;
+    // Find furthest player for the fill
+    const myPlayer = roomData.players[myId];
+    const myPct = myPlayer ? Math.round((myPlayer.attempted/total)*100) : 0;
+    const fill = el('race-bar-fill');
+    if(fill) fill.style.width = myPct + '%';
+    const names = el('race-bar-names');
+    if(names) {
+        names.innerHTML = players.map(p => {
+            const pct = Math.round((p.attempted/total)*100);
+            return `<span style="color:${p.name===myName?'var(--accent)':'var(--text2)'}; font-weight:${p.name===myName?900:600};">${p.name.charAt(0)}:${pct}%</span>`;
+        }).join(' | ');
+    }
 }
 
 function renderSidebarLeaderboard() {
@@ -1449,7 +1752,7 @@ window.showFinalResults = (forceShow = false) => {
 
     // Show analysis button if enabled
     const anaBtn = el('btn-open-analysis');
-    if(anaBtn) anaBtn.style.display = roomData.settings.showAnalysis === 'true' && isAllDone ? 'flex' : 'none';
+    if(anaBtn) anaBtn.style.display = isAllDone ? 'flex' : 'none';
 }
 
 // ── ANALYSIS ENGINE ──
