@@ -261,7 +261,7 @@
   .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: white; }
 
   /* ── DOWNLOAD PROGRESS DETAIL ── */
-  .dl-detail { font-family: 'Outfit'; font-size: 11px; color: var(--accent2); font-weight: 700; text-align: center; letter-spacing: 0.5px; }
+  .dl-detail { font-family: 'Outfit'; font-size: 10px; color: var(--accent2); font-weight: 700; text-align: right; letter-spacing: 0.5px; white-space: nowrap; }
 
   /* ── ANALYSIS MODAL ── */
   #analysis-layer { position: fixed; inset: 0; background: rgba(7,8,12,0.97); z-index: 200; display: none; flex-direction: column; }
@@ -985,7 +985,7 @@ async function processFileHost(source, isUrl) {
             if(cached) { fileBuffer = cached; } else {
                 el('host-file-status').textContent = "Downloading Paper...";
                 fileBuffer = await parallelFetch(source, (loaded, total) => {
-                    el('host-file-status').textContent = `Downloading File...`;
+                    el('host-file-status').textContent = `[Direct Web] Downloading...`;
                     el('host-file-sub').textContent = total
                         ? `${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`
                         : `${(loaded/1024/1024).toFixed(2)} MB`;
@@ -1116,13 +1116,19 @@ function initPeerAsPlayer() {
         hostConn.on('data', async (data) => {
             if(data.type === 'room_state') { const oldStatus = roomData.status; roomData = data.state; handleRoomStateUpdatePlayer(oldStatus); }
             if(data.type === 'kicked') { showToast('error', 'You were kicked.'); setTimeout(() => window.location.reload(), 2000); }
-            if(data.type === 'file_start') { totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0; sendLobbyProgress(`Receiving 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5); }
+            // P2P RECEIVE LOGIC 
+            if(data.type === 'file_start') { 
+                totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0; 
+                sendLobbyProgress(`[P2P Host] 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5); 
+            }
             if(data.type === 'file_chunk') {
                 receiveBuffer.push(data.chunk); receivedSize += data.chunk.byteLength;
-                if(receivedSize % (1024 * 512) < 130000) sendLobbyProgress(`Receiving ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, Math.floor((receivedSize/totalSize)*80)+5);
+                if(receivedSize % (1024 * 512) < 130000) {
+                    sendLobbyProgress(`[P2P Host] ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, Math.floor((receivedSize/totalSize)*80)+5);
+                }
             }
             if(data.type === 'file_end') {
-                sendLobbyProgress(`Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
+                sendLobbyProgress(`[P2P Host] Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
                 await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
             }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
@@ -1161,6 +1167,7 @@ function broadcastRoomState() {
     for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
 }
 
+// ── NEW INTELLIGENT FILE FETCH LOGIC ──
 async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
     el('view-file').textContent = roomData.testFile; el('view-sections').textContent = roomData.settings.sections.join(', ');
@@ -1172,18 +1179,29 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
         isFileAcquisitionStarted = true; 
         let cached = await loadFromCache(roomData.testFile);
         if(cached) {
-            sendLobbyProgress('Loading from Cache...', 50); fileBuffer = cached; await processFilePlayer(fileBuffer);
+            // Priority 1: Cache
+            sendLobbyProgress('[Cache] Loading...', 50); fileBuffer = cached; await processFilePlayer(fileBuffer);
         } else {
             if(roomData.testUrl) {
-                sendLobbyProgress('Downloading from Web...', 10);
+                // Priority 2: Direct Web Download (GitHub / CDN)
+                sendLobbyProgress('[Direct Web] Starting...', 10);
                 try {
                     fileBuffer = await parallelFetch(roomData.testUrl, (loaded, total) => {
-                        if(total) sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50));
-                        else sendLobbyProgress(`Downloading ${(loaded/1024/1024).toFixed(2)} MB`, 10);
+                        if(total) sendLobbyProgress(`[Direct Web] ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50));
+                        else sendLobbyProgress(`[Direct Web] ${(loaded/1024/1024).toFixed(2)} MB`, 10);
                     });
                     await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
-                } catch(e) { sendLobbyProgress('Error downloading', 0); showToast('error', 'Download failed');}
-            } else { sendLobbyProgress('Requesting file from Host...', 5); hostConn.send({ type: 'request_file' }); }
+                } catch(e) {
+                    // Priority 3: Fallback to P2P Host Transfer if Direct DL fails
+                    console.warn("Direct Web Download failed. Falling back to P2P Host Transfer.", e);
+                    sendLobbyProgress('[Fallback P2P] Requesting...', 5);
+                    hostConn.send({ type: 'request_file' });
+                }
+            } else { 
+                // Host uploaded a local custom file, must use P2P
+                sendLobbyProgress('[P2P Host] Requesting...', 5); 
+                hostConn.send({ type: 'request_file' }); 
+            }
         }
     }
     
@@ -1220,7 +1238,7 @@ function updateLobbyUI() {
 
     players.forEach(p => {
         if(!p.ready) allReady = false;
-        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:150px;"><div class="progress-wrap" style="height:6px;margin:0 0 4px;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</span><span class="dl-detail">${p.progressPct>0&&p.progressPct<100?p.progressPct+'%':''}</span></div></div>`;
+        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:160px;"><div class="progress-wrap" style="height:6px;margin:0 0 4px;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</span><span class="dl-detail">${p.progressPct>0&&p.progressPct<100?p.progressPct+'%':''}</span></div></div>`;
         let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
         if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
         list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
