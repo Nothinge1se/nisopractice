@@ -46,7 +46,7 @@
   .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 8vw, 64px); font-weight: 900; background: linear-gradient(135deg, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(99,102,241,0.2); }
   .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
 
-  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: clamp(20px, 5vw, 32px); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
+  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: clamp(20px, 5vw, 32px); width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
   .card-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; color: #fff;}
 
   .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: white; padding: 16px; font-size: 16px; font-weight: 700; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
@@ -86,8 +86,11 @@
 
   .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
-  /* LEFT DOCK (For Generic Widgets) */
-  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); overflow-y: auto; overflow-x: hidden; }
+  /* DOCK PANELS */
+  .dock-panel { display: none; flex-direction: column; width: 320px; background: var(--surface); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.2); overflow-y: auto; overflow-x: hidden; flex-shrink: 0; }
+  #left-dock { border-right: 1px solid var(--border); }
+  #right-dock { border-left: 1px solid var(--border); }
+  .dock-panel .widget-header { border-top: none; }
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
@@ -95,11 +98,12 @@
   .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700; flex-shrink: 0;}
   .review-banner.show { display: flex; }
 
-  .q-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: var(--surface); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10; flex-wrap: wrap; gap: 10px; flex-shrink:0;}
-  .q-top-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 18px; background: var(--surface3); padding: 6px 16px; border-radius: 10px; border: 1px solid var(--border); color: #fff; text-transform: uppercase; letter-spacing: 1px;}
+  /* FLOATING TOP Q INDICATOR */
+  .q-top-floating { position: absolute; top: 16px; left: 16px; z-index: 20; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; pointer-events: none; }
+  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; background: rgba(28, 32, 48, 0.85); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #fff; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto;}
+  .timer-float { background: rgba(28, 32, 48, 0.85); backdrop-filter: blur(8px); border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 12px; font-weight: 800; color: var(--accent2); padding: 4px 12px; border-radius: 8px; font-family: 'Outfit'; pointer-events: auto; }
   
-  .q-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; }
+  .q-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 80px 20px 24px; display: flex; flex-direction: column; align-items: center; }
   .q-images { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; }
   .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
@@ -120,9 +124,10 @@
   .nat-input.correct-ans { border-color: var(--ans); color: var(--ans); }
   .nat-input.wrong-ans { border-color: var(--unans); color: var(--unans); }
 
-  .btm-bar { padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10;}
+  .btm-bar { position: relative; overflow: visible; z-index: 10; padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .btm-content-wrap { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; }
   .btm-left, .btm-right { display: flex; gap: 10px; }
-  .action-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px;}
+  .action-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;}
   .action-btn:hover:not(:disabled) { background: var(--surface3); }
   .action-btn.mark { border-color: var(--marked); color: var(--marked); }
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);}
@@ -168,12 +173,15 @@
   .lb-name { font-weight: 700; font-size: 16px; font-family: 'Outfit';}
   .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
 
-  /* Lobby Grid */
-  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 900px; align-items: start;}
+  /* Lobby Grid Layout (Responsive Expansion) */
+  .lobby-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
   .lobby-left, .lobby-right { display: flex; flex-direction: column; gap: 20px; }
+  
   .config-row { margin-bottom: 16px; }
   .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 14px; font-family: 'Outfit';}
   
+  .cfg-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 14px; }
+
   .kick-btn { background: var(--unans); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); }
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
 
@@ -212,21 +220,21 @@
     .sidebar.open { transform: translateX(0); }
     #mob-overlay.open { display: block; }
 
-    .btm-bar { padding: 12px; flex-direction: column; gap: 8px; height: auto;}
+    .btm-bar { padding: 12px; height: auto;}
+    .btm-content-wrap { gap: 8px; }
     .btm-left, .btm-right { width: 100%; justify-content: space-between; }
     .action-btn { flex: 1; padding: 10px 8px; font-size: 12px; text-align: center; justify-content: center;}
     
     .opts-grid { grid-template-columns: 1fr; }
     .lobby-grid { grid-template-columns: 1fr; }
-    .q-top { flex-direction: column; align-items: flex-start; }
-    .compact-stats-top { display: none; } 
-    .q-badge { font-size: 16px; padding: 4px 12px; }
-    .q-scroll { padding: 16px; }
+    .q-scroll { padding: 60px 16px 16px; }
     .ans-area { padding: 16px 12px; }
+    .q-top-floating { top: 12px; left: 12px; }
 
     /* Hide desktop widgets */
     #wid-chat-desk { display: none !important; }
     #wid-group-status { display: none !important; }
+    .dock-panel { display: none !important; }
   }
   
   @media (max-width: 480px) {
@@ -293,32 +301,15 @@
     #app { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
     .main-stage { flex: 1; min-height: 0; overflow: hidden; }
     .q-area { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-    .q-scroll { flex: 1; min-height: 0; overflow-y: scroll !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 12px; }
     .ans-area { flex-shrink: 0; padding: 10px 10px 4px; overflow-y: auto; max-height: 42dvh; -webkit-overflow-scrolling: touch; }
-    .btm-bar { flex-shrink: 0; padding: 8px 10px; gap: 6px; }
-    .action-btn { padding: 8px 6px; font-size: 11px; }
     .opts-grid { grid-template-columns: 1fr 1fr; gap: 6px; max-width: 100%; }
     .opt-btn { padding: 8px 10px; font-size: 13px; gap: 8px; }
     .opt-key { width: 26px; height: 26px; font-size: 13px; }
     .header { height: 50px; padding: 0 10px; }
     .timer-box { font-size: 17px; padding: 4px 12px; }
-    .q-badge { font-size: 13px; padding: 3px 8px; }
     .sidebar { top: 50px; }
-    .q-top { padding: 8px 10px; gap: 6px; }
     .q-images img { border-radius: 8px; }
-    .btm-bar { flex-direction: row; flex-wrap: wrap; }
-    .btm-left, .btm-right { flex: none; gap: 6px; }
     .nat-input { font-size: 20px; padding: 10px 16px; }
-  }
-
-  /* ── DRAGGABLE FAB ── */
-  .mobile-fab { touch-action: none; user-select: none; }
-
-  /* ── LOBBY MOBILE SCROLL FIX ── */
-  @media (max-width: 850px) {
-    #lobby-screen { overflow-y: scroll !important; -webkit-overflow-scrolling: touch; padding-bottom: 60px; height: 100dvh; }
-    .lobby-grid { grid-template-columns: 1fr !important; }
-    .glass-card { max-height: none !important; }
   }
 </style>
 </head>
@@ -330,7 +321,7 @@
   <div class="hero-title">NPRAQ</div>
   <div class="hero-sub">Live CBT Multiplayer</div>
   
-  <div class="glass-card" id="intro-card">
+  <div class="glass-card" id="intro-card" style="max-width: 500px;">
     <div class="card-title">Join or Host Room</div>
     <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
     <div class="join-wrap">
@@ -386,7 +377,7 @@
         <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click to copy join link</div>
       </div>
 
-      <div class="glass-card" style="padding: 16px; display:none;" id="host-controls">
+      <div class="glass-card" style="padding: 16px; display:none; max-width: none;" id="host-controls">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
           <div class="card-title" style="font-size:17px; margin:0; color:var(--accent2);">⚙️ Configuration</div>
         </div>
@@ -417,11 +408,11 @@
           </div>
         </div>
 
-        <!-- Toggles in two collapsible groups -->
-        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+        <!-- WIDER GRID for Toggles -->
+        <div class="cfg-grid-container">
 
           <!-- GROUP: Gameplay Features -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
             <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🎮 Gameplay <span style="color:var(--accent);">▾</span></summary>
             <div style="padding:0 14px 10px;">
               <div class="toggle-row">
@@ -448,7 +439,7 @@
           </details>
 
           <!-- GROUP: Display Addons -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
             <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🧩 Addons <span style="color:var(--accent);">▾</span></summary>
             <div style="padding:0 14px 10px;">
               <div class="toggle-row">
@@ -457,10 +448,10 @@
               </div>
               <div class="toggle-row">
                 <div class="toggle-label">Colored Progress Bars <small>Show red/green segments live</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-color-progress" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-color-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
               </div>
               <div class="toggle-row">
-                <div class="toggle-label">Race Progress Bar 🏎️ <small>Slim glowing bar in top header</small></div>
+                <div class="toggle-label">Race Progress Bar 🏎️ <small>Bottom progress background tracking</small></div>
                 <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
               </div>
               <div class="toggle-row">
@@ -483,7 +474,7 @@
           </details>
 
           <!-- GROUP: Post-Game -->
-          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
             <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">📊 Post-Game <span style="color:var(--accent);">▾</span></summary>
             <div style="padding:0 14px 10px;">
               <div class="toggle-row">
@@ -501,7 +492,7 @@
         <button class="btn btn-primary" id="btn-start-game" disabled>🚀 Start Match</button>
       </div>
 
-      <div class="glass-card" style="padding: 20px;" id="player-view-cfg">
+      <div class="glass-card" style="padding: 20px; max-width: none;" id="player-view-cfg">
         <div class="card-title" style="font-size:18px; margin-bottom:16px; color:var(--text2); text-transform:uppercase;">Room Settings</div>
         <div style="font-size:14px; font-weight:700; line-height:1.8; font-family:'Outfit'; background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
           <span style="color:var(--text2);">PAPER:</span> <span id="view-file" style="color:white; word-break: break-all;">...</span><br>
@@ -514,7 +505,7 @@
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column;">
+      <div class="glass-card" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column; max-width: none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span class="label-title" style="margin:0;">Players</span>
           <span style="font-family:'Outfit'; font-weight:900; font-size:16px; color:var(--text); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
@@ -523,7 +514,7 @@
         <button class="btn btn-primary" id="btn-ready-up" style="margin-top:16px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.toggleReady()">I'm Ready</button>
       </div>
 
-      <div class="glass-card" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column;">
+      <div class="glass-card" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column; max-width: none;">
         <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
         <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 16px;"></div>
         <div class="chat-input-wrap" style="padding: 12px 16px; gap:6px;">
@@ -560,23 +551,6 @@
         <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
       </div>
     </div>
-    <div id="header-row2" style="display:none; width:100%; padding:2px 10px 6px; gap:8px; align-items:center; flex-wrap:wrap;">
-      <div id="per-q-timer-wrap" style="display:none; font-family:'Outfit'; font-size:11px; font-weight:800; color:var(--accent2); background:var(--surface2); padding:2px 8px; border-radius:7px; border:1px solid var(--border);">⏱ <span id="per-q-timer">0s</span></div>
-      <div id="race-bar-wrap" style="display:none; flex:1; min-width:100px;">
-        <div style="position:relative; height:8px; background:var(--surface3); border-radius:8px; overflow:visible; box-shadow:0 0 6px var(--accent-glow);">
-          <div id="race-bar-fill" style="height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:8px; transition:width 0.5s ease; box-shadow:0 0 8px var(--accent);"></div>
-        </div>
-        <div id="race-bar-names" style="font-size:9px; color:var(--text2); font-family:'Outfit'; font-weight:700; margin-top:2px; display:flex; gap:4px; flex-wrap:wrap;"></div>
-      </div>
-      <div id="top-stats-mob" style="display:none; gap:5px; flex-wrap:wrap; font-size:11px;" class="compact-stats-top">
-        <div class="st-item" title="Ans"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-mob">0</span></div>
-        <div class="st-item" title="M+A"><div class="st-dot" style="background:var(--mark-ans); border-radius:50%;"></div><span id="st-mark-ans-mob">0</span></div>
-        <div class="st-item" title="Marked"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-mob">0</span></div>
-        <div class="st-item" title="Unans"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-mob">0</span></div>
-        <div class="st-item" title="NV"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-mob">0</span></div>
-        <div class="st-item" style="border-left:1px solid var(--border); padding-left:4px;"><span id="st-overall-mob" style="color:var(--text2);">0/0</span></div>
-      </div>
-    </div>
   </div>
 
   <!-- Review Banner (Post-submit non-intrusive header) -->
@@ -591,21 +565,16 @@
   <div class="main-stage">
     
     <!-- LEFT DOCK FOR GENERIC WIDGETS -->
-    <div id="left-dock"></div>
+    <div id="left-dock" class="dock-panel"></div>
 
     <div class="q-area">
-      <div class="q-top">
-        <div class="q-top-left">
-           <div class="q-badge" id="q-num-badge">Q1</div>
-           <div style="font-weight:700; color:var(--text2); font-size:14px; font-family:'Outfit'; text-transform:uppercase;" id="q-type-badge">MCQ</div>
-        </div>
-        <!-- Top Stats (Mobile fallback) -->
-        <div class="compact-stats-top" id="top-stats-mob" style="display:none;">
-           <div class="st-item"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-mob">0</span></div>
-           <div class="st-item"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-mob">0</span></div>
-           <div class="st-item"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-mob">0</span></div>
-           <div class="st-item"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-mob">0</span></div>
-        </div>
+      <!-- FLOATING Q INDICATOR -->
+      <div class="q-top-floating">
+         <div style="display:flex; gap:8px; align-items:center;">
+             <div class="q-badge" id="q-num-badge">Q1</div>
+             <div class="q-badge" id="q-type-badge" style="background: rgba(45, 51, 74, 0.85); color: var(--text2); border-color: var(--border);">MCQ</div>
+         </div>
+         <div id="per-q-timer-wrap" class="timer-float" style="display:none;">⏱ <span id="per-q-timer">0s</span></div>
       </div>
       
       <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column;">
@@ -619,28 +588,38 @@
         <!-- Rendered via JS -->
       </div>
 
-      <div class="btm-bar">
-        <!-- Standard Bottom Bar -->
-        <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
-            <div class="btm-left">
-              <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
-              <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+      <!-- MAIN BOTTOM BAR -->
+      <div class="btm-bar" id="main-btm-bar">
+        <!-- Race/Colored Progress Fill Background -->
+        <div id="btm-race-fill"></div>
+        <div id="race-bar-names" style="position:absolute; bottom:100%; right:16px; margin-bottom:4px; font-size:10px; z-index:10; display:flex; gap:6px;"></div>
+
+        <div class="btm-content-wrap">
+            <!-- Standard Bottom Bar Options -->
+            <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
+                <div class="btm-left">
+                  <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
+                  <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+                </div>
+                <div class="btm-right">
+                  <button class="action-btn" id="btn-back" onclick="window.navigate(-1)">← Back</button>
+                  <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+                </div>
             </div>
-            <div class="btm-right">
-              <button class="action-btn" id="btn-back" onclick="window.navigate(-1)">← Back</button>
-              <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+            
+            <!-- Group Practice Bottom Bar -->
+            <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
+                <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2;">Waiting for others...</div>
+                <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Group Question →</button>
+                <button class="action-btn save" id="btn-group-submit" onclick="window.forceSubmit()" style="display:none;">Submit Test</button>
             </div>
-        </div>
-        
-        <!-- Group Practice Bottom Bar -->
-        <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
-            <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
-            <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Waiting for others...</div>
-            <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Group Question →</button>
-            <button class="action-btn save" id="btn-group-submit" onclick="window.forceSubmit()" style="display:none;">Submit Test</button>
         </div>
       </div>
     </div>
+    
+    <!-- RIGHT DOCK FOR GENERIC WIDGETS -->
+    <div id="right-dock" class="dock-panel"></div>
 
     <div id="mob-overlay" onclick="window.toggleMobMenu()"></div>
     
@@ -658,7 +637,9 @@
         <div class="widget-header">
           <span>🫂 Group Status</span> 
           <div class="controls-row">
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status')">◨ Dock Left</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'right')" title="Dock Right">◧ R</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'sidebar')" title="To Sidebar">☰</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
           </div>
         </div>
@@ -669,7 +650,9 @@
         <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
           <div class="controls-row">
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb')">◨ Dock Left</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'right')" title="Dock Right">◧ R</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'sidebar')" title="To Sidebar">☰</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
           </div>
         </div>
@@ -682,7 +665,9 @@
         <div class="widget-header">
           <span>Live Chat</span> 
           <div class="controls-row">
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk')">◨ Dock Left</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'right')" title="Dock Right">◧ R</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'sidebar')" title="To Sidebar">☰</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
           </div>
         </div>
@@ -737,6 +722,7 @@
           if(!fab) return;
           let dragging=false, startX, startY, origX, origY, moved=false;
           fab.addEventListener('touchstart', e=>{
+            if(window.innerWidth > 850) return;
             const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
             const r=fab.getBoundingClientRect(); origX=r.left; origY=r.top;
             dragging=true; moved=false; fab.style.transition='none';
@@ -917,25 +903,25 @@ const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCas
 // UI Toggles & Setup
 window.toggleMobMenu = () => { const sb = el('main-sidebar'); const ov = el('mob-overlay'); if(sb && ov) { sb.classList.toggle('open'); ov.classList.toggle('open'); } };
 
-window.toggleDock = (widgetId) => {
+window.toggleDock = (widgetId, target) => {
     if(window.innerWidth <= 850) return;
     const widget = el(widgetId);
+    if(!widget) return;
     const leftDock = el('left-dock');
+    const rightDock = el('right-dock');
     const sidebar = el('main-sidebar');
-    const btn = widget.querySelector('.btn-dock');
 
-    if (widget.parentElement === leftDock) {
-        // Move back to sidebar
-        sidebar.insertBefore(widget, el('mob-submit-area'));
-        if(btn) btn.textContent = '◨ Dock Left';
-    } else {
-        // Move to left dock
-        leftDock.appendChild(widget);
-        if(btn) btn.textContent = '◧ Undock';
+    if (target === 'left') { 
+        leftDock.appendChild(widget); 
+    } else if (target === 'right') { 
+        rightDock.appendChild(widget); 
+    } else { 
+        sidebar.insertBefore(widget, el('mob-submit-area')); 
     }
     
-    // Auto show/hide dock container based on content
+    // Auto show/hide dock containers
     leftDock.style.display = leftDock.children.length > 0 ? 'flex' : 'none';
+    rightDock.style.display = rightDock.children.length > 0 ? 'flex' : 'none';
 };
 
 window.toggleWidget = (id) => {
@@ -1427,6 +1413,7 @@ function launchGame() {
             t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
             t.dataset.key = k;
             t.onclick = () => {
+                if(roomData.settings.timerMode === 'group') return; // disabled in group mode
                 el('section-select').value = k; window.changeSection();
                 tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
                 t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
@@ -1461,16 +1448,18 @@ function launchGame() {
         el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
     }
 
-    // Race bar
+    // Race bar - now integrated in btm-race-fill
     if(roomData.settings.addonRace === 'true') {
-        el('race-bar-wrap').style.display = '';
-        el('header-row2').style.display = 'flex';
+        el('btm-race-fill').style.display = 'flex';
+        el('race-bar-names').style.display = 'flex';
+    } else {
+        el('btm-race-fill').style.display = 'none';
+        el('race-bar-names').style.display = 'none';
     }
 
     // Per-Q timer
     if(roomData.settings.addonQtimer === 'true') {
-        el('per-q-timer-wrap').style.display = '';
-        el('header-row2').style.display = 'flex';
+        el('per-q-timer-wrap').style.display = 'inline-block';
     }
 
     // NTA tabs
@@ -1501,9 +1490,8 @@ function launchGame() {
         el('header-paper-name').textContent = nm; el('header-paper-name').style.display = 'block';
     }
 
-    // Mobile stats row2
+    // Mobile stats
     if(isMobile) {
-        el('header-row2').style.display = 'flex';
         el('top-stats-mob').style.display = 'flex';
     }
 
@@ -1655,6 +1643,28 @@ window.groupSave = () => {
     updateGroupUI(); 
 };
 
+window.executeGroupNext = (qId) => {
+    if(roomData.settings.timerMode !== 'group') return;
+    const tgtIdx = getSeq().findIndex(i => allQuestions[i].id === qId);
+    if(tgtIdx !== -1 && currentQIdx !== tgtIdx) {
+        // Reset UI
+        el('btn-group-next').style.display = 'none';
+        el('btn-group-submit').style.display = 'none';
+        el('btn-group-save').style.display = 'block';
+        el('btn-group-save').disabled = false;
+        el('group-wait-text').style.display = 'none';
+
+        // Track time
+        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+        questionTimes[allQuestions[currentQIdx].id] = (questionTimes[allQuestions[currentQIdx].id] || 0) + spent;
+        
+        currentQIdx = tgtIdx;
+        
+        pushProgressToHost();
+        renderSidebar(); renderQuestion(); updateGroupUI();
+    }
+};
+
 window.groupNext = () => {
     const actIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
     const nextIdx = getSeq()[actIdx + 1];
@@ -1718,6 +1728,25 @@ function updateGroupUI() {
     
     if(el('group-status-list')) el('group-status-list').innerHTML = html;
     if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
+
+    // Auto resolution triggers (Once)
+    let allLockedGlobal = players.length > 0;
+    players.forEach(p => { if(!(p.groupAnswers || {})[q.id]) allLockedGlobal = false; });
+    
+    if (allLockedGlobal && isResolved && groupResolvedForQ !== q.id && roomData.activeGroupQ === q.id) {
+        groupResolvedForQ = q.id;
+        
+        // Show correct/wrong Toast for myself
+        const myAnsStr = String((roomData.players[myId].groupAnswers || {})[q.id]).trim();
+        if (myAnsStr && myAnsStr !== 'skipped' && myAnsStr !== 'null') {
+             const isMyC = q.type==='mcq' ? correctOps.includes(myAnsStr) : correctOps[0] === myAnsStr;
+             if(isMyC) showToast('success', '✅ Correct Answer!');
+             else showToast('error', '❌ Wrong Answer!');
+        }
+
+        renderAnswerArea(q); // Repaint colors for correct answers
+        updateCompactStats();
+    }
     
     // Manage bottom bar buttons
     const isViewingActive = q.id === roomData.activeGroupQ;
@@ -1727,7 +1756,7 @@ function updateGroupUI() {
         if (isResolved) {
             el('group-wait-text').style.display = 'none';
             el('btn-group-save').style.display = 'none';
-            if(currentQIdx === getSeq()[getSeq().length - 1]) {
+            if(q.id === allQuestions[getSeq()[getSeq().length - 1]].id) {
                 el('btn-group-submit').style.display = 'block';
                 el('btn-group-next').style.display = 'none';
             } else {
@@ -1820,11 +1849,11 @@ window.navigate = (dir, isSaveNext = false) => {
     const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; 
     
     if(np >= 0 && np < ind.length) { 
-        currentQIdx = ind[np]; renderSidebar(); renderQuestion(); 
+        currentQIdx = ind[np]; renderSidebar(); renderQuestion(); updateGroupUI();
     } else if (isSaveNext && np >= ind.length && currentSection !== 'ALL') {
         const sections = Object.keys(sectionMap); const secIdx = sections.indexOf(currentSection);
         if(secIdx < sections.length - 1) {
-            currentSection = sections[secIdx + 1]; el('section-select').value = currentSection; currentQIdx = getSeq()[0]; renderSidebar(); renderQuestion(); 
+            currentSection = sections[secIdx + 1]; el('section-select').value = currentSection; currentQIdx = getSeq()[0]; renderSidebar(); renderQuestion(); updateGroupUI();
         }
     }
 };
@@ -1840,7 +1869,21 @@ window.goToQ = (idx) => {
     currentQIdx = idx; renderSidebar(); renderQuestion(); updateGroupUI();
 };
 
-window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; else a.status = 'unans'; checkStreakBomb(); navigate(1, true); };
+window.saveNext = () => { 
+    const a = answers[allQuestions[currentQIdx].id]; 
+    if(a.selected) {
+        a.status = 'ans'; 
+        // Toast
+        const q = allQuestions[currentQIdx];
+        const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+        const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
+        if (isC) showToast('success', '✅ Correct Answer!');
+        else showToast('error', '❌ Wrong Answer!');
+    } else { 
+        a.status = 'unans'; 
+    }
+    checkStreakBomb(); navigate(1, true); 
+};
 function checkStreakBomb() {
     if(roomData.settings.bombs !== 'true') return;
     const q = allQuestions[currentQIdx]; const a = answers[q.id];
@@ -2048,24 +2091,20 @@ function updateRaceBar() {
     const myPlayer = roomData.players[myId];
     const myPct = myPlayer ? Math.round((myPlayer.attempted/total)*100) : 0;
     
-    const fill = el('race-bar-fill');
+    const fill = el('btm-race-fill');
     if (fill) {
-        if (roomData.settings.colorProgress === 'true' && myPlayer && myPlayer.liveStats) {
-            const cPct = myPlayer.attempted ? (myPlayer.liveStats.correct / myPlayer.attempted) * 100 : 0;
-            const wPct = myPlayer.attempted ? (myPlayer.liveStats.wrong / myPlayer.attempted) * 100 : 0;
+        if (roomData.settings.colorProgress === 'true' && myPlayer && myPlayer.liveStats && myPlayer.attempted > 0) {
+            const cPct = (myPlayer.liveStats.correct / myPlayer.attempted) * 100;
+            const wPct = (myPlayer.liveStats.wrong / myPlayer.attempted) * 100;
             fill.style.background = 'transparent';
-            fill.style.boxShadow = 'none';
-            fill.style.display = 'flex';
-            fill.style.overflow = 'hidden';
             fill.style.width = myPct + '%';
             fill.innerHTML = `
-                <div style="height:100%; background:var(--ans); width:${cPct}%; box-shadow: 0 0 8px var(--ans);"></div>
-                <div style="height:100%; background:var(--unans); width:${wPct}%; box-shadow: 0 0 8px var(--unans);"></div>
+                <div style="height:100%; background:rgba(16,185,129,0.25); width:${cPct}%; border-right:2px solid var(--ans);"></div>
+                <div style="height:100%; background:rgba(239,68,68,0.25); width:${wPct}%; border-right:2px solid var(--unans);"></div>
             `;
         } else {
-            fill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent2))';
-            fill.style.boxShadow = '0 0 8px var(--accent)';
-            fill.style.display = 'block';
+            fill.style.background = 'rgba(99, 102, 241, 0.15)';
+            fill.style.borderRight = '2px solid var(--accent)';
             fill.style.width = myPct + '%';
             fill.innerHTML = '';
         }
