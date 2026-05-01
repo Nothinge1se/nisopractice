@@ -407,6 +407,7 @@
             <select id="cfg-timer-mode" class="config-select">
               <option value="countdown">⏳ Countdown</option>
               <option value="race">🏁 Race (Up)</option>
+              <option value="group">🫂 Group Practice</option>
             </select>
           </div>
           <div style="flex:1;">
@@ -621,13 +622,24 @@
       </div>
 
       <div class="btm-bar">
-        <div class="btm-left">
-          <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
-          <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+        <!-- Standard Bottom Bar -->
+        <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
+            <div class="btm-left">
+              <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
+              <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+            </div>
+            <div class="btm-right">
+              <button class="action-btn" id="btn-back" onclick="window.navigate(-1)">← Back</button>
+              <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+            </div>
         </div>
-        <div class="btm-right">
-          <button class="action-btn" onclick="window.navigate(-1)">← Back</button>
-          <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+        
+        <!-- Group Practice Bottom Bar -->
+        <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
+            <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+            <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Waiting for others...</div>
+            <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Question →</button>
+            <button class="action-btn save" id="btn-group-submit" onclick="window.forceSubmit()" style="display:none;">Submit Test</button>
         </div>
       </div>
     </div>
@@ -642,6 +654,17 @@
         <div id="section-tabs" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-bottom:4px;"></div>
       </div>
       <div class="grid-wrap" id="q-grid"></div>
+
+      <!-- New Group Status Widget (Desktop) -->
+      <div class="widget" id="wid-group-status" style="display:none; height: 200px;">
+        <div class="widget-header">
+          <span>🫂 Group Status</span> 
+          <div class="controls-row">
+            <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
+          </div>
+        </div>
+        <div class="widget-body" style="padding:12px; gap:8px; overflow-y:auto;" id="group-status-list"></div>
+      </div>
 
       <div class="widget" id="wid-lb" style="height: 250px;">
         <div class="widget-header">
@@ -689,11 +712,24 @@
       </div>
   </div>
 
-  <!-- MOBILE FLOATING CHAT SHELL -->
+  <!-- MOBILE FLOATING SHELLS -->
+  <!-- 1. Chat Wrapper -->
   <div id="mob-chat-wrapper">
       <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
   <button id="mob-chat-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
+
+  <!-- 2. Group Status Wrapper (Mobile) -->
+  <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
+      <div class="widget-header">
+          <span>🫂 Group Status</span>
+          <span onclick="document.getElementById('mob-group-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
+      </div>
+      <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
+  </div>
+  <button id="mob-group-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')" style="display:none; position:fixed; bottom:155px; right:16px; width:56px; height:56px; border-radius:50%; background:var(--accent2); color:white; font-size:24px; z-index:90; box-shadow:0 4px 15px rgba(0,0,0,0.5); border:2px solid rgba(255,255,255,0.2); align-items:center; justify-content:center; cursor:pointer; transition:0.2s;">🫂</button>
+
+
 <script>
 (function(){
   const fab = document.getElementById('mob-chat-fab');
@@ -721,6 +757,16 @@
   },{passive:false});
 })();
 </script>
+
+  <!-- GROUP RESOLUTION MODAL -->
+  <div class="modal-layer" id="group-resolve-modal" style="z-index: 100;">
+    <div class="glass-card" style="max-width: 450px;">
+       <h2 style="font-family:'Syne'; color:var(--text); text-align:center; font-size: 24px; margin-bottom: 4px;">Question Resolved!</h2>
+       <div style="font-family:'Outfit'; text-align:center; font-size:13px; color:var(--text2); margin-bottom:12px;">Everyone has locked their answers.</div>
+       <div id="group-resolve-list" style="display:flex; flex-direction:column; gap:8px; max-height: 40vh; overflow-y:auto; padding-right: 4px;"></div>
+       <button class="btn btn-primary" onclick="el('group-resolve-modal').classList.remove('show')" style="margin-top:12px;">Close & Review Board</button>
+    </div>
+  </div>
 
   <!-- SUBMIT WARNING MODAL -->
   <div class="modal-layer" id="submit-warning-modal">
@@ -869,6 +915,11 @@ let isFileAcquisitionStarted = false; let isLaunchPending = false;
 // New feature vars
 let questionTimes = {}; let questionEnterTime = Date.now();
 let correctStreak = 0;
+
+// Group Practice Tracking variables
+let myLockedQId = null;
+let myLockedAns = null;
+let groupResolvedForQ = null;
 
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
@@ -1036,7 +1087,17 @@ function initPeerAsHost() {
             if(data.type === 'lobby_progress') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].progressText = data.text; roomData.players[conn.peer].progressPct = data.pct; broadcastRoomState(); } }
             if(data.type === 'toggle_ready') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].ready = data.ready; roomData.players[conn.peer].state = data.ready ? 'ready' : 'downloading'; roomData.players[conn.peer].progressText = data.ready ? 'Ready' : 'Not Ready'; roomData.players[conn.peer].progressPct = 100; broadcastRoomState(); } }
             if(data.type === 'request_file') { sendP2PFileChunks(conn); }
-            if(data.type === 'sync_progress') { if(roomData.players[conn.peer]) { const p = roomData.players[conn.peer]; p.attempted = data.attempted; p.currentQ = data.currentQ; if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } broadcastRoomState(); checkAllSubmitted(); } }
+            if(data.type === 'sync_progress') { 
+                if(roomData.players[conn.peer]) { 
+                    const p = roomData.players[conn.peer]; 
+                    p.attempted = data.attempted; 
+                    p.currentQ = data.currentQ; 
+                    p.groupLockedQ = data.groupLockedQ; // Group Practice tracking
+                    p.groupAns = data.groupAns;
+                    if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } 
+                    broadcastRoomState(); checkAllSubmitted(); 
+                } 
+            }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
             if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
@@ -1171,7 +1232,8 @@ function broadcastRoomState() {
 async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
     el('view-file').textContent = roomData.testFile; el('view-sections').textContent = roomData.settings.sections.join(', ');
-    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : 'Countdown'; el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
+    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : (roomData.settings.timerMode === 'group' ? 'Group Practice' : 'Countdown'); 
+    el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
     
     if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) renderSidebarLeaderboard();
     
@@ -1212,7 +1274,10 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
     // Live results refresh
     if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
-    if(roomData.status === 'playing' && el('app').style.display === 'flex') { updateRaceBar(); }
+    if(roomData.status === 'playing' && el('app').style.display === 'flex') { 
+        updateRaceBar(); 
+        updateGroupUI(); // Call group UI sync
+    }
 }
 
 async function processFilePlayer(buffer) {
@@ -1313,28 +1378,32 @@ function launchGame() {
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
 
-function buildSectionTabs() {
-    const tabsEl = el('section-tabs'); if(!tabsEl) return;
-    tabsEl.innerHTML = '';
-    el('section-select').style.display = 'none';
-    tabsEl.style.display = 'block';
-    const allKeys = ['ALL', ...Object.keys(sectionMap)];
-    allKeys.forEach(k => {
-        const t = document.createElement('button');
-        t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap; transition:0.2s;';
-        t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
-        t.dataset.key = k;
-        t.onclick = () => {
-            el('section-select').value = k; window.changeSection();
-            tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
-            t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
-        };
-        if(k === 'ALL') { t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white'; }
-        tabsEl.appendChild(t);
-    });
-}
-    questionTimes = {}; questionEnterTime = Date.now(); lastAnswerQId = null;
+    // Build the NTA section tabs
+    function buildSectionTabs() {
+        const tabsEl = el('section-tabs'); if(!tabsEl) return;
+        tabsEl.innerHTML = '';
+        el('section-select').style.display = 'none';
+        tabsEl.style.display = 'block';
+        const allKeys = ['ALL', ...Object.keys(sectionMap)];
+        allKeys.forEach(k => {
+            const t = document.createElement('button');
+            t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap; transition:0.2s;';
+            t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
+            t.dataset.key = k;
+            t.onclick = () => {
+                if(roomData.settings.timerMode === 'group') return; // disabled in group mode
+                el('section-select').value = k; window.changeSection();
+                tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
+                t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
+            };
+            if(k === 'ALL') { t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white'; }
+            tabsEl.appendChild(t);
+        });
+    }
+
+    questionTimes = {}; questionEnterTime = Date.now();
     correctStreak = 0;
+    myLockedQId = null; myLockedAns = null; groupResolvedForQ = null;
     
     // Apply addons
     if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
@@ -1342,7 +1411,7 @@ function buildSectionTabs() {
     
     if(roomData.settings.addonChat !== 'false') {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = '');
-        el('mob-chat-fab') && (el('mob-chat-fab').style.display = '');
+        el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'flex');
     } else {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = 'none');
         el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
@@ -1367,6 +1436,27 @@ function buildSectionTabs() {
     // NTA tabs
     if(roomData.settings.addonTabs === 'true') buildSectionTabs();
 
+    // Group Mode Setups
+    if (roomData.settings.timerMode === 'group') {
+        el('btm-bar-standard').style.display = 'none';
+        el('btm-bar-group').style.display = 'flex';
+        
+        if (window.innerWidth > 850) {
+            el('wid-group-status').style.display = 'flex';
+        } else {
+            el('mob-group-fab').style.display = 'flex';
+        }
+
+        // Hide NTA Section wrap completely in group mode to enforce linear flow
+        el('sec-sel-wrap').style.display = 'none'; 
+    } else {
+        // Reset to normal defaults just in case
+        el('btm-bar-standard').style.display = 'flex';
+        el('btm-bar-group').style.display = 'none';
+        el('wid-group-status').style.display = 'none';
+        el('mob-group-fab').style.display = 'none';
+    }
+
     // Set paper name in header
     if(roomData.testFile) {
         const nm = roomData.testFile.split('/').pop().replace('.niso','').replace('.zip','');
@@ -1379,7 +1469,7 @@ function buildSectionTabs() {
         el('top-stats-mob').style.display = 'flex';
     }
 
-    startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard();
+    startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard(); updateGroupUI();
     
     // Ghost full-live polling
     if(roomData.settings.showGhosts === 'true' && roomData.settings.ghostFullLive === 'true') {
@@ -1431,11 +1521,119 @@ function calculateScore() {
 function pushProgressToHost(isFinal = false) {
     const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
     const curQ = allQuestions[currentQIdx] ? allQuestions[currentQIdx].id : null;
-    const pay = { attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined };
-    if(isHost) { const p = roomData.players[myId]; p.attempted = pay.attempted; p.currentQ = pay.currentQ; if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } broadcastRoomState(); checkAllSubmitted(); } 
+    const pay = { 
+        attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, 
+        currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined,
+        groupLockedQ: myLockedQId, groupAns: myLockedAns
+    };
+    if(isHost) { 
+        const p = roomData.players[myId]; p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupLockedQ = pay.groupLockedQ; p.groupAns = pay.groupAns;
+        if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } 
+        broadcastRoomState(); checkAllSubmitted(); 
+    } 
     else { if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); }
 }
 function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) { roomData.status = 'finished'; broadcastRoomState(); showFinalResults(true); } }
+
+// ── GROUP PRACTICE SPECIFIC LOGIC ──
+window.groupSave = () => {
+    const qId = allQuestions[currentQIdx].id;
+    const ans = answers[qId];
+    if(!ans.selected) {
+        // We will lock it as 'skipped' if empty
+        ans.status = 'unans';
+        myLockedAns = 'skipped';
+    } else {
+        ans.status = 'ans';
+        myLockedAns = ans.selected;
+    }
+    myLockedQId = qId;
+    pushProgressToHost();
+    
+    el('btn-group-save').style.display = 'none';
+    el('group-wait-text').style.display = 'block';
+    
+    renderAnswerArea(allQuestions[currentQIdx]); // Rerender to disable buttons
+    updateGroupUI(); 
+};
+
+window.groupNext = () => {
+    el('btn-group-next').style.display = 'none';
+    el('btn-group-submit').style.display = 'none';
+    el('btn-group-save').style.display = 'block';
+    el('btn-group-save').disabled = false;
+    
+    // Track per-Q time
+    const qId = allQuestions[currentQIdx].id;
+    const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+    questionTimes[qId] = (questionTimes[qId] || 0) + spent;
+    
+    myLockedQId = null;
+    myLockedAns = null;
+    currentQIdx++;
+    
+    pushProgressToHost();
+    renderSidebar(); renderQuestion(); updateGroupUI();
+};
+
+function updateGroupUI() {
+    if(roomData.settings.timerMode !== 'group' || hasSubmitted) return;
+    const q = allQuestions[currentQIdx]; if(!q) return;
+    const players = Object.values(roomData.players);
+    
+    let html = '';
+    let allLocked = true;
+    
+    players.forEach(p => {
+        const isLocked = p.groupLockedQ === q.id;
+        if(!isLocked) allLocked = false;
+        const icon = isLocked ? '✅' : '⏳';
+        const color = isLocked ? 'var(--ans)' : 'var(--text2)';
+        html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+            <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
+            <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${isLocked ? 'Locked' : 'Thinking...'}</span>
+        </div>`;
+    });
+    
+    if(el('group-status-list')) el('group-status-list').innerHTML = html;
+    if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
+    
+    // Auto resolution trigger
+    if(allLocked && groupResolvedForQ !== q.id && myLockedQId === q.id) {
+        groupResolvedForQ = q.id;
+        el('group-wait-text').style.display = 'none';
+        
+        if(currentQIdx === allQuestions.length - 1) {
+            el('btn-group-submit').style.display = 'block';
+        } else {
+            el('btn-group-next').style.display = 'block';
+            el('btn-group-next').disabled = false;
+        }
+        
+        let mHtml = '';
+        const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+        
+        players.forEach(p => {
+            const pAns = String(p.groupAns).trim();
+            const isC = pAns !== 'skipped' && (q.type === 'mcq' ? correctOps.includes(pAns) : correctOps[0] === pAns);
+            const isSkip = pAns === 'skipped' || pAns === 'null';
+            const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
+            const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
+            const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAns)-1] : pAns);
+            mHtml += `<div style="display:flex; justify-content:space-between; background:var(--surface3); padding:10px 14px; border-radius:10px; border:1px solid ${cColor};">
+                <span style="font-weight:700;">${p.name}</span>
+                <span style="color:${cColor}; font-weight:800;">${ansText} ${cIcon}</span>
+            </div>`;
+        });
+        
+        el('group-resolve-list').innerHTML = mHtml;
+        el('group-resolve-modal').classList.add('show');
+        
+        renderAnswerArea(q); // Repaint colors for correct answers
+        updateCompactStats();
+    }
+}
+
 
 // Submit Flow
 window.submitWarningBtn = () => {
@@ -1450,6 +1648,13 @@ window.forceSubmit = () => {
     if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
     // Record time on last question
     if(allQuestions[currentQIdx]) { const qId = allQuestions[currentQIdx].id; const spent = Math.round((Date.now()-questionEnterTime)/1000); questionTimes[qId]=(questionTimes[qId]||0)+spent; }
+    
+    // In case they click "Submit" directly from a resolved Group Practice ending
+    if (roomData.settings.timerMode === 'group' && myLockedQId !== allQuestions[currentQIdx].id) {
+        myLockedQId = allQuestions[currentQIdx].id;
+        myLockedAns = answers[allQuestions[currentQIdx].id].selected || 'skipped';
+    }
+    
     pushProgressToHost(true);
     
     // UI changes lock options
@@ -1485,7 +1690,10 @@ async function preloadImages(zip, progressCallback) {
 }
 
 // ── 7. CBT UI ──
-window.changeSection = () => { currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); };
+window.changeSection = () => { 
+    if(roomData.settings.timerMode === 'group') return; // disabled in group
+    currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); 
+};
 const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
 window.navigate = (dir, isSaveNext = false) => { 
     if(!hasSubmitted) {
@@ -1508,6 +1716,9 @@ window.navigate = (dir, isSaveNext = false) => {
     }
 };
 window.goToQ = (idx) => { 
+    if(roomData.settings.timerMode === 'group' && !hasSubmitted) {
+        return showToast('error', 'Cannot skip questions in Group mode!');
+    }
     if(!hasSubmitted) {
         const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
         // Track time on this question
@@ -1597,9 +1808,13 @@ function renderQuestion() {
 function renderAnswerArea(q) {
   const area = el('answer-area'); const ans = answers[q.id];
   
+  const isLockedInGroup = roomData.settings.timerMode === 'group' && myLockedQId === q.id;
+  const isResolvedInGroup = roomData.settings.timerMode === 'group' && groupResolvedForQ === q.id;
+  const shouldPaintColors = hasSubmitted || isResolvedInGroup;
+  
   // Review Mode Helpers
   let correctOptions = [];
-  if (hasSubmitted) {
+  if (shouldPaintColors) {
       if (Array.isArray(q.correctAnswer)) correctOptions = q.correctAnswer.map(Number);
       else correctOptions = [parseInt(q.correctAnswer)]; 
   }
@@ -1607,24 +1822,27 @@ function renderAnswerArea(q) {
   if (q.type === 'mcq') {
     const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
     for (let i = 1; i <= no; i++) {
-      const b = document.createElement('button'); b.className = 'opt-btn'; b.disabled = hasSubmitted; 
+      const b = document.createElement('button'); b.className = 'opt-btn'; 
+      b.disabled = hasSubmitted || isLockedInGroup; 
+      
       if (ans && ans.selected === i) b.classList.add('selected');
       
       // Paint Review Colors
-      if (hasSubmitted) {
+      if (shouldPaintColors) {
           if (correctOptions.includes(i)) b.classList.add('correct-ans');
           else if (ans && ans.selected === i && !correctOptions.includes(i)) b.classList.add('wrong-ans');
       }
 
       b.innerHTML = `<div class="opt-key">${lbls[i-1]}</div><span>Option ${lbls[i-1]}</span>`;
-      if(!hasSubmitted) b.onclick = () => { ans.selected = i; renderAnswerArea(q); }; grid.appendChild(b);
+      if(!hasSubmitted && !isLockedInGroup) b.onclick = () => { ans.selected = i; renderAnswerArea(q); }; grid.appendChild(b);
     }
     area.innerHTML = ''; area.appendChild(grid);
   } else {
     area.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'nat-input'; inp.type = 'text'; inp.placeholder = '0.00';
-    if (ans && ans.selected) inp.value = ans.selected; inp.disabled = hasSubmitted;
+    if (ans && ans.selected) inp.value = ans.selected; 
+    inp.disabled = hasSubmitted || isLockedInGroup;
     
-    if (hasSubmitted) {
+    if (shouldPaintColors) {
         const isC = String(q.correctAnswer).trim() === String(ans?.selected).trim();
         inp.classList.add(isC ? 'correct-ans' : 'wrong-ans');
         const corrTxt = document.createElement('div'); corrTxt.innerHTML = `Correct Answer: <b style="font-size:20px;">${q.correctAnswer}</b>`;
