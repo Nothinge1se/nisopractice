@@ -70,7 +70,6 @@
   /* --- FILE PROGRESS UI --- */
   .progress-container { display: flex; flex-direction: column; gap: 12px; padding: 20px; background: var(--bg); border-radius: 16px; border: 2px solid var(--accent); box-shadow: 0 0 20px rgba(99,102,241,0.2); }
   .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 10px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-  /* Notice the fluid easing on the fill! */
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px var(--accent-glow); }
   .progress-text { font-size: 14px; color: var(--text); font-weight: 800; text-align: center; font-family: 'Outfit'; letter-spacing: 0.5px;}
   .progress-sub { font-size: 12px; color: var(--text2); font-weight: 600; text-align: center; font-family: 'Outfit';}
@@ -117,7 +116,7 @@
   .opt-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 600; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
   .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface2); }
   .opt-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); box-shadow: 0 0 0 2px var(--accent-glow), inset 0 2px 5px rgba(0,0,0,0.2); }
-  .opt-key { width: 32px; height: 32px; border-radius: 8px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: var(--text2);}
+  .opt-key { width: 32px; height: 32px; border-radius: 8px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: var(--text2); flex-shrink: 0;}
   .opt-btn.selected .opt-key { background: var(--accent); color: white; }
   
   .opt-btn.correct-ans { border-color: var(--ans) !important; background: rgba(16, 185, 129, 0.15) !important; color: white;}
@@ -159,10 +158,12 @@
   .widget.minimized .widget-body { display: none; }
 
   .chat-wrapper { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; }
-  .chat-msgs { flex: none; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500; height: 350px; max-height: 350px;}
+  .chat-msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
   .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word; flex-shrink: 0;}
   .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
-  .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); flex-shrink: 0; }
+  
+  /* Padded bottom strictly for mobile keyboards and home bars */
+  .chat-input-wrap { display: flex; padding: 12px; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--surface2); border-top: 1px solid var(--border); flex-shrink: 0; }
   .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit'; min-width: 0;}
   .chat-input-wrap input:focus { border-color: var(--accent); }
   .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase; flex-shrink: 0;}
@@ -210,11 +211,11 @@
   .mob-menu-btn { display: none; font-size: 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: white; flex-shrink: 0;}
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
-  #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
+  #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 200; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
   #mob-chat-wrapper.show-mob { bottom: 0; display: flex !important; } 
 
   /* FAB Buttons */
-  .mobile-fab { position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .mobile-fab { position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; display: none; }
   .mobile-fab:active { transform: scale(0.9); }
   #mob-chat-fab { bottom: 85px; background: var(--accent); }
   #mob-group-fab { bottom: 155px; background: var(--accent2); }
@@ -240,7 +241,11 @@
     .btm-left, .btm-right { width: 100%; justify-content: space-between; }
     .action-btn { flex: 1; padding: 10px 8px; font-size: 12px; text-align: center; justify-content: center;}
     
-    .opts-grid { grid-template-columns: 1fr; }
+    /* 2 Column Mobile Grid constraint */
+    .opts-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+    .opt-btn { padding: 8px 12px !important; font-size: 13px !important; justify-content: flex-start; }
+    .opt-key { width: 28px !important; height: 28px !important; font-size: 13px !important; flex-shrink: 0; }
+
     .lobby-grid { grid-template-columns: 1fr; }
     .q-scroll { padding: 60px 16px 16px; }
     .ans-area { padding: 16px 12px; }
@@ -478,7 +483,10 @@
                   <div class="toggle-label" style="font-size:11px; color:var(--text2);">Color Sidebar Bar <small>Show red/green segments</small></div>
                   <label class="toggle-switch"><input type="checkbox" id="cfg-color-sidebar" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
                 </div>
-                
+                <div class="toggle-row">
+                  <div class="toggle-label">Compact Group UI <small>Mobile: Move progress to answers</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-compact-group" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
                 <div class="toggle-row">
                   <div class="toggle-label">Race Progress Bar 🏎️ <small>Bottom progress background tracking</small></div>
                   <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
@@ -536,7 +544,7 @@
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card spring-anim" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column; max-width: none;">
+      <div class="glass-card spring-anim" style="padding: 16px; flex: 1; min-height: 350px; display:flex; flex-direction:column; max-width: none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span class="label-title" style="margin:0;">Players</span>
           <span style="font-family:'Outfit'; font-weight:900; font-size:16px; color:var(--text); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
@@ -545,7 +553,7 @@
         <button class="btn btn-primary spring-anim" id="btn-ready-up" style="margin-top:16px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.toggleReady()">I'm Ready</button>
       </div>
 
-      <div class="glass-card spring-anim" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column; max-width: none;">
+      <div class="glass-card spring-anim" style="padding: 0; flex: 1; min-height: 350px; display:flex; flex-direction:column; max-width: none;">
         <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
         <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 16px;"></div>
         <div class="chat-input-wrap" style="padding: 12px 16px; gap:6px;">
@@ -608,6 +616,9 @@
         </div>
         <button id="btn-img-fit" onclick="window.toggleImgFit()" title="Fit/Free image" style="position:absolute; top:8px; right:8px; z-index:5; background:rgba(17,19,28,0.85); border:1px solid var(--border); border-radius:8px; color:var(--text2); padding:4px 8px; font-size:12px; font-family:'Outfit'; font-weight:700; backdrop-filter:blur(4px);">⤢ FIT</button>
       </div>
+
+      <!-- Compact Group Area Injected Right Above Options -->
+      <div id="compact-group-container" style="display:none; flex-direction:column; padding: 12px 20px 0; background:var(--surface); border-top: 1px solid var(--border); z-index:10; flex-shrink:0;"></div>
 
       <div class="ans-area" id="answer-area">
         <!-- Rendered via JS -->
@@ -736,7 +747,7 @@
   <div id="mob-chat-wrapper">
       <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
-  <button id="mob-chat-fab" class="mobile-fab spring-anim" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
+  <button id="mob-chat-fab" class="mobile-fab spring-anim">💬</button>
 
   <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
       <div class="widget-header">
@@ -745,11 +756,11 @@
       </div>
       <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
   </div>
-  <button id="mob-group-fab" class="mobile-fab spring-anim" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🤝</button>
+  <button id="mob-group-fab" class="mobile-fab spring-anim">🤝</button>
 
   <script>
     (function(){
-      // Sync draggable logic for both mobile buttons
+      // Robust draggable logic + clean click detection
       ['mob-chat-fab', 'mob-group-fab'].forEach(id => {
           const fab = document.getElementById(id);
           if(!fab) return;
@@ -772,7 +783,16 @@
             e.preventDefault();
           },{passive:false});
           document.addEventListener('touchend', e=>{
-            if(dragging && moved) e.preventDefault();
+            if(!dragging) return;
+            if(!moved) {
+                // Was a click
+                const targetId = id === 'mob-chat-fab' ? 'mob-chat-wrapper' : 'mob-group-wrapper';
+                const wrap = document.getElementById(targetId);
+                if(wrap) wrap.classList.toggle('show-mob');
+                if(e.cancelable) e.preventDefault();
+            } else {
+                if(e.cancelable) e.preventDefault();
+            }
             dragging=false; fab.style.transition='';
           },{passive:false});
       });
@@ -918,7 +938,7 @@ let myName = ""; let roomCode = "";
 
 let roomData = {
     hostId: null, status: 'waiting', testFile: null, testUrl: null, hasCustomFile: false,
-    settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, groupTimeout: 240, showLiveStats: 'false' },
+    settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, groupTimeout: 240, showLiveStats: 'false', compactGroup: 'true' },
     startTime: null, totalQuestions: 0, kickVotes: {}, players: {},
     activeGroupQ: null, activeGroupQStartTime: null, groupResolved: {} 
 };
@@ -1086,6 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             _lastWidthCategory = currentCategory;
             mountChatCore();
         }
+        updateGroupUI(); // Refresh compact toggle
     });
 
     if(window.innerWidth <= 850) { 
@@ -1323,6 +1344,7 @@ function attachHostSettingsListeners() {
         
         roomData.settings.addonProgress = el('cfg-addon-progress').checked ? 'true' : 'false';
         roomData.settings.colorSidebar = el('cfg-color-sidebar').checked ? 'true' : 'false';
+        roomData.settings.compactGroup = el('cfg-compact-group').checked ? 'true' : 'false';
         
         roomData.settings.addonRace = el('cfg-addon-race').checked ? 'true' : 'false';
         roomData.settings.colorRace = el('cfg-color-race').checked ? 'true' : 'false';
@@ -1559,11 +1581,27 @@ function appendChatUI(n, t, isPhoto = false) {
         const b = el(id); if(!b) return;
         const msgDiv = document.createElement('div');
         msgDiv.className = 'msg spring-anim';
-        msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
+        
+        // Initial setup for the transition
+        msgDiv.style.opacity = '0';
+        msgDiv.style.transform = 'scale(0.85) translateY(8px)';
+        if(isMe) {
+            msgDiv.style.borderColor = 'var(--accent)';
+            msgDiv.style.backgroundColor = 'rgba(99,102,241,0.08)';
+        }
+        
         msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
         b.appendChild(msgDiv); 
-        b.scrollTop = b.scrollHeight;
-        requestAnimationFrame(() => { msgDiv.style.transform = 'scale(1) translateY(0)'; msgDiv.style.opacity = '1'; });
+        
+        // Force a synchronous layout reflow so the browser acknowledges the opacity: 0 state
+        void msgDiv.offsetWidth; 
+        
+        // Apply target styles to trigger animation
+        msgDiv.style.opacity = '1';
+        msgDiv.style.transform = 'scale(1) translateY(0)';
+        
+        // Auto scroll
+        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 10);
     });
 }
 window.sendLobbyChatPhoto = async (input) => window.sendChatPhoto(input);
@@ -1783,7 +1821,10 @@ function launchGame() {
         if (!isMobile) {
             el('wid-group-status').style.display = 'flex';
         } else {
-            el('mob-group-fab').style.display = 'flex';
+            // Compact logic is handled in updateGroupUI
+            if(roomData.settings.compactGroup === 'false') {
+                el('mob-group-fab').style.display = 'flex';
+            }
         }
         
     } else {
@@ -1791,6 +1832,7 @@ function launchGame() {
         el('btm-bar-group').style.display = 'none';
         el('wid-group-status').style.display = 'none';
         el('mob-group-fab').style.display = 'none';
+        if(el('compact-group-container')) el('compact-group-container').style.display = 'none';
     }
 
     if(roomData.testFile) {
@@ -2045,7 +2087,10 @@ function updateGroupUI() {
     const players = Object.values(roomData.players);
     const { ops: correctOps, label: correctAnsStr } = getCorrectInfo(q);
     
-    let html = '';
+    let desktopHtml = '';
+    let mobileCompactHtml = '';
+    let correctAnswerHtml = '';
+
     players.forEach(p => {
         const pAns = (p.groupAnswers || {})[q.id];
         const hasAnswered = pAns !== undefined && pAns !== null;
@@ -2078,7 +2123,8 @@ function updateGroupUI() {
         const totalQ = roomData.totalQuestions || 1;
         const barHtml = generateProgressBarHtml(p, totalQ, roomData.settings.colorSidebar);
 
-        html += `<div class="spring-anim" style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
+        // Standard widget block
+        desktopHtml += `<div class="spring-anim" style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px; color: ${p.name===myName?'var(--accent)':'var(--text)'};">${p.name}</span>
                 <span style="font-size:12px; color:${cColor}; font-weight:800; background:var(--surface2); padding:4px 8px; border-radius:6px; border:1px solid ${cColor};">${ansText} ${cIcon}</span>
@@ -2087,18 +2133,48 @@ function updateGroupUI() {
                 ${barHtml}
             </div>
         </div>`;
+
+        // Slim Compact mode block (Mobile Only)
+        mobileCompactHtml += `<div class="spring-anim" style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+            <div style="font-family:'Outfit'; font-weight:800; font-size:13px; color:${p.name===myName?'var(--accent)':'var(--text)'}; width:75px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+            <div class="progress-wrap" style="flex:1; height:8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden; border-radius:4px;">
+                ${barHtml}
+            </div>
+            <div style="font-size:14px; width:20px; text-align:right;">${cIcon}</div>
+        </div>`;
     });
 
     if (isResolved) {
         const dispAns = correctAnsStr || '—';
-        html += `<div class="spring-anim" style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
+        correctAnswerHtml = `<div class="spring-anim" style="margin-top:8px; margin-bottom:8px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
             <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
             <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${dispAns}</div>
         </div>`;
     }
     
-    if(el('group-status-list')) el('group-status-list').innerHTML = html;
-    if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
+    // Inject Desktop / General Widgets
+    if(el('group-status-list')) el('group-status-list').innerHTML = desktopHtml + correctAnswerHtml;
+    
+    // Handle Mobile Compact Mode Logic
+    const compactContainer = el('compact-group-container');
+    const mobFab = el('mob-group-fab');
+    const useCompact = window.innerWidth <= 850 && roomData.settings.compactGroup === 'true';
+
+    if (useCompact) {
+        if(compactContainer) {
+            compactContainer.innerHTML = mobileCompactHtml + correctAnswerHtml;
+            compactContainer.style.display = 'flex';
+        }
+        if(el('mob-group-list')) el('mob-group-list').innerHTML = ''; // Clear it to save dom updates
+        if(mobFab) mobFab.style.display = 'none';
+        
+        // Safety close if it was accidentally left open
+        if(el('mob-group-wrapper')) el('mob-group-wrapper').classList.remove('show-mob');
+    } else {
+        if(compactContainer) compactContainer.style.display = 'none';
+        if(el('mob-group-list')) el('mob-group-list').innerHTML = desktopHtml + correctAnswerHtml;
+        if(mobFab) mobFab.style.display = 'flex';
+    }
 
     if (isResolved && !window.localResolvedTracker[q.id]) {
         window.localResolvedTracker[q.id] = true;
