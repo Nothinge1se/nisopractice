@@ -35,13 +35,16 @@
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
   body { background-color: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
   
-  button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: none; outline: none; }
+  /* SPRING ANIMATION BASE */
+  .spring-anim { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  
+  button { cursor: pointer; border: none; outline: none; }
   button:active:not(:disabled) { transform: scale(0.95); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* --- SHARED MENUS & CARDS --- */
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: radial-gradient(circle at top, #11131c 0%, #07080c 100%); z-index: 10; padding: 40px 20px; overflow-y: auto; }
-  .screen.hidden { display: none !important; }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: radial-gradient(circle at top, #11131c 0%, #07080c 100%); z-index: 10; padding: 40px 20px; overflow-y: auto; transition: opacity 0.3s; }
+  .screen.hidden { display: none !important; opacity: 0; pointer-events: none; }
   
   .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 8vw, 64px); font-weight: 900; background: linear-gradient(135deg, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(99,102,241,0.2); }
   .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
@@ -49,7 +52,7 @@
   .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: clamp(20px, 5vw, 32px); width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
   .card-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; color: #fff;}
 
-  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: white; padding: 16px; font-size: 16px; font-weight: 700; outline: none; width: 100%; transition: all 0.2s; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
+  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: white; padding: 16px; font-size: 16px; font-weight: 700; outline: none; width: 100%; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
   .input-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 4px 10px rgba(0,0,0,0.3); }
 
   .btn { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 800; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;}
@@ -57,6 +60,8 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border:none;}
   .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6); }
 
+  .paper-btn { justify-content: flex-start; padding: 16px; font-size: 14px; text-transform: none; font-weight: 700; }
+  
   .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
   .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.08); }
 
@@ -87,7 +92,7 @@
   .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
   /* DOCK PANELS */
-  .dock-panel { display: none; flex-direction: column; width: 300px; min-width: 300px; max-width: 300px; background: var(--surface); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden; flex-shrink: 0; }
+  .dock-panel { display: none; flex-direction: column; width: 300px; min-width: 300px; max-width: 300px; background: var(--surface); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden; flex-shrink: 0; transition: transform 0.3s; }
   #left-dock { border-right: 1px solid var(--border); }
   #right-dock { display: none !important; } 
 
@@ -176,19 +181,19 @@
   #group-status-list { height: auto; max-height: 400px; overflow-y: auto; }
 
   /* Lobby Grid Layout (Responsive Expansion) */
-  .lobby-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
+  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
   .lobby-left, .lobby-right { display: flex; flex-direction: column; gap: 20px; }
   
   .config-row { margin-bottom: 16px; }
   .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 14px; font-family: 'Outfit';}
   
-  .cfg-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 14px; }
+  .cfg-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px; }
 
   .kick-btn { background: var(--unans); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); }
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
 
   .join-wrap { display: flex; gap: 12px; width: 100%; }
-  .room-code { font-family: 'Outfit', monospace; font-size: clamp(32px, 8vw, 48px); font-weight: 900; color: #ffffff; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 16px; border: 2px solid var(--border); text-align: center; letter-spacing: clamp(4px, 2vw, 8px); cursor: pointer; transition: all 0.3s ease; width: 100%; margin-bottom: 8px; }
+  .room-code { font-family: 'Outfit', monospace; font-size: clamp(32px, 8vw, 48px); font-weight: 900; color: #ffffff; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 16px; border: 2px solid var(--border); text-align: center; letter-spacing: clamp(4px, 2vw, 8px); transition: all 0.3s ease; width: 100%; margin-bottom: 8px; }
 
   /* Modals */
   .modal-layer { position: absolute; inset: 0; background: rgba(7, 8, 12, 0.9); z-index: 60; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); display: none; padding: 20px;}
@@ -204,7 +209,7 @@
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
   #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
-  #mob-chat-wrapper.show-mob { bottom: 0; display: flex !important; } /* Only active when toggled explicitly */
+  #mob-chat-wrapper.show-mob { bottom: 0; display: flex !important; } 
 
   /* FAB Buttons */
   .mobile-fab { position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
@@ -212,16 +217,8 @@
   #mob-chat-fab { bottom: 85px; background: var(--accent); }
   #mob-group-fab { bottom: 155px; background: var(--accent2); }
 
-  /* SECURITY: Ensure mobile floating elements NEVER appear on Desktop */
   @media (min-width: 851px) {
-    .mobile-fab, #mob-chat-wrapper, #mob-group-wrapper {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        height: 0 !important;
-        width: 0 !important;
-    }
+    .mobile-fab, #mob-chat-wrapper, #mob-group-wrapper { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; height: 0 !important; width: 0 !important; }
   }
 
   @media (max-width: 850px) {
@@ -245,7 +242,6 @@
     .ans-area { padding: 16px 12px; }
     .q-top-floating { top: 12px; left: 12px; }
 
-    /* Hide desktop widgets */
     #wid-chat-desk { display: none !important; }
     #wid-group-status { display: none !important; }
     .dock-panel { display: none !important; }
@@ -259,20 +255,20 @@
     .screen { padding: 20px 16px; }
   }
 
-  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; animation: slideUp 0.3s ease; pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase;}
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase;}
   .toast.error { border-color: var(--unans); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 
   /* ── LIGHT MODE ── */
   body.light { --bg:#f0f2f8; --surface:#ffffff; --surface2:#e8eaf2; --surface3:#d8dce8; --border:#c4c8da; --text:#0f172a; --text2:#64748b; --not-vis:#94a3b8; }
 
-  /* ── GHOST LETTERS ON DOTS ── */
+  /* ── GHOST LETTERS ── */
   .dot { position: relative; }
   .dot-ghosts { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; pointer-events: none; }
   .dot-ghost-letter { font-size: 7px; font-weight: 900; opacity: 0.55; line-height: 1; font-family: 'Outfit'; color: #fff; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
 
   /* ── TOGGLE SWITCHES ── */
-  .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .toggle-row:last-child { border-bottom: none; }
   .toggle-label { font-family: 'Outfit'; font-size: 13px; font-weight: 700; color: var(--text); }
   .toggle-label small { display: block; color: var(--text2); font-size: 11px; font-weight: 500; margin-top: 2px; }
@@ -282,9 +278,6 @@
   .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--text2); top: 2px; left: 2px; transition: 0.2s; }
   .toggle-switch input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
   .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: white; }
-
-  /* ── DOWNLOAD PROGRESS DETAIL ── */
-  .dl-detail { font-family: 'Outfit'; font-size: 10px; color: var(--accent2); font-weight: 700; text-align: right; letter-spacing: 0.5px; white-space: nowrap; }
 
   /* ── ANALYSIS MODAL ── */
   #analysis-layer { position: fixed; inset: 0; background: rgba(7,8,12,0.97); z-index: 200; display: none; flex-direction: column; }
@@ -323,69 +316,82 @@
 </head>
 <body>
 
-<!-- 1. INTRO SCREEN -->
-<div id="intro-screen" class="screen">
+<!-- 1. MERGED INTRO/HOST SCREEN -->
+<div id="intro-screen" class="screen spring-anim">
   <div style="margin-top: 4vh;"></div>
   <div class="hero-title">NPRAQ</div>
   <div class="hero-sub">Live CBT Multiplayer</div>
   
-  <div class="glass-card" id="intro-card" style="max-width: 500px;">
-    <div class="card-title">Join or Host Room</div>
-    <input type="text" id="player-name" class="input-styled" placeholder="Enter your Name" maxlength="15">
-    <div class="join-wrap">
-      <input type="text" id="join-code" class="input-styled" placeholder="CODE" style="text-transform: uppercase; letter-spacing: 2px; font-weight: 800;" maxlength="6">
-      <button class="btn btn-primary" id="btn-join-room" style="flex: 0 0 110px;">Join</button>
-    </div>
-    <div style="text-align:center; color:var(--text2); font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing: 2px; margin: 4px 0;">Or Create New</div>
-    <button class="btn" id="btn-host-screen" style="border-color: var(--accent); color: var(--accent); box-shadow: inset 0 0 10px rgba(99,102,241,0.1);">Host a Room</button>
-    
-    <div style="height: 1px; background: var(--border); margin: 4px 0; opacity: 0.5;"></div>
-    <button class="btn" onclick="window.location.href='https://nisopractice.vercel.app'" style="background: transparent; border-color: var(--border); color: var(--text2); font-size: 14px; padding: 12px;">Solo Practice (Singleplayer)</button>
+  <div class="lobby-grid">
+      <!-- Left: Identity & Actions -->
+      <div class="lobby-left" id="intro-left-card">
+          <div class="glass-card spring-anim">
+             <div class="card-title" style="font-size:20px;">Join a Room</div>
+             <input type="text" id="player-name" class="input-styled spring-anim" placeholder="Enter your Name" maxlength="15">
+             <div class="join-wrap">
+               <input type="text" id="join-code" class="input-styled spring-anim" placeholder="CODE" style="text-transform: uppercase; letter-spacing: 2px; font-weight: 800;" maxlength="6">
+               <button class="btn btn-primary spring-anim" id="btn-join-room" style="flex: 0 0 110px;">Join</button>
+             </div>
+             
+             <div style="height: 1px; background: var(--border); margin: 8px 0; opacity: 0.5;"></div>
+             
+             <div class="card-title" style="font-size:20px; color:var(--accent2);">Host a Room</div>
+             <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-8px; font-family:'Outfit';">Select a paper from the list first</div>
+             <button class="btn btn-primary spring-anim" id="btn-host-trigger" style="background:var(--accent2); border-color:var(--accent2);">Host New Match</button>
+             
+             <div style="height: 1px; background: var(--border); margin: 4px 0; opacity: 0.5;"></div>
+             <button class="btn spring-anim" onclick="window.location.href='https://nisopractice.vercel.app'" style="background: transparent; border-color: var(--border); color: var(--text2); font-size: 14px; padding: 12px;">Solo Practice (Singleplayer)</button>
+          </div>
+      </div>
+      
+      <!-- Right: File Selection or Progress -->
+      <div class="lobby-right">
+          <div class="glass-card spring-anim" id="file-select-card">
+             <div class="card-title" style="font-size:20px; text-align:left;">Select Test Paper</div>
+             <div style="display:flex; flex-direction:column; gap:10px;">
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../1D.niso', this)">🚀 Demo Module (NEET)</button>
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../TOP_200_PYQ_2021_JEE.niso', this)">🚀 2021 Top 200 PYQ</button>
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../TOP_200_PYQ_2022_JEE.niso', this)">🚀 2022 Top 200 PYQ</button>
+             </div>
+             <div class="upload-zone spring-anim" id="upload-zone">
+               <div style="font-family:'Outfit'; font-weight:900; font-size:16px; margin-bottom: 6px; color: var(--text); text-transform: uppercase; letter-spacing: 1px;">Upload Custom (.niso)</div>
+               <div style="font-size: 12px; color: var(--text2); font-weight:600;">Secure P2P transfer, no server uploads</div>
+               <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
+             </div>
+          </div>
+          
+          <div class="glass-card spring-anim" style="display:none;" id="host-file-progress">
+             <div class="progress-container">
+                 <div class="progress-text" id="host-file-status">Processing File...</div>
+                 <div class="progress-wrap" style="height:12px;"><div class="progress-fill" id="host-file-fill"></div></div>
+                 <div class="progress-sub" id="host-file-sub">Please wait...</div>
+             </div>
+          </div>
+      </div>
   </div>
 </div>
 
-<!-- 2. HOST SELECT FILE SCREEN -->
-<div id="host-screen" class="screen hidden">
-  <div class="hero-title" style="font-size: clamp(28px, 6vw, 40px); margin-bottom: 20px;">Select Test Paper</div>
-  <div class="glass-card" style="max-width: 500px;" id="file-select-card">
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 16px;">
-      <button class="btn" onclick="window.hostSelectOnline('../1D.niso')">🚀 Demo Module (NEET)</button>
-      <button class="btn" onclick="window.hostSelectOnline('../TOP_200_PYQ_2021_JEE.niso')">🚀 2021 Top 200 PYQ</button>
-      <button class="btn" onclick="window.hostSelectOnline('../TOP_200_PYQ_2022_JEE.niso')">🚀 2022 Top 200 PYQ</button>
-    </div>
-    <div class="upload-zone" id="upload-zone">
-      <div style="font-family:'Outfit'; font-weight:900; font-size:18px; margin-bottom: 8px; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px;">Or Upload Custom File</div>
-      <div style="font-size: 13px; color: var(--text2); font-weight:600;">(.zip / .niso) - Secure P2P transfer</div>
-      <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
-    </div>
+<!-- 2. LOBBY SCREEN -->
+<div id="lobby-screen" class="screen hidden spring-anim">
+  <div style="width:100%; max-width:1100px; display:flex; justify-content:flex-start; margin-bottom:10px;">
+      <button class="btn spring-anim" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.location.reload()">← Back / Leave</button>
   </div>
   
-  <div class="glass-card" style="max-width: 500px; display:none;" id="host-file-progress">
-       <div class="progress-container">
-           <div class="progress-text" id="host-file-status">Processing File...</div>
-           <div class="progress-wrap" style="height:12px;"><div class="progress-fill" id="host-file-fill"></div></div>
-           <div class="progress-sub" id="host-file-sub">Please wait...</div>
-       </div>
-  </div>
-</div>
-
-<!-- 3. LOBBY SCREEN -->
-<div id="lobby-screen" class="screen hidden">
   <div class="hero-title" style="font-size: clamp(28px, 6vw, 40px); margin-bottom:4px;" id="lobby-title">Room Lobby</div>
   <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2); margin-bottom: 20px;">Connecting to Peer Network...</div>
   
   <div class="lobby-grid">
     <!-- LEFT: Settings -->
     <div class="lobby-left">
-      <div class="glass-card" style="padding: 20px;">
+      <div class="glass-card spring-anim" style="padding: 20px;">
         <div class="label-title" style="text-align:center; font-size: 13px;">Invite Friends</div>
         <div style="width: 100%; display: flex; justify-content: center;">
-            <div class="room-code" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
+            <div class="room-code spring-anim" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
         </div>
-        <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click to copy join link</div>
+        <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click code to copy join link</div>
       </div>
 
-      <div class="glass-card" style="padding: 16px; display:none; max-width: none;" id="host-controls">
+      <div class="glass-card spring-anim" style="padding: 16px; display:none; max-width: none;" id="host-controls">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
           <div class="card-title" style="font-size:17px; margin:0; color:var(--accent2);">⚙️ Configuration</div>
         </div>
@@ -394,10 +400,10 @@
         <div class="config-row">
           <label class="label-title">Sections</label>
           <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <button id="sec-mode-all" onclick="window.setSectionMode('all')" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--accent); border:2px solid var(--accent); color:white;">ALL</button>
-            <button id="sec-mode-custom" onclick="window.setSectionMode('custom')" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--surface2); border:2px solid var(--border); color:var(--text);">CUSTOM</button>
+            <button id="sec-mode-all" onclick="window.setSectionMode('all')" class="spring-anim" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--accent); border:2px solid var(--accent); color:white;">ALL</button>
+            <button id="sec-mode-custom" onclick="window.setSectionMode('custom')" class="spring-anim" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--surface2); border:2px solid var(--border); color:var(--text);">CUSTOM</button>
           </div>
-          <select id="cfg-sections" class="config-select" multiple style="height:72px; display:none;"></select>
+          <select id="cfg-sections" class="config-select spring-anim" multiple style="height:72px; display:none;"></select>
         </div>
 
         <!-- Timer row -->
@@ -420,9 +426,9 @@
         <div class="cfg-grid-container">
 
           <!-- GROUP: Gameplay Features -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
-            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🎮 Gameplay <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 14px 10px;">
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🎮 Gameplay <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 12px 8px;">
               <div class="toggle-row">
                 <div class="toggle-label">Live Fair-Play Stats <small>Correct/wrong fraction bars on dots</small></div>
                 <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
@@ -447,9 +453,9 @@
           </details>
 
           <!-- GROUP: Display Addons -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
-            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🧩 Addons <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 14px 10px;">
+          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🧩 Addons <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 12px 8px;">
               <div class="toggle-row">
                 <div class="toggle-label">Live Progress Sidebar <small>Player attempt bars in sidebar</small></div>
                 <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
@@ -482,9 +488,9 @@
           </details>
 
           <!-- GROUP: Post-Game -->
-          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; height: max-content;">
-            <summary style="padding:10px 14px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">📊 Post-Game <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 14px 10px; display:flex; flex-direction:column;">
+          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">📊 Post-Game <span style="color:var(--accent);">▾</span></summary>
+            <div style="padding:0 12px 8px; display:flex; flex-direction:column;">
               <div class="toggle-row">
                 <div class="toggle-label">Detailed Time Analysis <small>Per-Q time breakdown table</small></div>
                 <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
@@ -497,10 +503,10 @@
           </details>
 
         </div>
-        <button class="btn btn-primary" id="btn-start-game" disabled>🚀 Start Match</button>
+        <button class="btn btn-primary spring-anim" id="btn-start-game" disabled>🚀 Start Match</button>
       </div>
 
-      <div class="glass-card" style="padding: 20px; max-width: none;" id="player-view-cfg">
+      <div class="glass-card spring-anim" style="padding: 20px; max-width: none;" id="player-view-cfg">
         <div class="card-title" style="font-size:18px; margin-bottom:16px; color:var(--text2); text-transform:uppercase;">Room Settings</div>
         <div style="font-size:14px; font-weight:700; line-height:1.8; font-family:'Outfit'; background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
           <span style="color:var(--text2);">PAPER:</span> <span id="view-file" style="color:white; word-break: break-all;">...</span><br>
@@ -513,31 +519,31 @@
 
     <!-- RIGHT: Players & Chat -->
     <div class="lobby-right">
-      <div class="glass-card" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column; max-width: none;">
+      <div class="glass-card spring-anim" style="padding: 16px; flex: 1; max-height: 400px; display:flex; flex-direction:column; max-width: none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span class="label-title" style="margin:0;">Players</span>
           <span style="font-family:'Outfit'; font-weight:900; font-size:16px; color:var(--text); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
         </div>
         <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; padding-right: 4px;"></div>
-        <button class="btn btn-primary" id="btn-ready-up" style="margin-top:16px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.toggleReady()">I'm Ready</button>
+        <button class="btn btn-primary spring-anim" id="btn-ready-up" style="margin-top:16px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.toggleReady()">I'm Ready</button>
       </div>
 
-      <div class="glass-card" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column; max-width: none;">
+      <div class="glass-card spring-anim" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column; max-width: none;">
         <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
         <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 16px;"></div>
         <div class="chat-input-wrap" style="padding: 12px 16px; gap:6px;">
           <input type="text" id="lobby-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()" style="flex:1; min-width:0;">
           <input type="file" id="lobby-chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendLobbyChatPhoto(this)">
           <button id="btn-lobby-chat-photo" onclick="document.getElementById('lobby-chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
-          <button onclick="window.sendLobbyChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
+          <button class="spring-anim" onclick="window.sendLobbyChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 4. MAIN APP SCREEN -->
-<div id="app">
+<!-- 3. MAIN APP SCREEN -->
+<div id="app" class="spring-anim">
   <div class="header" style="height:auto; flex-direction:column; padding:0;">
     <div style="display:flex; align-items:center; justify-content:space-between; padding:0 10px; height:50px; width:100%; gap:8px;">
       <div style="display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden;">
@@ -554,35 +560,34 @@
           <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
           <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
         </div>
-        <button onclick="document.body.classList.toggle('light')" title="Light/Dark" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 7px; font-size:13px; color:var(--text); flex-shrink:0;">☀️</button>
-        <button class="btn btn-primary" style="padding:7px 12px; font-size:12px; width:auto; border-radius:9px; flex-shrink:0;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
+        <button class="spring-anim" onclick="document.body.classList.toggle('light')" title="Light/Dark" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 7px; font-size:13px; color:var(--text); flex-shrink:0;">☀️</button>
+        <button class="btn btn-primary spring-anim" style="padding:7px 12px; font-size:12px; width:auto; border-radius:9px; flex-shrink:0;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
         <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
       </div>
     </div>
   </div>
 
-  <!-- Review Banner (Post-submit non-intrusive header) -->
-  <div class="review-banner" id="review-banner">
+  <!-- Review Banner -->
+  <div class="review-banner spring-anim" id="review-banner">
       <div style="display:flex; align-items:center; gap:12px;">
          <span>👀 <b>Review Mode</b> (Test Submitted)</span>
          <span style="font-size:12px; color:var(--text2);">Green = Correct, Red = Wrong</span>
       </div>
-      <button class="btn-primary" style="padding: 6px 12px; border-radius:8px; font-size: 13px;" onclick="window.showFinalResults(true)">🏆 View Results</button>
+      <button class="btn-primary spring-anim" style="padding: 6px 12px; border-radius:8px; font-size: 13px;" onclick="window.showFinalResults(true)">🏆 View Results</button>
   </div>
 
   <div class="main-stage">
     
-    <!-- LEFT DOCK FOR GENERIC WIDGETS -->
-    <div id="left-dock" class="dock-panel"></div>
+    <!-- LEFT DOCK FOR CHAT & GROUP PROGRESS -->
+    <div id="left-dock" class="dock-panel spring-anim"></div>
 
     <div class="q-area">
-      <!-- FLOATING Q INDICATOR -->
       <div class="q-top-floating">
          <div style="display:flex; gap:8px; align-items:center;">
              <div class="q-badge" id="q-num-badge">Q1</div>
              <div class="q-badge" id="q-type-badge" style="background: rgba(45, 51, 74, 0.85); color: var(--text2); border-color: var(--border);">MCQ</div>
          </div>
-         <div id="per-q-timer-wrap" class="timer-float" style="display:none;">⏱ <span id="per-q-timer">0s</span></div>
+         <div id="per-q-timer-wrap" class="timer-float spring-anim" style="display:none;">⏱ <span id="per-q-timer">0s</span></div>
       </div>
       
       <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column;">
@@ -603,28 +608,26 @@
         <div id="race-bar-names"></div>
 
         <div class="btm-content-wrap">
-            <!-- Standard Bottom Bar Options -->
             <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
                 <div class="btm-left">
-                  <button class="action-btn mark" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
-                  <button class="action-btn" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+                  <button class="action-btn mark spring-anim" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
+                  <button class="action-btn spring-anim" id="btn-clear" onclick="window.clearResponse()">Clear</button>
                 </div>
                 <div class="btm-right">
-                  <button class="action-btn" id="btn-back" onclick="window.navigate(-1)">← Back</button>
-                  <button class="action-btn save" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+                  <button class="action-btn spring-anim" id="btn-back" onclick="window.navigate(-1)">← Back</button>
+                  <button class="action-btn save spring-anim" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
                 </div>
             </div>
             
-            <!-- Group Practice Bottom Bar -->
             <div id="btm-bar-group" style="display:none; width:100%; justify-content:space-between; align-items:center;">
                 <div class="btm-left">
-                     <button class="action-btn" id="btn-group-back" onclick="window.navigate(-1)">← Back</button>
+                     <button class="action-btn spring-anim" id="btn-group-back" onclick="window.navigate(-1)">← Back</button>
                 </div>
                 <div class="btm-right" style="display:flex; gap:10px; align-items:center;">
-                    <button class="action-btn" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
-                    <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
-                    <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
-                    <button class="action-btn save" id="btn-group-next" style="display:none; background:var(--ans); border-color:var(--ans); color:white;" onclick="window.navigate(1)">Next Question →</button>
+                    <button class="action-btn spring-anim" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
+                    <button class="action-btn save spring-anim" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+                    <div id="group-wait-text" class="spring-anim" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
+                    <button class="action-btn save spring-anim" id="btn-group-next" style="display:none; background:var(--ans); border-color:var(--ans); color:white;" onclick="window.navigate(1)">Next Question →</button>
                 </div>
             </div>
         </div>
@@ -632,54 +635,49 @@
     </div>
     
     <!-- RIGHT DOCK FOR GENERIC WIDGETS -->
-    <div id="right-dock" class="dock-panel"></div>
+    <div id="right-dock" class="dock-panel spring-anim"></div>
 
     <div id="mob-overlay" onclick="window.toggleMobMenu()"></div>
     
-    <div class="sidebar" id="main-sidebar">
+    <div class="sidebar spring-anim" id="main-sidebar">
       <!-- Navigator Wrapped in a Widget -->
-      <div class="widget" id="wid-q-nav">
+      <div class="widget spring-anim" id="wid-q-nav">
           <div class="widget-header">
             <span>📍 Navigator</span> 
             <div class="controls-row">
               <button class="control-btn btn-dock" onclick="window.toggleDock('wid-q-nav', 'left')" title="Dock Left">◨ L</button>
-              
-              <button class="control-btn btn-dock" onclick="window.toggleDock('wid-q-nav', 'sidebar')" title="To Sidebar">☰</button>
+              <button class="control-btn btn-dock" onclick="window.toggleDock('wid-q-nav', 'sidebar')" title="To Right">◨ R</button>
               <button class="control-btn" onclick="window.toggleWidget('wid-q-nav')">Min</button>
             </div>
           </div>
           <div class="widget-body">
               <div class="sec-sel" id="sec-sel-wrap">
-                  <!-- dropdown mode -->
                   <select id="section-select" onchange="window.changeSection()" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:white;font-weight:800;font-size:13px;outline:none;font-family:'Outfit';display:block; text-transform:uppercase; letter-spacing:1px;"><option value="ALL">All Sections</option></select>
-                  <!-- NTA tab mode (hidden by default) -->
                   <div id="section-tabs" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-bottom:4px;"></div>
               </div>
               <div class="grid-wrap" id="q-grid"></div>
           </div>
       </div>
 
-      <!-- New Group Status Widget (Desktop) -->
-      <div class="widget" id="wid-group-status" style="display:none;">
+      <!-- Group Status Widget -->
+      <div class="widget spring-anim" id="wid-group-status" style="display:none;">
         <div class="widget-header">
           <span>🤝 Group Progress</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'left')" title="Dock Left">◨ L</button>
-            
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'sidebar')" title="To Sidebar">☰</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'sidebar')" title="To Right">◨ R</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
           </div>
         </div>
         <div class="widget-body" style="padding:12px; gap:8px;" id="group-status-list"></div>
       </div>
 
-      <div class="widget" id="wid-lb">
+      <div class="widget spring-anim" id="wid-lb">
         <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'left')" title="Dock Left">◨ L</button>
-            
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'sidebar')" title="To Sidebar">☰</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'sidebar')" title="To Right">◨ R</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
           </div>
         </div>
@@ -688,13 +686,12 @@
         </div>
       </div>
 
-      <div class="widget" id="wid-chat-desk" style="border-bottom:none;">
+      <div class="widget spring-anim" id="wid-chat-desk" style="border-bottom:none;">
         <div class="widget-header">
           <span>Live Chat</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'left')" title="Dock Left">◨ L</button>
-            
-            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'sidebar')" title="To Sidebar">☰</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'sidebar')" title="To Right">◨ R</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
           </div>
         </div>
@@ -704,12 +701,11 @@
       </div>
       
       <div style="padding: 16px; background:var(--surface2); border-top:1px solid var(--border); display:none;" id="mob-submit-area">
-        <button class="btn btn-primary" style="width:100%; font-size: 14px; padding: 12px;" id="btn-mob-submit" onclick="window.submitWarningBtn()">Submit Test</button>
+        <button class="btn btn-primary spring-anim" style="width:100%; font-size: 14px; padding: 12px;" id="btn-mob-submit" onclick="window.submitWarningBtn()">Submit Test</button>
       </div>
     </div>
   </div>
 
-  <!-- THE ACTUAL CHAT CORE (Moved around by JS/CSS) -->
   <div id="chat-core-wrapper" class="chat-wrapper" style="display: flex; flex-direction: column; flex: none; height: auto;">
       <div class="widget-header" id="mob-chat-header" style="display:none;">
           <span>Live Chat</span>
@@ -720,18 +716,16 @@
         <input type="text" id="game-chat-input" placeholder="Message..." onkeypress="if(event.key==='Enter') window.sendGameChat()" style="flex:1; min-width:0;">
         <input type="file" id="chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendChatPhoto(this)">
         <button id="btn-chat-photo" onclick="document.getElementById('chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
-        <button onclick="window.sendGameChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
+        <button onclick="window.sendGameChat()" class="spring-anim" style="padding:0 12px; flex-shrink:0;">Send</button>
       </div>
   </div>
 
   <!-- MOBILE FLOATING SHELLS -->
-  <!-- 1. Chat Wrapper -->
   <div id="mob-chat-wrapper">
       <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
-  <button id="mob-chat-fab" class="mobile-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
+  <button id="mob-chat-fab" class="mobile-fab spring-anim" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
 
-  <!-- 2. Group Status Wrapper (Mobile) -->
   <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
       <div class="widget-header">
           <span>🤝 Group Progress</span>
@@ -739,7 +733,7 @@
       </div>
       <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
   </div>
-  <button id="mob-group-fab" class="mobile-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🤝</button>
+  <button id="mob-group-fab" class="mobile-fab spring-anim" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🤝</button>
 
   <script>
     (function(){
@@ -783,8 +777,8 @@
   </script>
 
   <!-- SUBMIT WARNING MODAL -->
-  <div class="modal-layer" id="submit-warning-modal">
-    <div class="glass-card" style="max-width: 400px; text-align:center;">
+  <div class="modal-layer spring-anim" id="submit-warning-modal">
+    <div class="glass-card spring-anim" style="max-width: 400px; text-align:center;">
         <h2 style="font-family:'Syne'; font-size:28px; color:var(--text);">Submit Test?</h2>
         <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); font-size:16px; margin: 10px 0; line-height: 1.8;">
             Attempted: <span id="warn-att" style="color:var(--ans);">0</span><br>
@@ -793,39 +787,39 @@
             Not Visited: <span id="warn-notvis" style="color:var(--not-vis);">0</span>
         </div>
         <div style="display:flex; gap:12px; margin-top:10px;">
-            <button class="btn" onclick="document.getElementById('submit-warning-modal').classList.remove('show')">Cancel</button>
-            <button class="btn btn-primary" onclick="window.forceSubmit()">Yes, Submit</button>
+            <button class="btn spring-anim" onclick="document.getElementById('submit-warning-modal').classList.remove('show')">Cancel</button>
+            <button class="btn btn-primary spring-anim" onclick="window.forceSubmit()">Yes, Submit</button>
         </div>
     </div>
   </div>
 
   <!-- FINAL LEADERBOARD / VICTORY LAYER -->
-  <div class="modal-layer" id="final-results-layer" style="background:var(--bg); z-index:80;">
+  <div class="modal-layer spring-anim" id="final-results-layer" style="background:var(--bg); z-index:80;">
     <div class="hero-title" style="font-size:clamp(32px, 8vw, 56px); margin-bottom:8px;">Live Results 🏆</div>
     <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); text-align:center; margin-bottom:20px;" id="results-wait-text">Waiting for others to finish...</div>
     
-    <div class="glass-card" style="max-width: 650px; width: 100%; max-height:65vh; overflow-y:auto; padding:24px;">
+    <div class="glass-card spring-anim" style="max-width: 650px; width: 100%; max-height:65vh; overflow-y:auto; padding:24px;">
       <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
     
     <div style="display:flex; gap:16px; margin-top:24px; flex-wrap:wrap; justify-content:center;">
-        <button class="btn" style="width:auto; padding: 12px 24px;" onclick="window.enterReviewMode()">👀 See Answers</button>
-        <button class="btn" id="btn-open-analysis" style="width:auto; padding: 12px 24px; display:none; border-color:var(--accent2); color:var(--accent2);" onclick="window.openAnalysis()">📊 Time Analysis</button>
-        <button class="btn btn-primary" style="width:auto; padding: 12px 24px;" onclick="window.location.reload()">Home</button>
+        <button class="btn spring-anim" style="width:auto; padding: 12px 24px;" onclick="window.enterReviewMode()">👀 See Answers</button>
+        <button class="btn spring-anim" id="btn-open-analysis" style="width:auto; padding: 12px 24px; display:none; border-color:var(--accent2); color:var(--accent2);" onclick="window.openAnalysis()">📊 Time Analysis</button>
+        <button class="btn btn-primary spring-anim" style="width:auto; padding: 12px 24px;" onclick="window.location.reload()">Home</button>
     </div>
   </div>
 
 </div>
 
 <!-- ANALYSIS LAYER -->
-<div id="analysis-layer">
+<div id="analysis-layer" class="spring-anim">
   <div class="analysis-header">
     <div style="font-family:'Syne'; font-size:20px; font-weight:900;">📊 Detailed Analysis</div>
-    <button class="btn" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.closeAnalysis()">✕ Close</button>
+    <button class="btn spring-anim" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.closeAnalysis()">✕ Close</button>
   </div>
   <div class="analysis-tabs">
-    <div class="analysis-tab active" id="atab-time" onclick="window.switchAnalysisTab('time')">⏱ Time per Q</div>
-    <div class="analysis-tab" id="atab-summary" onclick="window.switchAnalysisTab('summary')">📋 Summary</div>
+    <div class="analysis-tab active spring-anim" id="atab-time" onclick="window.switchAnalysisTab('time')">⏱ Time per Q</div>
+    <div class="analysis-tab spring-anim" id="atab-summary" onclick="window.switchAnalysisTab('summary')">📋 Summary</div>
   </div>
   <div class="analysis-scroll" id="analysis-body">
     <!-- Rendered by JS -->
@@ -833,7 +827,8 @@
 </div>
 
 <script>
-window.localResolvedTracker = {}; // For one-time toasts in group mode
+window.localResolvedTracker = {}; 
+let selectedFileUrl = null;
 
 // ── PARALLEL DOWNLOADER ──
 async function parallelFetch(url, onProgress, numStreams = 4) {
@@ -928,7 +923,7 @@ let questionTimes = {}; let questionEnterTime = Date.now();
 let correctStreak = 0;
 
 const el = id => document.getElementById(id);
-const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
+const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast spring-anim ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
 const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCase();
 
 // UI Toggles & Setup
@@ -1083,9 +1078,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
     }
     
-    el('btn-host-screen').addEventListener('click', () => {
-        myName = el('player-name').value.trim() || 'Player_' + Math.floor(Math.random()*1000); 
-        el('intro-screen').classList.add('hidden'); el('host-screen').classList.remove('hidden');
+    el('btn-host-trigger').addEventListener('click', async () => {
+        myName = el('player-name').value.trim() || 'Player_' + Math.floor(Math.random()*1000);
+        
+        if(roomData.hasCustomFile && fileBuffer) {
+            el('file-select-card').style.display = 'none';
+            el('intro-left-card').style.display = 'none';
+            await saveToCache(roomData.testFile, fileBuffer);
+            await processFileHost(fileBuffer, false);
+        } else if (selectedFileUrl) {
+            roomData.testUrl = selectedFileUrl; roomData.testFile = selectedFileUrl; roomData.hasCustomFile = false;
+            el('file-select-card').style.display = 'none';
+            el('intro-left-card').style.display = 'none';
+            await processFileHost(selectedFileUrl, true);
+        } else {
+            showToast('error', 'Select a test paper first from the right list!');
+        }
     });
 
     el('btn-join-room').addEventListener('click', () => {
@@ -1101,16 +1109,16 @@ document.addEventListener('DOMContentLoaded', () => {
     el('file-input').addEventListener('change', async (e) => {
         if (e.target.files[0]) {
             const file = e.target.files[0];
-            roomData.testUrl = null; roomData.testFile = file.name; roomData.hasCustomFile = true;
-            
-            el('file-select-card').style.display = 'none';
-            el('host-file-progress').style.display = 'flex';
-            el('host-file-status').textContent = "Reading Local File..."; 
-            el('host-file-fill').style.width = '20%';
+            selectedFileUrl = null; roomData.hasCustomFile = true;
+            roomData.testFile = file.name; roomData.testUrl = null;
             
             fileBuffer = await file.arrayBuffer();
-            await saveToCache(file.name, fileBuffer);
-            await processFileHost(fileBuffer, false);
+            
+            document.querySelectorAll('.paper-btn').forEach(b => {
+                b.style.borderColor = 'var(--border)'; b.style.background = 'var(--surface2)'; b.style.color = 'var(--text)';
+            });
+            el('upload-zone').style.borderColor = 'var(--accent)';
+            el('upload-zone').style.background = 'rgba(99,102,241,0.1)';
         }
     });
 
@@ -1124,11 +1132,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (urlCode && el('join-code')) el('join-code').value = urlCode.toUpperCase();
 });
 
-window.hostSelectOnline = async (url) => { 
-    roomData.testUrl = url; roomData.testFile = url; roomData.hasCustomFile = false; 
-    el('file-select-card').style.display = 'none';
-    await processFileHost(url, true); 
+window.selectPaper = (url, btnElement) => {
+    selectedFileUrl = url; roomData.hasCustomFile = false;
+    document.querySelectorAll('.paper-btn').forEach(b => {
+        b.style.borderColor = 'var(--border)'; b.style.background = 'var(--surface2)'; b.style.color = 'var(--text)';
+    });
+    btnElement.style.borderColor = 'var(--accent)'; btnElement.style.background = 'rgba(99,102,241,0.1)'; btnElement.style.color = 'white';
+    
+    el('upload-zone').style.borderColor = 'var(--border)';
+    el('upload-zone').style.background = 'var(--bg)';
 };
+
 
 async function processFileHost(source, isUrl) {
     el('host-file-progress').style.display = 'flex';
@@ -1163,7 +1177,7 @@ async function processFileHost(source, isUrl) {
         Object.keys(masterSectionMap).forEach(k => { const o = document.createElement('option'); o.value=k; o.textContent=k; o.selected=true; sel.appendChild(o); });
 
         setTimeout(() => {
-            el('host-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
+            el('intro-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
             el('host-controls').style.display = 'block'; el('player-view-cfg').style.display = 'none'; el('btn-ready-up').style.display = 'block'; 
             initPeerAsHost();
         }, 800);
@@ -1172,6 +1186,7 @@ async function processFileHost(source, isUrl) {
         showToast('error', err.message); 
         el('host-file-progress').style.display = 'none';
         el('file-select-card').style.display = 'flex';
+        el('intro-left-card').style.display = 'flex';
     }
 }
 
@@ -1202,9 +1217,14 @@ function initPeerAsHost() {
                     if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
                         const actQ = roomData.activeGroupQ;
                         let allAnswered = true;
-                        for (let id in roomData.players) {
-                            if (!roomData.players[id].groupAnswers || roomData.players[id].groupAnswers[actQ] === undefined) {
-                                allAnswered = false; break;
+                        const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted);
+                        if (activePlayers.length === 0) {
+                            allAnswered = true;
+                        } else {
+                            for (let pl of activePlayers) {
+                                if (!pl.groupAnswers || pl.groupAnswers[actQ] === undefined) {
+                                    allAnswered = false; break;
+                                }
                             }
                         }
                         if (allAnswered && !roomData.groupResolved[actQ]) {
@@ -1454,8 +1474,8 @@ function updateLobbyUI() {
         if(!p.ready) allReady = false;
         let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:160px;"><div class="progress-wrap" style="height:6px;margin:0 0 4px;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</span><span class="dl-detail">${p.progressPct>0&&p.progressPct<100?p.progressPct+'%':''}</span></div></div>`;
         let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
-        if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
-        list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
+        if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn spring-anim" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
+        list.innerHTML += `<div class="spring-anim" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
     });
     
     const me = roomData.players[myId]; const btn = el('btn-ready-up');
@@ -1490,8 +1510,8 @@ function appendChatUI(n, t, isPhoto = false) {
     ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
         const b = el(id); if(!b) return;
         const msgDiv = document.createElement('div');
-        msgDiv.className = 'msg';
-        msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
+        msgDiv.className = 'msg spring-anim';
+        msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
         msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
         b.appendChild(msgDiv); 
         b.scrollTop = b.scrollHeight;
@@ -1545,7 +1565,8 @@ function launchGame() {
         const allKeys = ['ALL', ...Object.keys(sectionMap)];
         allKeys.forEach(k => {
             const t = document.createElement('button');
-            t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap; transition:0.2s;';
+            t.className = 'spring-anim';
+            t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap;';
             t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
             t.dataset.key = k;
             t.onclick = () => {
@@ -1568,11 +1589,25 @@ function launchGame() {
         roomData.groupResolved = {};
     }
     
-    // Apply addons
-    if(roomData.settings.addonProgress !== 'false' && roomData.settings.timerMode !== 'group') el('wid-lb').style.display = '';
-    else el('wid-lb').style.display = 'none';
-    
     const isMobile = window.innerWidth <= 850;
+
+    // DEFAULT DOCKING LOGIC
+    if (!isMobile) {
+        const lDock = el('left-dock');
+        lDock.innerHTML = '';
+        const wChat = el('wid-chat-desk');
+        if (wChat && roomData.settings.addonChat !== 'false') lDock.appendChild(wChat);
+        const wGroup = el('wid-group-status');
+        if (wGroup && roomData.settings.timerMode === 'group') lDock.appendChild(wGroup);
+        const wLb = el('wid-lb');
+        if (wLb && roomData.settings.addonProgress !== 'false' && roomData.settings.timerMode !== 'group') lDock.appendChild(wLb);
+        
+        lDock.style.display = lDock.children.length > 0 ? 'flex' : 'none';
+        
+        // Ensure navigator remains in right sidebar
+        const wNav = el('wid-q-nav');
+        if(wNav && !el('main-sidebar').contains(wNav)) el('main-sidebar').insertBefore(wNav, el('main-sidebar').firstChild);
+    }
     
     if(roomData.settings.addonChat !== 'false') {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = '');
@@ -1622,7 +1657,7 @@ function launchGame() {
     }
 
     if(isMobile) {
-        el('top-stats-mob').style.display = 'flex';
+        el('top-stats-mob') && (el('top-stats-mob').style.display = 'flex');
     }
 
     startTimers(); renderQuestion(); renderSidebar(); 
@@ -1652,6 +1687,24 @@ function startTimers() {
             else { t.textContent = formatTime(r); if(r < 300) t.parentElement.classList.add('ending'); }
         } 
         else { t.textContent = formatTime(correctedElps); }
+
+        // Per Q Timer Accrual Tracker logic
+        if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true' && !hasSubmitted) {
+            const qId = allQuestions[currentQIdx]?.id;
+            const ans = answers[qId];
+            
+            const isGroupMode = roomData.settings.timerMode === 'group';
+            const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
+            const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
+            
+            let activeTime = 0;
+            if (!isFrozenGroup && !isFrozenSolo) {
+                activeTime = Math.round((Date.now() - questionEnterTime) / 1000);
+            }
+            
+            const totalSpent = (questionTimes[qId] || 0) + activeTime;
+            if(el('per-q-timer')) el('per-q-timer').textContent = totalSpent + 's';
+        }
     }, 1000);
 }
 function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
@@ -1723,9 +1776,14 @@ function pushProgressToHost(isFinal = false) {
         if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
             const actQ = roomData.activeGroupQ;
             let allAnswered = true;
-            for (let id in roomData.players) {
-                if (!roomData.players[id].groupAnswers || roomData.players[id].groupAnswers[actQ] === undefined) {
-                    allAnswered = false; break;
+            const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted); // Ignoring early quitters
+            if (activePlayers.length === 0) {
+                allAnswered = true;
+            } else {
+                for (let pl of activePlayers) {
+                    if (!pl.groupAnswers || pl.groupAnswers[actQ] === undefined) {
+                        allAnswered = false; break;
+                    }
                 }
             }
             if (allAnswered && !roomData.groupResolved[actQ]) {
@@ -1814,24 +1872,39 @@ function updateGroupUI() {
             cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
             ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
         }
+        if (p.submitted) {
+            cColor = 'var(--marked)';
+            cIcon = '🏁';
+            ansText = 'Submitted';
+        }
         
         const totalQ = roomData.totalQuestions || 1;
         const pct = Math.round((p.attempted/totalQ)*100);
 
-        html += `<div style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
+        let barInner = `<div class="progress-fill" style="width:${pct}%; background:var(--accent);"></div>`;
+        if (roomData.settings.colorProgress === 'true' && p.liveStats && p.attempted > 0) {
+            const cPct = (p.liveStats.correct / p.attempted) * 100;
+            const wPct = (p.liveStats.wrong / p.attempted) * 100;
+            barInner = `
+                <div style="height:100%; background:var(--ans); width:${cPct}%; ${cPct>0?'border-right:1px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; background:var(--unans); width:${wPct}%;"></div>
+            `;
+        }
+
+        html += `<div class="spring-anim" style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px; color: ${p.name===myName?'var(--accent)':'var(--text)'};">${p.name}</span>
                 <span style="font-size:12px; color:${cColor}; font-weight:800; background:var(--surface2); padding:4px 8px; border-radius:6px; border:1px solid ${cColor};">${ansText} ${cIcon}</span>
             </div>
             <div class="progress-wrap" style="height: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
-                <div class="progress-fill" style="width:${pct}%; background:var(--accent);"></div>
+                ${barInner}
             </div>
         </div>`;
     });
 
     if (isResolved) {
         const dispAns = correctAnsStr || '—';
-        html += `<div style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
+        html += `<div class="spring-anim" style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
             <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
             <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${dispAns}</div>
         </div>`;
@@ -1895,7 +1968,18 @@ window.submitWarningBtn = () => {
 window.forceSubmit = () => {
     el('submit-warning-modal').classList.remove('show');
     if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
-    if(allQuestions[currentQIdx]) { const qId = allQuestions[currentQIdx].id; const spent = Math.round((Date.now()-questionEnterTime)/1000); questionTimes[qId]=(questionTimes[qId]||0)+spent; }
+    if(allQuestions[currentQIdx]) { 
+        const qId = allQuestions[currentQIdx].id; 
+        const ans = answers[qId];
+        const isGroupMode = roomData.settings.timerMode === 'group';
+        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
+        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
+        
+        if(!isFrozenGroup && !isFrozenSolo) {
+            const spent = Math.round((Date.now()-questionEnterTime)/1000); 
+            questionTimes[qId] = (questionTimes[qId]||0)+spent; 
+        }
+    }
     
     pushProgressToHost(true);
     
@@ -2008,10 +2092,18 @@ window.changeSection = () => {
 const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
 window.navigate = (dir, isSaveNext = false) => { 
     if(!hasSubmitted) {
-        const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
         const qId = allQuestions[currentQIdx].id;
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[qId] = (questionTimes[qId] || 0) + spent;
+        const ans = answers[qId]; 
+        if(ans && ans.status === 'not-vis') ans.status = 'unans';
+        
+        const isGroupMode = roomData.settings.timerMode === 'group';
+        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
+        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
+        
+        if(!isFrozenGroup && !isFrozenSolo) {
+            const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+            questionTimes[qId] = (questionTimes[qId] || 0) + spent;
+        }
         questionEnterTime = Date.now();
     }
     resetSaveBtn();
@@ -2028,10 +2120,18 @@ window.navigate = (dir, isSaveNext = false) => {
 };
 window.goToQ = (idx) => { 
     if(!hasSubmitted) {
-        const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
         const qId = allQuestions[currentQIdx].id;
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[qId] = (questionTimes[qId] || 0) + spent;
+        const ans = answers[qId]; 
+        if(ans && ans.status === 'not-vis') ans.status = 'unans';
+        
+        const isGroupMode = roomData.settings.timerMode === 'group';
+        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
+        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
+        
+        if(!isFrozenGroup && !isFrozenSolo) {
+            const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+            questionTimes[qId] = (questionTimes[qId] || 0) + spent;
+        }
         questionEnterTime = Date.now();
     }
     resetSaveBtn();
@@ -2131,10 +2231,6 @@ function updateCompactStats() {
         if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
         if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = overall;
     });
-    if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true' && !hasSubmitted) {
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        if(el('per-q-timer')) el('per-q-timer').textContent = spent + 's';
-    }
 }
 
 let imgFitMode = false;
@@ -2142,7 +2238,7 @@ window.toggleImgFit = () => {
     imgFitMode = !imgFitMode;
     const btn = el('btn-img-fit'); if(btn) btn.textContent = imgFitMode ? '⤡ FREE' : '⤢ FIT';
     document.querySelectorAll('#q-image-container img').forEach(img => {
-        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 260px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 350px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
         else { img.style.maxHeight = ''; img.style.objectFit = ''; img.style.width = ''; }
     });
 };
@@ -2154,11 +2250,11 @@ function renderQuestion() {
   for (const f of q.images) {
     if (imageCache[f]) {
         const img = document.createElement('img'); img.src = imageCache[f];
-        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 260px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 350px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
         imgA.appendChild(img); hasI = true;
     }
   }
-  if (!hasI) imgA.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
+  if (!hasI) imgA.innerHTML = `<div class="spring-anim" style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
   questionEnterTime = Date.now(); 
   renderAnswerArea(q); updateCompactStats();
 }
@@ -2178,7 +2274,7 @@ function renderAnswerArea(q) {
   const shouldGreyOut = isGroupMode && !isViewingActive && !isResolvedInGroup;
   
   if (shouldGreyOut) {
-      area.innerHTML = `<div style="text-align:center; padding: 40px 20px; font-family:'Outfit';">
+      area.innerHTML = `<div class="spring-anim" style="text-align:center; padding: 40px 20px; font-family:'Outfit';">
           <div style="font-size:32px; margin-bottom:12px;">🔒</div>
           <div style="font-size:16px; font-weight:800; color:var(--text2);">Wait for the group to reach this question</div>
       </div>`;
@@ -2190,7 +2286,7 @@ function renderAnswerArea(q) {
   if (q.type === 'mcq') {
     const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
     for (let i = 1; i <= no; i++) {
-      const b = document.createElement('button'); b.className = 'opt-btn'; 
+      const b = document.createElement('button'); b.className = 'opt-btn spring-anim'; 
       b.disabled = hasSubmitted || iAmLockedInGroup || isResolvedInGroup; 
       
       const isLocallySelected = ans && ans.selected === i;
@@ -2213,7 +2309,7 @@ function renderAnswerArea(q) {
     }
     area.innerHTML = ''; area.appendChild(grid);
   } else {
-    area.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'nat-input'; inp.type = 'text'; inp.placeholder = '0.00';
+    area.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'nat-input spring-anim'; inp.type = 'text'; inp.placeholder = '0.00';
     
     if (isGroupMode && myGroupAns && myGroupAns !== 'skipped') inp.value = myGroupAns;
     else if (ans && ans.selected) inp.value = ans.selected; 
@@ -2241,6 +2337,7 @@ function renderAnswerArea(q) {
   // Host: Inject Set Answer Key feature if missing
   if (!hasAnswer && isHost && !hasSubmitted && !isResolvedInGroup) {
       const hostDiv = document.createElement('div');
+      hostDiv.className = "spring-anim";
       hostDiv.style.cssText = "margin-top: 24px; padding: 16px; background: rgba(99,102,241,0.08); border: 2px dashed var(--accent); border-radius: 12px; text-align: center;";
       hostDiv.innerHTML = `<div style="font-size:13px; font-weight:800; color:var(--accent2); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">👑 Host: Set Correct Answer</div>`;
 
@@ -2250,7 +2347,7 @@ function renderAnswerArea(q) {
           const no = q.answerOptions || 4;
           for(let i=1; i<=no; i++) {
               const b = document.createElement('button');
-              b.className = 'action-btn';
+              b.className = 'action-btn spring-anim';
               b.textContent = 'Opt ' + ['A','B','C','D'][i-1];
               b.onclick = () => window.hostSetAnswerKey(q.id, [i]);
               btns.appendChild(b);
@@ -2260,7 +2357,7 @@ function renderAnswerArea(q) {
           const wrp = document.createElement('div'); wrp.style.display = 'flex'; wrp.style.gap = '8px'; wrp.style.justifyContent = 'center';
           wrp.innerHTML = `
               <input type="text" id="host-ans-inp" class="input-styled" style="width:120px; padding:10px; font-size:16px;" placeholder="0.00">
-              <button class="btn btn-primary" style="width:auto; padding:10px 20px;" onclick="window.hostSetAnswerKey('${q.id}', [document.getElementById('host-ans-inp').value.trim()])">Set</button>
+              <button class="btn btn-primary spring-anim" style="width:auto; padding:10px 20px;" onclick="window.hostSetAnswerKey('${q.id}', [document.getElementById('host-ans-inp').value.trim()])">Set</button>
           `;
           hostDiv.appendChild(wrp);
       }
@@ -2271,7 +2368,7 @@ function renderAnswerArea(q) {
 function renderSidebar() {
   const g = el('q-grid'); g.innerHTML = '';
   getSeq().forEach(idx => {
-    const q = allQuestions[idx]; const d = document.createElement('div'); d.className = `dot ${answers[q.id].status}`;
+    const q = allQuestions[idx]; const d = document.createElement('div'); d.className = `dot spring-anim ${answers[q.id].status}`;
     if (idx === currentQIdx) d.classList.add('active'); d.textContent = q.globalNum;
     
     if (!hasSubmitted && roomData && roomData.settings.showLiveStats === 'true') {
@@ -2333,8 +2430,8 @@ function updateRaceBar() {
             fill.style.background = 'transparent';
             fill.style.width = myPct + '%';
             fill.innerHTML = `
-                <div style="height:100%; background:rgba(16,185,129,0.25); width:${cPct}%; border-right:2px solid var(--ans);"></div>
-                <div style="height:100%; background:rgba(239,68,68,0.25); width:${wPct}%; border-right:2px solid var(--unans);"></div>
+                <div style="height:100%; background:rgba(16,185,129,0.25); width:${cPct}%; ${cPct>0?'border-right:2px solid var(--ans);':''}"></div>
+                <div style="height:100%; background:rgba(239,68,68,0.25); width:${wPct}%; ${wPct>0?'border-right:2px solid var(--unans);':''}"></div>
             `;
         } else {
             fill.style.background = 'rgba(99, 102, 241, 0.15)';
@@ -2370,7 +2467,7 @@ function renderSidebarLeaderboard() {
         }
 
         list.innerHTML += `
-            <div class="lb-item ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
+            <div class="lb-item spring-anim ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
                 <div class="lb-top" style="margin-bottom: 12px;">
                   <span class="lb-name" style="font-size: 16px;">${p.name} ${p.submitted?'🏁':''}</span>
                   <span class="lb-stat" style="font-size: 16px;">${p.attempted} / ${roomData.totalQuestions}</span>
@@ -2412,13 +2509,13 @@ window.showFinalResults = (forceShow = false) => {
         if(p.submitted) {
             const med = rank <= 3 ? `<span class="medal">${medals[rank-1]}</span>` : `<span style="font-size:24px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${rank}</span>`;
             const speedTag = roomData.settings.speedBonus === 'true' ? `<div style="font-size:11px; color:var(--accent2); font-weight:700;">⚡ Speed Bonus Active</div>` : '';
-            list.innerHTML += `<div class="lb-result-item ${p.name === myName ? 'me' : ''}">
+            list.innerHTML += `<div class="lb-result-item spring-anim ${p.name === myName ? 'me' : ''}">
                 <div style="display:flex; gap:16px; align-items:center;">${med}<span style="font-size:20px; font-weight:800;">${p.name}</span></div>
                 <div style="text-align:right;"><div style="font-size:24px; color:var(--ans); font-weight:900; font-family:'Outfit';">${p.score} <span style="font-size:12px;color:var(--text2);">marks</span></div><div style="font-size:12px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>${speedTag}</div>
             </div>`;
             rank++;
         } else {
-            list.innerHTML += `<div class="lb-result-item waiting ${p.name === myName ? 'me' : ''}">
+            list.innerHTML += `<div class="lb-result-item waiting spring-anim ${p.name === myName ? 'me' : ''}">
                 <div style="display:flex; gap:16px; align-items:center;"><span style="font-size:20px; color:var(--text2); font-weight:900; font-family:'Outfit';">---</span><span style="font-size:18px; font-weight:600; color:var(--text2);">${p.name}</span></div>
                 <div style="text-align:right; font-family:'Outfit'; font-weight:700; color:var(--text2);">Still Playing...</div>
             </div>`;
@@ -2473,7 +2570,7 @@ function renderAnalysis(mode) {
             const fastest = Object.entries(p.questionTimes||{}).sort((a,b)=>a[1]-b[1])[0];
             const slowest = Object.entries(p.questionTimes||{}).sort((a,b)=>b[1]-a[1])[0];
             const medals = ['🥇','🥈','🥉'];
-            html += `<div style="background:var(--surface2);border-radius:16px;border:2px solid ${p.name===myName?'var(--accent)':'var(--border)'};padding:20px;">
+            html += `<div class="spring-anim" style="background:var(--surface2);border-radius:16px;border:2px solid ${p.name===myName?'var(--accent)':'var(--border)'};padding:20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="font-family:'Outfit';font-size:18px;font-weight:800;">${ri<3?medals[ri]:'#'+(ri+1)} ${p.name}</div>
                     <div style="font-family:'Outfit';font-size:20px;font-weight:900;color:var(--ans);">${p.score} marks</div>
