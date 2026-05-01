@@ -133,13 +133,11 @@
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
 
   /* SIDEBARS & WIDGETS */
-  .sidebar { width: 340px; min-width: 340px; max-width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden; }
-  /* Widgets inside sidebar don't restrict their own scroll — sidebar scrolls as a whole */
-  .sidebar > .widget { flex-shrink: 0; }
+  .sidebar { width: 340px; min-width: 340px; max-width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden;}
   .sec-sel { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 13px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
-  .grid-wrap { padding: 16px; flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .grid-wrap { padding: 16px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
   .dot { width: 40px; height: 40px; border-radius: 10px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
   .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.3); z-index: 2;}
   .dot.ans { background: var(--ans); color: #fff; }
@@ -618,9 +616,8 @@
             <!-- Group Practice Bottom Bar -->
             <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
                 <button class="action-btn" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
-                <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save</button>
-                <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" disabled style="opacity:0.4;">Next →</button>
-                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:13px; text-transform:uppercase; letter-spacing:1px; z-index:2;">Waiting...</div>
+                <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
             </div>
         </div>
       </div>
@@ -654,36 +651,32 @@
           </div>
       </div>
 
-      <!-- Merged Group Status + Live Progress Widget (group mode only) -->
-      <div class="widget" id="wid-group-status" style="display:none;">
+      <!-- New Group Status Widget (Desktop) -->
+      <div class="widget" id="wid-group-status" style="display:none; height: 200px;">
         <div class="widget-header">
-          <span>👥 Group &amp; Progress</span> 
+          <span>🫂 Group Status</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'left')" title="Dock Left">◨ L</button>
+            
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'sidebar')" title="To Sidebar">☰</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
           </div>
         </div>
-        <div class="widget-body" style="flex-direction:column;">
-          <!-- Live Progress bars (compact) -->
-          <div id="sidebar-leaderboard" style="padding:8px 12px; display:flex; flex-direction:column; gap:6px; border-bottom:1px solid var(--border);"></div>
-          <!-- Group answer status -->
-          <div id="group-status-list" style="padding:8px 12px; display:flex; flex-direction:column; gap:6px;"></div>
-        </div>
+        <div class="widget-body" style="padding:12px; gap:8px; overflow-y:auto;" id="group-status-list"></div>
       </div>
 
-      <!-- Standalone Live Progress (non-group modes) -->
-      <div class="widget" id="wid-lb" style="height: 220px;">
+      <div class="widget" id="wid-lb" style="height: 250px;">
         <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'left')" title="Dock Left">◨ L</button>
+            
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'sidebar')" title="To Sidebar">☰</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
           </div>
         </div>
         <div class="widget-body">
-          <div id="sidebar-leaderboard-solo" style="overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px; flex:1;"></div>
+          <div class="lb-list" id="sidebar-leaderboard"></div>
         </div>
       </div>
 
@@ -1585,15 +1578,9 @@ function launchGame() {
     }
     lastActiveGroupQ = roomData.activeGroupQ;
     
-    // Apply addons — group mode uses merged widget, others use solo lb
-    if (roomData.settings.timerMode === 'group') {
-        el('wid-lb').style.display = 'none';
-        if (!isMobile) el('wid-group-status').style.display = '';
-    } else {
-        el('wid-group-status').style.display = 'none';
-        if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
-        else el('wid-lb').style.display = 'none';
-    }
+    // Apply addons
+    if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
+    else el('wid-lb').style.display = 'none';
     
     // Mobile fab buttons ONLY for mobile
     const isMobile = window.innerWidth <= 850;
@@ -1627,12 +1614,18 @@ function launchGame() {
     if (roomData.settings.timerMode === 'group') {
         el('btm-bar-standard').style.display = 'none';
         el('btm-bar-group').style.display = 'flex';
-        if (isMobile) {
+        
+        if (!isMobile) {
+            el('wid-group-status').style.display = 'flex';
+        } else {
             el('mob-group-fab').style.display = 'flex';
         }
+        
     } else {
+        // Reset to normal defaults just in case
         el('btm-bar-standard').style.display = 'flex';
         el('btm-bar-group').style.display = 'none';
+        el('wid-group-status').style.display = 'none';
         el('mob-group-fab').style.display = 'none';
     }
 
