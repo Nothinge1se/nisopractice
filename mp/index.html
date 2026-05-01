@@ -86,9 +86,8 @@
 
   .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
-  /* LEFT DOCK (For Chat) */
-  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
-  #left-dock .widget-header { border-top: none; }
+  /* LEFT DOCK (For Generic Widgets) */
+  #left-dock { display: none; flex-direction: column; width: 320px; background: var(--surface); border-right: 1px solid var(--border); z-index: 20; box-shadow: 5px 0 20px rgba(0,0,0,0.2); overflow-y: auto; overflow-x: hidden; }
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
@@ -104,8 +103,8 @@
   .q-images { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; }
   .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
-  .ans-area { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10; flex-shrink:0;}
-  .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 800px; margin: 0 auto; }
+  .ans-area { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10; flex-shrink:0; min-height:120px; display:flex; flex-direction:column; justify-content:center; }
+  .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 800px; margin: 0 auto; width:100%; }
   .opt-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 600; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
   .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface2); }
   .opt-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); box-shadow: 0 0 0 2px var(--accent-glow), inset 0 2px 5px rgba(0,0,0,0.2); }
@@ -197,8 +196,11 @@
   #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
   #mob-chat-wrapper.show-mob { bottom: 0; }
 
-  #mob-chat-fab { display: none; position: fixed; bottom: 85px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-  #mob-chat-fab:active { transform: scale(0.9); }
+  /* FAB Buttons default to NONE, strictly enabled via JS for mobile ONLY */
+  .mobile-fab { display: none; position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .mobile-fab:active { transform: scale(0.9); }
+  #mob-chat-fab { bottom: 85px; background: var(--accent); }
+  #mob-group-fab { bottom: 155px; background: var(--accent2); }
 
   @media (max-width: 850px) {
     .header { padding: 0 12px; height: 60px;}
@@ -222,10 +224,9 @@
     .q-scroll { padding: 16px; }
     .ans-area { padding: 16px 12px; }
 
-    /* Hide desktop chat widget */
+    /* Hide desktop widgets */
     #wid-chat-desk { display: none !important; }
-    #mob-chat-fab { display: flex; }
-    #mob-chat-wrapper { display: flex; }
+    #wid-group-status { display: none !important; }
   }
   
   @media (max-width: 480px) {
@@ -311,7 +312,7 @@
   }
 
   /* ── DRAGGABLE FAB ── */
-  #mob-chat-fab { touch-action: none; user-select: none; }
+  .mobile-fab { touch-action: none; user-select: none; }
 
   /* ── LOBBY MOBILE SCROLL FIX ── */
   @media (max-width: 850px) {
@@ -589,17 +590,8 @@
 
   <div class="main-stage">
     
-    <!-- LEFT DOCK FOR CHAT -->
-    <div id="left-dock">
-       <div class="widget-header">
-          <span>Live Chat</span>
-          <div class="controls-row">
-            <button class="control-btn" onclick="window.toggleChatDock()">◨ Undock</button>
-            <button class="control-btn" onclick="window.toggleWidget('left-dock')">Min</button>
-          </div>
-       </div>
-       <div class="widget-body" id="dock-chat-target"></div>
-    </div>
+    <!-- LEFT DOCK FOR GENERIC WIDGETS -->
+    <div id="left-dock"></div>
 
     <div class="q-area">
       <div class="q-top">
@@ -644,7 +636,7 @@
         <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
             <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
             <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Waiting for others...</div>
-            <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Question →</button>
+            <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Group Question →</button>
             <button class="action-btn save" id="btn-group-submit" onclick="window.forceSubmit()" style="display:none;">Submit Test</button>
         </div>
       </div>
@@ -666,6 +658,7 @@
         <div class="widget-header">
           <span>🫂 Group Status</span> 
           <div class="controls-row">
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status')">◨ Dock Left</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
           </div>
         </div>
@@ -676,6 +669,7 @@
         <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
           <div class="controls-row">
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb')">◨ Dock Left</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
           </div>
         </div>
@@ -688,7 +682,7 @@
         <div class="widget-header">
           <span>Live Chat</span> 
           <div class="controls-row">
-            <button class="control-btn" onclick="window.toggleChatDock()">◧ Dock Left</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk')">◨ Dock Left</button>
             <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
           </div>
         </div>
@@ -723,7 +717,7 @@
   <div id="mob-chat-wrapper">
       <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
   </div>
-  <button id="mob-chat-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
+  <button id="mob-chat-fab" class="mobile-fab" onclick="document.getElementById('mob-chat-wrapper').classList.toggle('show-mob')">💬</button>
 
   <!-- 2. Group Status Wrapper (Mobile) -->
   <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
@@ -733,36 +727,38 @@
       </div>
       <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
   </div>
-  <button id="mob-group-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')" style="display:none; position:fixed; bottom:155px; right:16px; width:56px; height:56px; border-radius:50%; background:var(--accent2); color:white; font-size:24px; z-index:90; box-shadow:0 4px 15px rgba(0,0,0,0.5); border:2px solid rgba(255,255,255,0.2); align-items:center; justify-content:center; cursor:pointer; transition:0.2s;">🫂</button>
+  <button id="mob-group-fab" class="mobile-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🫂</button>
 
-
-<script>
-(function(){
-  const fab = document.getElementById('mob-chat-fab');
-  if(!fab) return;
-  let dragging=false, startX, startY, origX, origY, moved=false;
-  fab.addEventListener('touchstart', e=>{
-    const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
-    const r=fab.getBoundingClientRect(); origX=r.left; origY=r.top;
-    dragging=true; moved=false; fab.style.transition='none';
-  },{passive:true});
-  document.addEventListener('touchmove', e=>{
-    if(!dragging) return;
-    const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
-    if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true;
-    if(!moved) return;
-    let nx=origX+dx; let ny=origY+dy;
-    nx=Math.max(8,Math.min(nx,window.innerWidth-fab.offsetWidth-8));
-    ny=Math.max(8,Math.min(ny,window.innerHeight-fab.offsetHeight-8));
-    fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener('touchend', e=>{
-    if(dragging && moved) e.preventDefault();
-    dragging=false; fab.style.transition='';
-  },{passive:false});
-})();
-</script>
+  <script>
+    (function(){
+      // Sync draggable logic for both mobile buttons
+      ['mob-chat-fab', 'mob-group-fab'].forEach(id => {
+          const fab = document.getElementById(id);
+          if(!fab) return;
+          let dragging=false, startX, startY, origX, origY, moved=false;
+          fab.addEventListener('touchstart', e=>{
+            const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
+            const r=fab.getBoundingClientRect(); origX=r.left; origY=r.top;
+            dragging=true; moved=false; fab.style.transition='none';
+          },{passive:true});
+          document.addEventListener('touchmove', e=>{
+            if(!dragging) return;
+            const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
+            if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true;
+            if(!moved) return;
+            let nx=origX+dx; let ny=origY+dy;
+            nx=Math.max(8,Math.min(nx,window.innerWidth-fab.offsetWidth-8));
+            ny=Math.max(8,Math.min(ny,window.innerHeight-fab.offsetHeight-8));
+            fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
+            e.preventDefault();
+          },{passive:false});
+          document.addEventListener('touchend', e=>{
+            if(dragging && moved) e.preventDefault();
+            dragging=false; fab.style.transition='';
+          },{passive:false});
+      });
+    })();
+  </script>
 
   <!-- SUBMIT WARNING MODAL -->
   <div class="modal-layer" id="submit-warning-modal">
@@ -898,7 +894,8 @@ let myName = ""; let roomCode = "";
 let roomData = {
     hostId: null, status: 'waiting', testFile: null, testUrl: null, hasCustomFile: false,
     settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, showLiveStats: 'false' },
-    startTime: null, totalQuestions: 0, kickVotes: {}, players: {}
+    startTime: null, totalQuestions: 0, kickVotes: {}, players: {},
+    activeGroupQ: null, groupResolved: {} // For Group Practice State
 };
 
 let fileBuffer = null; 
@@ -911,11 +908,7 @@ let isFileAcquisitionStarted = false; let isLaunchPending = false;
 // New feature vars
 let questionTimes = {}; let questionEnterTime = Date.now();
 let correctStreak = 0;
-
-// Group Practice Tracking variables
-let myLockedQId = null;
-let myLockedAns = null;
-let groupResolvedForQ = null;
+let lastActiveGroupQ = null;
 
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
@@ -924,11 +917,25 @@ const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCas
 // UI Toggles & Setup
 window.toggleMobMenu = () => { const sb = el('main-sidebar'); const ov = el('mob-overlay'); if(sb && ov) { sb.classList.toggle('open'); ov.classList.toggle('open'); } };
 
-let isChatDockedLeft = false;
-window.toggleChatDock = () => {
-    if(window.innerWidth <= 850) return; // Ignore on mobile
-    isChatDockedLeft = !isChatDockedLeft;
-    mountChatCore(true);
+window.toggleDock = (widgetId) => {
+    if(window.innerWidth <= 850) return;
+    const widget = el(widgetId);
+    const leftDock = el('left-dock');
+    const sidebar = el('main-sidebar');
+    const btn = widget.querySelector('.btn-dock');
+
+    if (widget.parentElement === leftDock) {
+        // Move back to sidebar
+        sidebar.insertBefore(widget, el('mob-submit-area'));
+        if(btn) btn.textContent = '◨ Dock Left';
+    } else {
+        // Move to left dock
+        leftDock.appendChild(widget);
+        if(btn) btn.textContent = '◧ Undock';
+    }
+    
+    // Auto show/hide dock container based on content
+    leftDock.style.display = leftDock.children.length > 0 ? 'flex' : 'none';
 };
 
 window.toggleWidget = (id) => {
@@ -947,14 +954,9 @@ function mountChatCore(force = false) {
         el('mob-chat-header').style.display = 'flex';
     } else {
         el('mob-chat-header').style.display = 'none';
-        if(isChatDockedLeft) {
-            el('dock-chat-target').appendChild(core);
-            el('left-dock').style.display = 'flex';
-            el('wid-chat-desk').style.display = 'none';
-        } else {
+        // Let it stay in its dock/sidebar container naturally
+        if(!core.parentElement || core.parentElement.id === 'mob-chat-target') {
             el('desk-chat-target').appendChild(core);
-            el('left-dock').style.display = 'none';
-            el('wid-chat-desk').style.display = 'flex';
         }
     }
     const box = el('game-chat-msgs');
@@ -966,7 +968,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', () => {
         const currentCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
-        // Only remount if we cross the mobile/desktop boundary (prevents keyboard dismiss bug)
         if (currentCategory !== _lastWidthCategory) {
             _lastWidthCategory = currentCategory;
             mountChatCore(true);
@@ -1073,13 +1074,13 @@ function initPeerAsHost() {
     isHost = true; roomCode = generateCode(); peer = new Peer(roomCode);
     peer.on('open', (id) => {
         myId = id; roomData.hostId = myId; el('lobby-status-text').textContent = "Waiting for players to join..."; el('lobby-room-code').textContent = roomCode;
-        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: 'Ready', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0 };
+        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: 'Ready', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0, groupAnswers: {} };
         updateLobbyUI(); attachHostSettingsListeners();
     });
     peer.on('connection', (conn) => {
         connections[conn.peer] = conn;
         conn.on('data', (data) => {
-            if(data.type === 'join') { roomData.players[conn.peer] = { name: data.name, ready: false, state: 'downloading', progressText: 'Joining...', progressPct: 0, submitted: false, attempted: 0, score: 0, timeTaken: 0 }; broadcastRoomState(); }
+            if(data.type === 'join') { roomData.players[conn.peer] = { name: data.name, ready: false, state: 'downloading', progressText: 'Joining...', progressPct: 0, submitted: false, attempted: 0, score: 0, timeTaken: 0, groupAnswers: {} }; broadcastRoomState(); }
             if(data.type === 'lobby_progress') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].progressText = data.text; roomData.players[conn.peer].progressPct = data.pct; broadcastRoomState(); } }
             if(data.type === 'toggle_ready') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].ready = data.ready; roomData.players[conn.peer].state = data.ready ? 'ready' : 'downloading'; roomData.players[conn.peer].progressText = data.ready ? 'Ready' : 'Not Ready'; roomData.players[conn.peer].progressPct = 100; broadcastRoomState(); } }
             if(data.type === 'request_file') { sendP2PFileChunks(conn); }
@@ -1088,18 +1089,29 @@ function initPeerAsHost() {
                     const p = roomData.players[conn.peer]; 
                     p.attempted = data.attempted; 
                     p.currentQ = data.currentQ; 
-                    p.groupLockedQ = data.groupLockedQ; // Group Practice tracking
-                    p.groupAns = data.groupAns;
-                    p.liveStats = data.liveStats || { correct: 0, wrong: 0 }; // Colored Progress tracking
+                    p.groupAnswers = data.groupAnswers || {}; 
+                    p.liveStats = data.liveStats || { correct: 0, wrong: 0 }; 
                     if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } 
+                    
+                    // Host checks Auto-Resolution for Group Practice Mode
+                    if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+                        const actQ = roomData.activeGroupQ;
+                        let allAnswered = true;
+                        for (let id in roomData.players) {
+                            if (!roomData.players[id].groupAnswers || !roomData.players[id].groupAnswers[actQ]) {
+                                allAnswered = false; break;
+                            }
+                        }
+                        if (allAnswered && !roomData.groupResolved[actQ]) {
+                            roomData.groupResolved[actQ] = true;
+                        }
+                    }
                     broadcastRoomState(); checkAllSubmitted(); 
                 } 
             }
-            if(data.type === 'group_next') {
-                for(let id in connections) {
-                    if(id !== conn.peer) connections[id].send({ type: 'group_next', qId: data.qId });
-                }
-                window.executeGroupNext(data.qId);
+            if(data.type === 'group_next_req') {
+                roomData.activeGroupQ = data.qId;
+                broadcastRoomState();
             }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
@@ -1196,7 +1208,6 @@ function initPeerAsPlayer() {
                 sendLobbyProgress(`[P2P Host] Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
                 await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
             }
-            if(data.type === 'group_next') { window.executeGroupNext(data.qId); }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
             if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
         });
@@ -1276,12 +1287,20 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
         if(masterQuestions.length > 0) launchGame();
         else isLaunchPending = true; // Wait for processing
     }
+
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
     // Live results refresh
     if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
     if(roomData.status === 'playing' && el('app').style.display === 'flex') { 
         updateRaceBar(); 
-        updateGroupUI(); // Call group UI sync
+        
+        // Group Practice: If host advanced active question, jump to it!
+        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ !== lastActiveGroupQ) {
+             lastActiveGroupQ = roomData.activeGroupQ;
+             const targetIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
+             if (targetIdx !== -1) window.goToQ(targetIdx);
+        }
+        updateGroupUI();
     }
 }
 
@@ -1336,18 +1355,23 @@ function _sendChat(id) {
     const i = el(id); const t = i.value.trim(); if(!t) return; i.value = '';
     if(isHost) broadcastChat(myName, t); else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: t });
 }
-function broadcastChat(n, t) { appendChatUI(n, t); for(let id in connections) connections[id].send({ type: 'chat', name:n, text:t }); }
+function broadcastChat(n, t) { 
+    appendChatUI(n, t); 
+    for(let id in connections) connections[id].send({ type: 'chat', name:n, text:t }); 
+}
 function appendChatUI(n, t, isPhoto = false) {
     const isMe = n === myName;
     const content = isPhoto ? `<img src="${t}" style="max-width:180px; border-radius:8px; margin-top:4px; display:block;" loading="lazy">` : t;
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'msg';
-    msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
-    msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
+    
+    // Explicitly append to both chat boxes cleanly
     ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
         const b = el(id); if(!b) return;
-        const clone = id === 'lobby-chat-msgs' ? msgDiv : (id === 'game-chat-msgs' ? msgDiv : msgDiv.cloneNode(true));
-        b.appendChild(msgDiv); b.scrollTop = b.scrollHeight;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'msg';
+        msgDiv.style.cssText = `transform:scale(0.85) translateY(8px); opacity:0; transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s; ${isMe ? 'border-color:var(--accent); background:rgba(99,102,241,0.08);' : ''}`;
+        msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
+        b.appendChild(msgDiv); 
+        b.scrollTop = b.scrollHeight;
         requestAnimationFrame(() => { msgDiv.style.transform = 'scale(1) translateY(0)'; msgDiv.style.opacity = '1'; });
     });
 }
@@ -1403,7 +1427,6 @@ function launchGame() {
             t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
             t.dataset.key = k;
             t.onclick = () => {
-                if(roomData.settings.timerMode === 'group') return; // disabled in group mode
                 el('section-select').value = k; window.changeSection();
                 tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
                 t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
@@ -1415,15 +1438,24 @@ function launchGame() {
 
     questionTimes = {}; questionEnterTime = Date.now();
     correctStreak = 0;
-    myLockedQId = null; myLockedAns = null; groupResolvedForQ = null;
+    
+    // Group Setup
+    if (isHost) {
+        roomData.activeGroupQ = allQuestions[0].id;
+        roomData.groupResolved = {};
+    }
+    lastActiveGroupQ = roomData.activeGroupQ;
     
     // Apply addons
     if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
     else el('wid-lb').style.display = 'none';
     
+    // Mobile fab buttons ONLY for mobile
+    const isMobile = window.innerWidth <= 850;
+    
     if(roomData.settings.addonChat !== 'false') {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = '');
-        el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'flex');
+        if(isMobile) { el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'flex'); }
     } else {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = 'none');
         el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
@@ -1449,14 +1481,12 @@ function launchGame() {
         el('btm-bar-standard').style.display = 'none';
         el('btm-bar-group').style.display = 'flex';
         
-        if (window.innerWidth > 850) {
+        if (!isMobile) {
             el('wid-group-status').style.display = 'flex';
         } else {
             el('mob-group-fab').style.display = 'flex';
         }
-
-        // Hide NTA Section wrap completely in group mode to enforce linear flow
-        el('sec-sel-wrap').style.display = 'none'; 
+        
     } else {
         // Reset to normal defaults just in case
         el('btm-bar-standard').style.display = 'flex';
@@ -1472,7 +1502,7 @@ function launchGame() {
     }
 
     // Mobile stats row2
-    if(window.innerWidth <= 850) {
+    if(isMobile) {
         el('header-row2').style.display = 'flex';
         el('top-stats-mob').style.display = 'flex';
     }
@@ -1511,10 +1541,22 @@ function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padSt
 function calculateLiveStats() {
     let correct = 0; let wrong = 0;
     allQuestions.forEach(q => {
-        const a = answers[q.id];
-        if(a && (a.status === 'ans' || a.status === 'mark-ans')) {
-            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
-            if(isC) correct++; else wrong++;
+        // Look deeply at the synced groupAnswers for accurate live stats
+        const isGroup = roomData.settings.timerMode === 'group';
+        const myPlayer = roomData.players[myId];
+        if (isGroup && myPlayer && myPlayer.groupAnswers) {
+             const ansStr = myPlayer.groupAnswers[q.id];
+             if (ansStr && ansStr !== 'skipped' && ansStr !== 'null') {
+                 const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+                 const isC = q.type==='mcq' ? correctOps.includes(ansStr) : correctOps[0] === ansStr;
+                 if(isC) correct++; else wrong++;
+             }
+        } else {
+            const a = answers[q.id];
+            if(a && (a.status === 'ans' || a.status === 'mark-ans')) {
+                const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+                if(isC) correct++; else wrong++;
+            }
         }
     });
     return { correct, wrong };
@@ -1523,8 +1565,18 @@ function calculateLiveStats() {
 function calculateScore() {
     let net = 0;
     allQuestions.forEach(q => {
-        const a = answers[q.id]; if(a && a.selected) {
-            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+        // Map local answering or group answers
+        let selectedAns = null;
+        if (roomData.settings.timerMode === 'group') {
+             const pAns = (roomData.players[myId].groupAnswers || {})[q.id];
+             if(pAns && pAns !== 'skipped' && pAns !== 'null') selectedAns = pAns;
+        } else {
+             const a = answers[q.id]; 
+             if(a && a.selected) selectedAns = a.selected;
+        }
+
+        if(selectedAns) {
+            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(selectedAns)) : String(q.correctAnswer).trim() === String(selectedAns);
             if(isC) {
                 let bonus = q.marks.cm || 4;
                 if(roomData.settings.speedBonus === 'true') {
@@ -1541,18 +1593,36 @@ function calculateScore() {
 function pushProgressToHost(isFinal = false) {
     const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
     const curQ = allQuestions[currentQIdx] ? allQuestions[currentQIdx].id : null;
+    
+    // Pack my group answers
+    const myGroupAnswers = roomData.players[myId] ? roomData.players[myId].groupAnswers : {};
+
     const pay = { 
         attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, 
         currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined,
-        groupLockedQ: myLockedQId, groupAns: myLockedAns,
+        groupAnswers: myGroupAnswers,
         liveStats: calculateLiveStats()
     };
     
     if(isHost) { 
         const p = roomData.players[myId]; 
-        p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupLockedQ = pay.groupLockedQ; p.groupAns = pay.groupAns;
+        p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupAnswers = pay.groupAnswers;
         p.liveStats = pay.liveStats;
         if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } 
+        
+        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+            const actQ = roomData.activeGroupQ;
+            let allAnswered = true;
+            for (let id in roomData.players) {
+                if (!roomData.players[id].groupAnswers || !roomData.players[id].groupAnswers[actQ]) {
+                    allAnswered = false; break;
+                }
+            }
+            if (allAnswered && !roomData.groupResolved[actQ]) {
+                roomData.groupResolved[actQ] = true;
+            }
+        }
+
         broadcastRoomState(); checkAllSubmitted(); 
     } else { 
         if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); 
@@ -1564,15 +1634,18 @@ function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values
 window.groupSave = () => {
     const qId = allQuestions[currentQIdx].id;
     const ans = answers[qId];
+    
+    // Save to our groupAnswers record
+    if(!roomData.players[myId].groupAnswers) roomData.players[myId].groupAnswers = {};
+    
     if(!ans.selected) {
-        // We will lock it as 'skipped' if empty
         ans.status = 'unans';
-        myLockedAns = 'skipped';
+        roomData.players[myId].groupAnswers[qId] = 'skipped';
     } else {
         ans.status = 'ans';
-        myLockedAns = ans.selected;
+        roomData.players[myId].groupAnswers[qId] = ans.selected;
     }
-    myLockedQId = qId;
+    
     pushProgressToHost();
     
     el('btn-group-save').style.display = 'none';
@@ -1582,99 +1655,103 @@ window.groupSave = () => {
     updateGroupUI(); 
 };
 
-window.executeGroupNext = (qId) => {
-    if(roomData.settings.timerMode !== 'group') return;
-    const tgtIdx = getSeq().findIndex(i => allQuestions[i].id === qId);
-    if(tgtIdx !== -1 && currentQIdx !== tgtIdx) {
-        // Reset UI
-        el('btn-group-next').style.display = 'none';
-        el('btn-group-submit').style.display = 'none';
-        el('btn-group-save').style.display = 'block';
-        el('btn-group-save').disabled = false;
-        el('group-wait-text').style.display = 'none';
-
-        // Track time
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[allQuestions[currentQIdx].id] = (questionTimes[allQuestions[currentQIdx].id] || 0) + spent;
-        
-        myLockedQId = null;
-        myLockedAns = null;
-        currentQIdx = tgtIdx;
-        
-        pushProgressToHost();
-        renderSidebar(); renderQuestion(); updateGroupUI();
-    }
-};
-
 window.groupNext = () => {
-    const nextIdx = getSeq()[getSeq().indexOf(currentQIdx) + 1];
-    if(nextIdx === undefined) return;
-    const nextQId = allQuestions[nextIdx].id;
+    const actIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
+    const nextIdx = getSeq()[actIdx + 1];
     
-    if(isHost) {
-        for(let id in connections) { connections[id].send({ type: 'group_next', qId: nextQId }); }
-        window.executeGroupNext(nextQId);
-    } else if(hostConn && hostConn.open) {
-        hostConn.send({ type: 'group_next', qId: nextQId });
+    if(nextIdx !== undefined) {
+        const nextQId = allQuestions[nextIdx].id;
+        if(isHost) {
+            roomData.activeGroupQ = nextQId;
+            broadcastRoomState();
+        } else if(hostConn && hostConn.open) {
+            hostConn.send({ type: 'group_next_req', qId: nextQId });
+        }
+    } else {
+        // Last question reached
+        window.forceSubmit();
     }
 };
 
 function updateGroupUI() {
     if(roomData.settings.timerMode !== 'group' || hasSubmitted) return;
     const q = allQuestions[currentQIdx]; if(!q) return;
+    
+    // We update UI based on the *viewed* question
+    const isResolved = roomData.groupResolved[q.id];
     const players = Object.values(roomData.players);
     
     let html = '';
-    let allLocked = players.length > 0;
-    
-    // Determine if all are locked for THIS specific question
-    players.forEach(p => {
-        if(p.groupLockedQ !== q.id) allLocked = false;
-    });
-    
-    // Auto resolution trigger
-    if(allLocked && groupResolvedForQ !== q.id && myLockedQId === q.id) {
-        groupResolvedForQ = q.id;
-        el('group-wait-text').style.display = 'none';
-        
-        if(currentQIdx === getSeq()[getSeq().length - 1]) {
-            el('btn-group-submit').style.display = 'block';
-        } else {
-            el('btn-group-next').style.display = 'block';
-            el('btn-group-next').disabled = false;
-        }
-        
-        renderAnswerArea(q); // Repaint colors for correct answers
-        updateCompactStats();
-    }
-
     const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
     
     players.forEach(p => {
-        const isLocked = p.groupLockedQ === q.id;
-        if(groupResolvedForQ === q.id) {
-            const pAns = String(p.groupAns).trim();
-            const isC = pAns !== 'skipped' && (q.type === 'mcq' ? correctOps.includes(pAns) : correctOps[0] === pAns);
-            const isSkip = pAns === 'skipped' || pAns === 'null';
+        const pAns = (p.groupAnswers || {})[q.id];
+        const hasAnswered = pAns !== undefined && pAns !== null;
+        
+        if (isResolved) {
+            const isC = pAns !== 'skipped' && (q.type === 'mcq' ? correctOps.includes(String(pAns)) : correctOps[0] === String(pAns));
+            const isSkip = !hasAnswered || pAns === 'skipped' || pAns === 'null';
             const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
             const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
             const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAns)-1] : pAns);
+            
             html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid ${cColor};">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
                 <span style="font-size:12px; color:${cColor}; font-weight:800;">${ansText} ${cIcon}</span>
             </div>`;
         } else {
-            const icon = isLocked ? '✅' : '⏳';
-            const color = isLocked ? 'var(--ans)' : 'var(--text2)';
+            const icon = hasAnswered ? '✅' : '⏳';
+            const color = hasAnswered ? 'var(--ans)' : 'var(--text2)';
             html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
-                <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${isLocked ? 'Locked' : 'Thinking...'}</span>
+                <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${hasAnswered ? 'Locked' : 'Thinking...'}</span>
             </div>`;
         }
     });
+
+    if (isResolved) {
+        html += `<div style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
+            <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
+            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${q.correctAnswer}</div>
+        </div>`;
+    }
     
     if(el('group-status-list')) el('group-status-list').innerHTML = html;
     if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
+    
+    // Manage bottom bar buttons
+    const isViewingActive = q.id === roomData.activeGroupQ;
+    const myAns = (roomData.players[myId].groupAnswers || {})[q.id];
+    
+    if (isViewingActive) {
+        if (isResolved) {
+            el('group-wait-text').style.display = 'none';
+            el('btn-group-save').style.display = 'none';
+            if(currentQIdx === getSeq()[getSeq().length - 1]) {
+                el('btn-group-submit').style.display = 'block';
+                el('btn-group-next').style.display = 'none';
+            } else {
+                el('btn-group-next').style.display = 'block';
+                el('btn-group-next').disabled = false;
+                el('btn-group-submit').style.display = 'none';
+            }
+        } else if (myAns) {
+            el('btn-group-save').style.display = 'none';
+            el('btn-group-next').style.display = 'none';
+            el('group-wait-text').style.display = 'block';
+            el('group-wait-text').textContent = 'Waiting for others...';
+        } else {
+            el('btn-group-save').style.display = 'block';
+            el('btn-group-save').disabled = false;
+            el('btn-group-next').style.display = 'none';
+            el('group-wait-text').style.display = 'none';
+        }
+    } else {
+        // Viewing non-active question
+        el('btn-group-save').style.display = 'none';
+        el('btn-group-next').style.display = 'none';
+        el('group-wait-text').style.display = 'none';
+    }
 }
 
 
@@ -1691,12 +1768,6 @@ window.forceSubmit = () => {
     if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
     // Record time on last question
     if(allQuestions[currentQIdx]) { const qId = allQuestions[currentQIdx].id; const spent = Math.round((Date.now()-questionEnterTime)/1000); questionTimes[qId]=(questionTimes[qId]||0)+spent; }
-    
-    // In case they click "Submit" directly from a resolved Group Practice ending
-    if (roomData.settings.timerMode === 'group' && myLockedQId !== allQuestions[currentQIdx].id) {
-        myLockedQId = allQuestions[currentQIdx].id;
-        myLockedAns = answers[allQuestions[currentQIdx].id].selected || 'skipped';
-    }
     
     pushProgressToHost(true);
     
@@ -1734,7 +1805,6 @@ async function preloadImages(zip, progressCallback) {
 
 // ── 7. CBT UI ──
 window.changeSection = () => { 
-    if(roomData.settings.timerMode === 'group') return; // disabled in group
     currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); 
 };
 const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
@@ -1759,9 +1829,6 @@ window.navigate = (dir, isSaveNext = false) => {
     }
 };
 window.goToQ = (idx) => { 
-    if(roomData.settings.timerMode === 'group' && !hasSubmitted) {
-        return showToast('error', 'Cannot skip questions in Group mode!');
-    }
     if(!hasSubmitted) {
         const a = answers[allQuestions[currentQIdx].id]; if(a && a.status === 'not-vis') a.status = 'unans';
         // Track time on this question
@@ -1770,7 +1837,7 @@ window.goToQ = (idx) => {
         questionTimes[qId] = (questionTimes[qId] || 0) + spent;
         questionEnterTime = Date.now();
     }
-    currentQIdx = idx; renderSidebar(); renderQuestion(); 
+    currentQIdx = idx; renderSidebar(); renderQuestion(); updateGroupUI();
 };
 
 window.saveNext = () => { const a = answers[allQuestions[currentQIdx].id]; if(a.selected) a.status = 'ans'; else a.status = 'unans'; checkStreakBomb(); navigate(1, true); };
@@ -1849,12 +1916,28 @@ function renderQuestion() {
 }
 
 function renderAnswerArea(q) {
-  const area = el('answer-area'); const ans = answers[q.id];
+  const area = el('answer-area'); 
+  const ans = answers[q.id];
   
-  const isLockedInGroup = roomData.settings.timerMode === 'group' && myLockedQId === q.id;
-  const isResolvedInGroup = roomData.settings.timerMode === 'group' && groupResolvedForQ === q.id;
+  const isGroupMode = roomData && roomData.settings.timerMode === 'group';
+  const isViewingActive = isGroupMode && q.id === roomData.activeGroupQ;
+  const isResolvedInGroup = isGroupMode && roomData.groupResolved[q.id];
   const shouldPaintColors = hasSubmitted || isResolvedInGroup;
   
+  const myGroupAns = isGroupMode ? (roomData.players[myId].groupAnswers || {})[q.id] : null;
+  const iAmLockedInGroup = isGroupMode && myGroupAns;
+  
+  // Grey out condition: We are in group mode, but not looking at the active question AND it hasn't been resolved yet
+  const shouldGreyOut = isGroupMode && !isViewingActive && !isResolvedInGroup;
+  
+  if (shouldGreyOut) {
+      area.innerHTML = `<div style="text-align:center; padding: 40px 20px; font-family:'Outfit';">
+          <div style="font-size:32px; margin-bottom:12px;">🔒</div>
+          <div style="font-size:16px; font-weight:800; color:var(--text2);">Wait for the group to reach this question</div>
+      </div>`;
+      return;
+  }
+
   // Review Mode Helpers
   let correctOptions = [];
   if (shouldPaintColors) {
@@ -1866,34 +1949,38 @@ function renderAnswerArea(q) {
     const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
     for (let i = 1; i <= no; i++) {
       const b = document.createElement('button'); b.className = 'opt-btn'; 
-      b.disabled = hasSubmitted || isLockedInGroup; 
+      b.disabled = hasSubmitted || iAmLockedInGroup; 
       
-      if (ans && ans.selected === i) b.classList.add('selected');
+      const isLocallySelected = ans && ans.selected === i;
+      const isGroupSelected = isGroupMode && parseInt(myGroupAns) === i;
+      if (isLocallySelected || isGroupSelected) b.classList.add('selected');
       
       // Paint Review Colors
       if (shouldPaintColors) {
           if (correctOptions.includes(i)) b.classList.add('correct-ans');
-          else if (ans && ans.selected === i && !correctOptions.includes(i)) b.classList.add('wrong-ans');
+          else if ((isLocallySelected || isGroupSelected) && !correctOptions.includes(i)) b.classList.add('wrong-ans');
       }
 
       b.innerHTML = `<div class="opt-key">${lbls[i-1]}</div><span>Option ${lbls[i-1]}</span>`;
-      if(!hasSubmitted && !isLockedInGroup) b.onclick = () => { ans.selected = i; renderAnswerArea(q); }; grid.appendChild(b);
+      if(!hasSubmitted && !iAmLockedInGroup) b.onclick = () => { answers[q.id].selected = i; renderAnswerArea(q); }; grid.appendChild(b);
     }
     area.innerHTML = ''; area.appendChild(grid);
   } else {
     area.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'nat-input'; inp.type = 'text'; inp.placeholder = '0.00';
-    if (ans && ans.selected) inp.value = ans.selected; 
-    inp.disabled = hasSubmitted || isLockedInGroup;
+    
+    if (isGroupMode && myGroupAns && myGroupAns !== 'skipped') inp.value = myGroupAns;
+    else if (ans && ans.selected) inp.value = ans.selected; 
+    
+    inp.disabled = hasSubmitted || iAmLockedInGroup;
     
     if (shouldPaintColors) {
-        const isC = String(q.correctAnswer).trim() === String(ans?.selected).trim();
+        const val = inp.value;
+        const isC = String(q.correctAnswer).trim() === String(val).trim();
         inp.classList.add(isC ? 'correct-ans' : 'wrong-ans');
-        const corrTxt = document.createElement('div'); corrTxt.innerHTML = `Correct Answer: <b style="font-size:20px;">${q.correctAnswer}</b>`;
-        corrTxt.style.cssText = "text-align:center; margin-top:16px; color:var(--ans); font-family:Outfit; font-weight:700;";
-        area.appendChild(inp); area.appendChild(corrTxt);
     } else {
-        inp.oninput = (e) => { let v = e.target.value.replace(/[^0-9.\-]/g, '').trim(); e.target.value = v; ans.selected = v || null; }; area.appendChild(inp);
+        inp.oninput = (e) => { let v = e.target.value.replace(/[^0-9.\-]/g, '').trim(); e.target.value = v; answers[q.id].selected = v || null; };
     }
+    area.appendChild(inp);
   }
 }
 
@@ -1939,8 +2026,11 @@ function renderSidebar() {
     }
 
     // Review Mode / Resolved Group Mode Dot Colors
-    if (answers[q.id].selected && (hasSubmitted || (roomData.settings.timerMode === 'group' && groupResolvedForQ === q.id))) {
-        const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(answers[q.id].selected)) : String(q.correctAnswer).trim() === String(answers[q.id].selected);
+    const isResolvedInGroup = roomData.settings.timerMode === 'group' && roomData.groupResolved && roomData.groupResolved[q.id];
+    const myAns = answers[q.id].selected || (roomData.players[myId] ? (roomData.players[myId].groupAnswers || {})[q.id] : null);
+
+    if (myAns && myAns !== 'skipped' && (hasSubmitted || isResolvedInGroup)) {
+        const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(myAns)) : String(q.correctAnswer).trim() === String(myAns);
         d.style.background = isC ? 'var(--ans)' : 'var(--unans)';
         d.style.color = 'white'; d.style.border = 'none';
     }
