@@ -89,8 +89,7 @@
   /* DOCK PANELS */
   .dock-panel { display: none; flex-direction: column; width: 300px; min-width: 300px; max-width: 300px; background: var(--surface); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden; flex-shrink: 0; }
   #left-dock { border-right: 1px solid var(--border); }
-  #right-dock { display: none !important; } /* merged into main sidebar */
-  .dock-panel .widget-header { border-top: none; }
+  #right-dock { display: none !important; } 
 
   /* QUESTION AREA */
   .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
@@ -137,7 +136,7 @@
   .sec-sel { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
   .sec-sel select { width: 100%; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 13px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
 
-  .grid-wrap { padding: 16px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
+  .grid-wrap { padding: 16px; overflow: visible; height: auto; flex: none; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
   .dot { width: 40px; height: 40px; border-radius: 10px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
   .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.3); z-index: 2;}
   .dot.ans { background: var(--ans); color: #fff; }
@@ -146,14 +145,14 @@
   .dot.mark-ans { background: var(--mark-ans); color: #fff; }
 
   /* Minimizable Widgets */
-  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden;}
+  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden; height: auto;}
   .widget-header { padding: 7px 12px; font-size: 11px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
-  .widget-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .widget-body { display: flex; flex-direction: column; flex: none; height: auto; }
   .widget.minimized { height: 36px !important; flex: none !important; }
   .widget.minimized .widget-body { display: none; }
 
   .chat-wrapper { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; }
-  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500; min-height: 0; max-height: none;}
+  .chat-msgs { flex: none; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500; height: 350px; max-height: 350px;}
   .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word; flex-shrink: 0;}
   .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
   .chat-input-wrap { display: flex; padding: 12px; background: var(--surface2); border-top: 1px solid var(--border); flex-shrink: 0; }
@@ -166,12 +165,15 @@
   .control-btn:hover { background: var(--accent); border-color: var(--accent); }
 
   /* Leaderboard UI */
-  .lb-list { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: 200px; background: var(--bg); }
+  .lb-list { overflow: visible; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: auto; max-height: none; background: var(--bg); }
   .lb-item { display: flex; flex-direction: column; background: var(--surface2); padding: 16px; border-radius: 12px; border: 2px solid var(--border); }
   .lb-item.me { border-color: var(--accent); background: rgba(99, 102, 241, 0.05);}
   .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .lb-name { font-weight: 700; font-size: 16px; font-family: 'Outfit';}
   .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
+
+  /* Group Status Dynamic List */
+  #group-status-list { height: auto; max-height: 400px; overflow-y: auto; }
 
   /* Lobby Grid Layout (Responsive Expansion) */
   .lobby-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
@@ -316,7 +318,7 @@
   /* ── MOBILE SCROLL FIXES ── */
   .screen { -webkit-overflow-scrolling: touch; }
   .q-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-  .grid-wrap { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+  .grid-wrap { -webkit-overflow-scrolling: touch; }
 </style>
 </head>
 <body>
@@ -405,7 +407,7 @@
             <select id="cfg-timer-mode" class="config-select">
               <option value="countdown">⏳ Countdown</option>
               <option value="race">🏁 Race (Up)</option>
-              <option value="group">🫂 Group Practice</option>
+              <option value="group">🤝 Group Practice</option>
             </select>
           </div>
           <div style="flex:1;">
@@ -614,10 +616,16 @@
             </div>
             
             <!-- Group Practice Bottom Bar -->
-            <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
-                <button class="action-btn" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
-                <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
-                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
+            <div id="btm-bar-group" style="display:none; width:100%; justify-content:space-between; align-items:center;">
+                <div class="btm-left">
+                     <button class="action-btn" id="btn-group-back" onclick="window.navigate(-1)">← Back</button>
+                </div>
+                <div class="btm-right" style="display:flex; gap:10px; align-items:center;">
+                    <button class="action-btn" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
+                    <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+                    <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
+                    <button class="action-btn save" id="btn-group-next" style="display:none; background:var(--ans); border-color:var(--ans); color:white;" onclick="window.navigate(1)">Next Question →</button>
+                </div>
             </div>
         </div>
       </div>
@@ -630,7 +638,7 @@
     
     <div class="sidebar" id="main-sidebar">
       <!-- Navigator Wrapped in a Widget -->
-      <div class="widget" id="wid-q-nav" style="flex: 1.5; min-height: 200px; display:flex; flex-direction:column; border-bottom:1px solid var(--border);">
+      <div class="widget" id="wid-q-nav">
           <div class="widget-header">
             <span>📍 Navigator</span> 
             <div class="controls-row">
@@ -640,7 +648,7 @@
               <button class="control-btn" onclick="window.toggleWidget('wid-q-nav')">Min</button>
             </div>
           </div>
-          <div class="widget-body" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+          <div class="widget-body">
               <div class="sec-sel" id="sec-sel-wrap">
                   <!-- dropdown mode -->
                   <select id="section-select" onchange="window.changeSection()" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:white;font-weight:800;font-size:13px;outline:none;font-family:'Outfit';display:block; text-transform:uppercase; letter-spacing:1px;"><option value="ALL">All Sections</option></select>
@@ -652,9 +660,9 @@
       </div>
 
       <!-- New Group Status Widget (Desktop) -->
-      <div class="widget" id="wid-group-status" style="display:none; height: 200px;">
+      <div class="widget" id="wid-group-status" style="display:none;">
         <div class="widget-header">
-          <span>🫂 Group Status</span> 
+          <span>🤝 Group Progress</span> 
           <div class="controls-row">
             <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'left')" title="Dock Left">◨ L</button>
             
@@ -662,10 +670,10 @@
             <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
           </div>
         </div>
-        <div class="widget-body" style="padding:12px; gap:8px; overflow-y:auto;" id="group-status-list"></div>
+        <div class="widget-body" style="padding:12px; gap:8px;" id="group-status-list"></div>
       </div>
 
-      <div class="widget" id="wid-lb" style="height: 250px;">
+      <div class="widget" id="wid-lb">
         <div class="widget-header">
           <span><span style="color:var(--ans);">●</span> Live Progress</span> 
           <div class="controls-row">
@@ -680,7 +688,7 @@
         </div>
       </div>
 
-      <div class="widget" id="wid-chat-desk" style="border-bottom:none; flex:1;">
+      <div class="widget" id="wid-chat-desk" style="border-bottom:none;">
         <div class="widget-header">
           <span>Live Chat</span> 
           <div class="controls-row">
@@ -702,16 +710,16 @@
   </div>
 
   <!-- THE ACTUAL CHAT CORE (Moved around by JS/CSS) -->
-  <div id="chat-core-wrapper" class="chat-wrapper" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+  <div id="chat-core-wrapper" class="chat-wrapper" style="display: flex; flex-direction: column; flex: none; height: auto;">
       <div class="widget-header" id="mob-chat-header" style="display:none;">
           <span>Live Chat</span>
           <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
       </div>
-      <div class="chat-msgs" id="game-chat-msgs" style="flex:1;"></div>
+      <div class="chat-msgs" id="game-chat-msgs"></div>
       <div class="chat-input-wrap" style="gap:6px;">
         <input type="text" id="game-chat-input" placeholder="Message..." onkeypress="if(event.key==='Enter') window.sendGameChat()" style="flex:1; min-width:0;">
         <input type="file" id="chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendChatPhoto(this)">
-        <button id="btn-chat-photo" onclick="el('chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
+        <button id="btn-chat-photo" onclick="document.getElementById('chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
         <button onclick="window.sendGameChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
       </div>
   </div>
@@ -726,12 +734,12 @@
   <!-- 2. Group Status Wrapper (Mobile) -->
   <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
       <div class="widget-header">
-          <span>🫂 Group Status</span>
+          <span>🤝 Group Progress</span>
           <span onclick="document.getElementById('mob-group-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
       </div>
       <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
   </div>
-  <button id="mob-group-fab" class="mobile-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🫂</button>
+  <button id="mob-group-fab" class="mobile-fab" onclick="document.getElementById('mob-group-wrapper').classList.toggle('show-mob')">🤝</button>
 
   <script>
     (function(){
@@ -785,7 +793,7 @@
             Not Visited: <span id="warn-notvis" style="color:var(--not-vis);">0</span>
         </div>
         <div style="display:flex; gap:12px; margin-top:10px;">
-            <button class="btn" onclick="el('submit-warning-modal').classList.remove('show')">Cancel</button>
+            <button class="btn" onclick="document.getElementById('submit-warning-modal').classList.remove('show')">Cancel</button>
             <button class="btn btn-primary" onclick="window.forceSubmit()">Yes, Submit</button>
         </div>
     </div>
@@ -828,8 +836,6 @@
 window.localResolvedTracker = {}; // For one-time toasts in group mode
 
 // ── PARALLEL DOWNLOADER ──
-// Splits file into N parallel Range requests for max speed on GitHub/CDN.
-// Falls back to single stream if server doesn't support Range requests.
 async function parallelFetch(url, onProgress, numStreams = 4) {
     let total = 0, supportsRange = false;
     try {
@@ -839,7 +845,6 @@ async function parallelFetch(url, onProgress, numStreams = 4) {
     } catch(e) {}
 
     if (!supportsRange || total < 2 * 1024 * 1024) {
-        // Fallback: single stream
         const res = await fetch(url);
         if (!res.ok) throw new Error('Download failed');
         let loaded = 0; const reader = res.body.getReader(); const chunks = [];
@@ -851,7 +856,6 @@ async function parallelFetch(url, onProgress, numStreams = 4) {
         return await new Blob(chunks).arrayBuffer();
     }
 
-    // Parallel Range download
     const chunkSize = Math.ceil(total / numStreams);
     let loaded = 0;
     const ranges = Array.from({ length: numStreams }, (_, i) => ({
@@ -870,7 +874,6 @@ async function parallelFetch(url, onProgress, numStreams = 4) {
         return await new Blob(chunks).arrayBuffer();
     }));
 
-    // Stitch parts together in order
     const combined = new Uint8Array(total);
     let offset = 0;
     for(const buf of buffers) { combined.set(new Uint8Array(buf), offset); offset += buf.byteLength; }
@@ -911,20 +914,18 @@ let roomData = {
     hostId: null, status: 'waiting', testFile: null, testUrl: null, hasCustomFile: false,
     settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, showLiveStats: 'false' },
     startTime: null, totalQuestions: 0, kickVotes: {}, players: {},
-    activeGroupQ: null, groupResolved: {} // For Group Practice State
+    activeGroupQ: null, groupResolved: {} 
 };
 
 let fileBuffer = null; 
-let masterQuestions = []; let masterSectionMap = {}; // Master pure copy
-let allQuestions = []; let sectionMap = {}; // Filtered game copy
+let masterQuestions = []; let masterSectionMap = {}; 
+let allQuestions = []; let sectionMap = {}; 
 let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};   
 let imageCache = {}; let timerInterval = null; let syncInterval = null;
 let hasSubmitted = false; let gameFinished = false; 
 let isFileAcquisitionStarted = false; let isLaunchPending = false;
-// New feature vars
 let questionTimes = {}; let questionEnterTime = Date.now();
 let correctStreak = 0;
-let lastActiveGroupQ = null;
 
 const el = id => document.getElementById(id);
 const showToast = (type, msg) => { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); };
@@ -943,13 +944,11 @@ window.toggleDock = (widgetId, target) => {
     if (target === 'left') { 
         leftDock.appendChild(widget); 
     } else { 
-        // both 'right' and 'sidebar' go to sidebar (merged)
         const mobSubmit = el('mob-submit-area');
         if (mobSubmit) sidebar.insertBefore(widget, mobSubmit);
         else sidebar.appendChild(widget);
     }
     
-    // Auto show/hide left dock
     leftDock.style.display = leftDock.children.length > 0 ? 'flex' : 'none';
 };
 
@@ -967,7 +966,6 @@ window.toggleDock = (widgetId, target) => {
 
         header.addEventListener('mousedown', e => {
             if (e.target.tagName === 'BUTTON' || window.innerWidth <= 850) return;
-            // Float the widget
             if (!widget.classList.contains('floating')) {
                 const rect = widget.getBoundingClientRect();
                 origW = rect.width; origH = rect.height;
@@ -976,7 +974,6 @@ window.toggleDock = (widgetId, target) => {
                 widget.style.height = origH + 'px';
                 widget.style.left = rect.left + 'px';
                 widget.style.top = rect.top + 'px';
-                // Insert placeholder
                 const ph = document.createElement('div');
                 ph.id = 'drag-placeholder-' + widget.id;
                 ph.style.cssText = `width:${origW}px; height:${origH}px; flex-shrink:0;`;
@@ -993,12 +990,10 @@ window.toggleDock = (widgetId, target) => {
             if (!isDragging) return;
             const dx = e.clientX - startX; const dy = e.clientY - startY;
             let newLeft = origLeft + dx; let newTop = origTop + dy;
-            // Constrain to viewport
             newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - widget.offsetWidth));
             newTop = Math.max(0, Math.min(newTop, window.innerHeight - widget.offsetHeight));
             widget.style.left = newLeft + 'px'; widget.style.top = newTop + 'px';
             
-            // Snap zones
             const inLeft = newLeft < 60;
             const inRight = newLeft + widget.offsetWidth > window.innerWidth - 60;
             if (inLeft) {
@@ -1018,14 +1013,12 @@ window.toggleDock = (widgetId, target) => {
             const rect = widget.getBoundingClientRect();
             const ph = document.getElementById('drag-placeholder-' + widget.id);
 
-            // Snap to left dock
             if (rect.left < 60) {
                 widget.classList.remove('floating');
                 widget.style.left = ''; widget.style.top = ''; widget.style.width = ''; widget.style.height = '';
                 el('left-dock').appendChild(widget);
                 el('left-dock').style.display = 'flex';
                 if (ph) ph.remove();
-            // Snap to sidebar (right edge)
             } else if (rect.right > window.innerWidth - 60) {
                 widget.classList.remove('floating');
                 widget.style.left = ''; widget.style.top = ''; widget.style.width = ''; widget.style.height = '';
@@ -1035,11 +1028,9 @@ window.toggleDock = (widgetId, target) => {
                 else sidebar.appendChild(widget);
                 if (ph) ph.remove();
             }
-            // else stays floating
         });
     }
 
-    // Observe for widgets and make them draggable
     const observer = new MutationObserver(() => {
         document.querySelectorAll('.widget').forEach(makeDraggable);
     });
@@ -1218,22 +1209,18 @@ function initPeerAsHost() {
                         }
                         if (allAnswered && !roomData.groupResolved[actQ]) {
                             roomData.groupResolved[actQ] = true;
-                            broadcastRoomState();
                             
-                            // Auto Jump logic
-                            setTimeout(() => {
-                                if (roomData.activeGroupQ === actQ && !hasSubmitted) {
-                                    const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
-                                    const nextIdx = getSeq()[actIdx + 1];
-                                    if (nextIdx !== undefined) {
-                                        roomData.activeGroupQ = allQuestions[nextIdx].id;
-                                        broadcastRoomState();
-                                    } else {
-                                        for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
-                                        window.forceSubmit();
-                                    }
-                                }
-                            }, 4000); // 4 seconds review time
+                            // Advance active group Q instantly to unlock it for everyone
+                            const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                            const nextIdx = getSeq()[actIdx + 1];
+                            if (nextIdx !== undefined) {
+                                roomData.activeGroupQ = allQuestions[nextIdx].id;
+                            } else {
+                                roomData.activeGroupQ = null; // Finished
+                                for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                                window.forceSubmit();
+                            }
+                            broadcastRoomState();
                         }
                     }
                     broadcastRoomState(); checkAllSubmitted(); 
@@ -1242,6 +1229,11 @@ function initPeerAsHost() {
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
             if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
+            
+            // Allow anyone to request host to update answer key
+            if(data.type === 'update_answer_key' && isHost) {
+                window.hostSetAnswerKey(data.qId, data.ans);
+            }
         });
         conn.on('close', () => { delete connections[conn.peer]; delete roomData.players[conn.peer]; if(roomData.kickVotes[conn.peer]) delete roomData.kickVotes[conn.peer]; broadcastRoomState(); });
     });
@@ -1299,7 +1291,7 @@ function attachHostSettingsListeners() {
         roomData.settings.addonTabs = el('cfg-addon-tabs').checked ? 'true' : 'false';
         roomData.settings.addonPhoto = el('cfg-addon-photo').checked ? 'true' : 'false';
         roomData.settings.autoResults = el('cfg-auto-results').checked ? 'true' : 'false';
-        // Ghost suboption visibility
+        
         el('cfg-ghost-live-row').style.display = el('cfg-ghost-tog').checked ? 'flex' : 'none';
         if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length;
         else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
@@ -1319,7 +1311,6 @@ function initPeerAsPlayer() {
         hostConn.on('data', async (data) => {
             if(data.type === 'room_state') { const oldStatus = roomData.status; roomData = data.state; handleRoomStateUpdatePlayer(oldStatus); }
             if(data.type === 'kicked') { showToast('error', 'You were kicked.'); setTimeout(() => window.location.reload(), 2000); }
-            // P2P RECEIVE LOGIC 
             if(data.type === 'file_start') { 
                 totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0; 
                 sendLobbyProgress(`[P2P Host] 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5); 
@@ -1337,6 +1328,17 @@ function initPeerAsPlayer() {
             if(data.type === 'force_submit_trigger') { window.forceSubmit(); }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
             if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
+            
+            if(data.type === 'update_answer_key') {
+                const q = allQuestions.find(x => x.id === data.qId);
+                if(q) { 
+                    q.correctAnswer = data.ans; 
+                    if(allQuestions[currentQIdx] && allQuestions[currentQIdx].id === data.qId) {
+                        renderAnswerArea(q); 
+                        updateGroupUI();
+                    }
+                }
+            }
         });
         hostConn.on('close', () => showToast('error', 'Host disconnected!'));
     });
@@ -1345,12 +1347,11 @@ function initPeerAsPlayer() {
 
 async function sendP2PFileChunks(conn) {
     if (!fileBuffer) return;
-    const CHUNK_SIZE = 256 * 1024;   // 256 KB per chunk
-    const MAX_BUFFERED = 4 * 1024 * 1024; // pause if buffer > 4 MB
+    const CHUNK_SIZE = 256 * 1024;   
+    const MAX_BUFFERED = 4 * 1024 * 1024; 
     let offset = 0;
     conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
     while (offset < fileBuffer.byteLength) {
-        // Backpressure: wait until the DataChannel drains before sending more
         while (conn.dataChannel && conn.dataChannel.bufferedAmount > MAX_BUFFERED) {
             await new Promise(r => setTimeout(r, 30));
         }
@@ -1364,31 +1365,30 @@ function sendLobbyProgress(text, pct) { if(hostConn && hostConn.open) hostConn.s
 function broadcastRoomState() {
     updateLobbyUI();
     if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
-        renderSidebarLeaderboard();
+        if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard();
         updateRaceBar();
     }
-    if(el('final-results-layer').classList.contains('show')) showFinalResults(false); // live refresh results
+    if(el('final-results-layer').classList.contains('show')) showFinalResults(false); 
     for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
 }
 
-// ── NEW INTELLIGENT FILE FETCH LOGIC ──
 async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
     el('view-file').textContent = roomData.testFile; el('view-sections').textContent = roomData.settings.sections.join(', ');
     el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : (roomData.settings.timerMode === 'group' ? 'Group Practice' : 'Countdown'); 
     el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
     
-    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) renderSidebarLeaderboard();
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
+        if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard();
+    }
     
     if((!oldStatus || oldStatus === 'waiting') && !isFileAcquisitionStarted && roomData.testFile) {
         isFileAcquisitionStarted = true; 
         let cached = await loadFromCache(roomData.testFile);
         if(cached) {
-            // Priority 1: Cache
             sendLobbyProgress('[Cache] Loading...', 50); fileBuffer = cached; await processFilePlayer(fileBuffer);
         } else {
             if(roomData.testUrl) {
-                // Priority 2: Direct Web Download (GitHub / CDN)
                 sendLobbyProgress('[Direct Web] Starting...', 10);
                 try {
                     fileBuffer = await parallelFetch(roomData.testUrl, (loaded, total) => {
@@ -1397,13 +1397,11 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
                     });
                     await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
                 } catch(e) {
-                    // Priority 3: Fallback to P2P Host Transfer if Direct DL fails
                     console.warn("Direct Web Download failed. Falling back to P2P Host Transfer.", e);
                     sendLobbyProgress('[Fallback P2P] Requesting...', 5);
                     hostConn.send({ type: 'request_file' });
                 }
             } else { 
-                // Host uploaded a local custom file, must use P2P
                 sendLobbyProgress('[P2P Host] Requesting...', 5); 
                 hostConn.send({ type: 'request_file' }); 
             }
@@ -1412,26 +1410,22 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     
     if((!oldStatus || oldStatus === 'waiting') && roomData.status === 'playing') {
         if(masterQuestions.length > 0) launchGame();
-        else isLaunchPending = true; // Wait for processing
+        else isLaunchPending = true; 
     }
 
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
-    // Live results refresh
+    
     if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
     
-    if(roomData.status === 'playing' && el('app').style.display === 'flex') { 
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) { 
         updateRaceBar(); 
-        
-        // Group Practice: If host advanced active question, jump to it automatically!
-        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ && roomData.activeGroupQ !== lastActiveGroupQ) {
-             lastActiveGroupQ = roomData.activeGroupQ;
-             const targetIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
-             if (targetIdx !== -1) {
-                 if (targetIdx > currentQIdx) showToast('success', '⏩ Next Question!');
-                 window.goToQ(targetIdx);
-             }
-        }
         updateGroupUI();
+        
+        // This instantly forces the Answer Area to drop its "Lock Screen" the moment
+        // it receives broadcast that the question has unlocked
+        if(allQuestions[currentQIdx]) {
+            renderAnswerArea(allQuestions[currentQIdx]);
+        }
     }
 }
 
@@ -1471,7 +1465,6 @@ function updateLobbyUI() {
     }
     if(isHost) el('btn-start-game').disabled = !allReady;
 
-    // Synchronize Photo Chat add-on visibility globally
     const photoBtn = el('btn-chat-photo');
     const lobbyPhotoBtn = el('btn-lobby-chat-photo');
     if(photoBtn) photoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
@@ -1494,7 +1487,6 @@ function appendChatUI(n, t, isPhoto = false) {
     const isMe = n === myName;
     const content = isPhoto ? `<img src="${t}" style="max-width:180px; max-height:200px; object-fit:contain; border-radius:8px; margin-top:4px; display:block;" loading="lazy">` : t;
     
-    // Explicitly append to both chat boxes cleanly
     ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
         const b = el(id); if(!b) return;
         const msgDiv = document.createElement('div');
@@ -1545,7 +1537,6 @@ function launchGame() {
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
 
-    // Build the NTA section tabs
     function buildSectionTabs() {
         const tabsEl = el('section-tabs'); if(!tabsEl) return;
         tabsEl.innerHTML = '';
@@ -1558,7 +1549,7 @@ function launchGame() {
             t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
             t.dataset.key = k;
             t.onclick = () => {
-                if(roomData.settings.timerMode === 'group') return; // disabled in group mode
+                if(roomData.settings.timerMode === 'group') return; 
                 el('section-select').value = k; window.changeSection();
                 tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
                 t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
@@ -1576,13 +1567,11 @@ function launchGame() {
         roomData.activeGroupQ = allQuestions[0].id;
         roomData.groupResolved = {};
     }
-    lastActiveGroupQ = roomData.activeGroupQ;
     
     // Apply addons
-    if(roomData.settings.addonProgress !== 'false') el('wid-lb').style.display = '';
+    if(roomData.settings.addonProgress !== 'false' && roomData.settings.timerMode !== 'group') el('wid-lb').style.display = '';
     else el('wid-lb').style.display = 'none';
     
-    // Mobile fab buttons ONLY for mobile
     const isMobile = window.innerWidth <= 850;
     
     if(roomData.settings.addonChat !== 'false') {
@@ -1593,7 +1582,6 @@ function launchGame() {
         el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
     }
 
-    // Race bar - now integrated in btm-race-fill
     if(roomData.settings.addonRace === 'true') {
         el('btm-race-fill').style.display = 'flex';
         el('race-bar-names').style.display = 'flex';
@@ -1602,18 +1590,18 @@ function launchGame() {
         el('race-bar-names').style.display = 'none';
     }
 
-    // Per-Q timer
     if(roomData.settings.addonQtimer === 'true') {
         el('per-q-timer-wrap').style.display = 'inline-block';
     }
 
-    // NTA tabs
     if(roomData.settings.addonTabs === 'true') buildSectionTabs();
 
     // Group Mode Setups
     if (roomData.settings.timerMode === 'group') {
         el('btm-bar-standard').style.display = 'none';
         el('btm-bar-group').style.display = 'flex';
+        
+        el('wid-lb').style.display = 'none'; // hide generic LB
         
         if (!isMobile) {
             el('wid-group-status').style.display = 'flex';
@@ -1622,31 +1610,28 @@ function launchGame() {
         }
         
     } else {
-        // Reset to normal defaults just in case
         el('btm-bar-standard').style.display = 'flex';
         el('btm-bar-group').style.display = 'none';
         el('wid-group-status').style.display = 'none';
         el('mob-group-fab').style.display = 'none';
     }
 
-    // Set paper name in header
     if(roomData.testFile) {
         const nm = roomData.testFile.split('/').pop().replace('.niso','').replace('.zip','');
         el('header-paper-name').textContent = nm; el('header-paper-name').style.display = 'block';
     }
 
-    // Mobile stats
     if(isMobile) {
         el('top-stats-mob').style.display = 'flex';
     }
 
-    startTimers(); renderQuestion(); renderSidebar(); renderSidebarLeaderboard(); updateGroupUI();
+    startTimers(); renderQuestion(); renderSidebar(); 
+    if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard(); 
+    updateGroupUI();
     
-    // Ghost full-live polling
     if(roomData.settings.showGhosts === 'true' && roomData.settings.ghostFullLive === 'true') {
         setInterval(() => { if(!hasSubmitted) renderSidebar(); }, 1000);
     }
-    // Live results polling (always on when results shown)
     setInterval(() => {
         if(el('final-results-layer').classList.contains('show')) showFinalResults(false);
     }, 1000);
@@ -1702,7 +1687,7 @@ function calculateScore() {
         }
         if (selectedAns) {
             const { hasAnswer } = getCorrectInfo(q);
-            if (!hasAnswer) return; // no answer key — don't score
+            if (!hasAnswer) return; 
             if (isCorrect(q, selectedAns)) {
                 let bonus = q.marks.cm || 4;
                 if (roomData.settings.speedBonus === 'true') {
@@ -1720,7 +1705,6 @@ function pushProgressToHost(isFinal = false) {
     const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
     const curQ = allQuestions[currentQIdx] ? allQuestions[currentQIdx].id : null;
     
-    // Pack my group answers
     const myGroupAnswers = roomData.players[myId] ? roomData.players[myId].groupAnswers : {};
 
     const pay = { 
@@ -1747,20 +1731,16 @@ function pushProgressToHost(isFinal = false) {
             if (allAnswered && !roomData.groupResolved[actQ]) {
                 roomData.groupResolved[actQ] = true;
                 
-                // HOST ONLY auto-jump logic 
-                setTimeout(() => {
-                    if (roomData.activeGroupQ === actQ && !hasSubmitted) {
-                        const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
-                        const nextIdx = getSeq()[actIdx + 1];
-                        if (nextIdx !== undefined) {
-                            roomData.activeGroupQ = allQuestions[nextIdx].id;
-                            broadcastRoomState();
-                        } else {
-                            for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
-                            window.forceSubmit();
-                        }
-                    }
-                }, 4000); // 4 seconds review time before yank
+                // HOST ONLY auto-advance logic instantly unblocks next question
+                const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                const nextIdx = getSeq()[actIdx + 1];
+                if (nextIdx !== undefined) {
+                    roomData.activeGroupQ = allQuestions[nextIdx].id;
+                } else {
+                    roomData.activeGroupQ = null; // Finished
+                    for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                    window.forceSubmit();
+                }
             }
         }
 
@@ -1783,7 +1763,6 @@ window.groupSave = (isSkip = false) => {
     const qId = allQuestions[currentQIdx].id;
     const ans = answers[qId];
     
-    // Save to our groupAnswers record
     if(!roomData.players[myId].groupAnswers) roomData.players[myId].groupAnswers = {};
     
     if(isSkip || !ans.selected) {
@@ -1801,7 +1780,7 @@ window.groupSave = (isSkip = false) => {
     el('group-wait-text').style.display = 'block';
     el('group-wait-text').textContent = 'Waiting for others...';
     
-    renderAnswerArea(allQuestions[currentQIdx]); // Rerender to disable buttons
+    renderAnswerArea(allQuestions[currentQIdx]); 
     updateGroupUI(); 
 };
 
@@ -1809,7 +1788,6 @@ function updateGroupUI() {
     if(roomData.settings.timerMode !== 'group' || hasSubmitted) return;
     const q = allQuestions[currentQIdx]; if(!q) return;
     
-    // We update UI based on the *viewed* question
     const isResolved = roomData.groupResolved[q.id];
     const players = Object.values(roomData.players);
     const { ops: correctOps, label: correctAnsStr } = getCorrectInfo(q);
@@ -1819,26 +1797,36 @@ function updateGroupUI() {
         const pAns = (p.groupAnswers || {})[q.id];
         const hasAnswered = pAns !== undefined && pAns !== null;
         
+        let cColor = 'var(--text2)';
+        let cIcon = '⏳';
+        let ansText = hasAnswered ? 'Locked' : 'Thinking...';
+        
+        if (hasAnswered && !isResolved) {
+             cColor = 'var(--ans)';
+             cIcon = '✅';
+        }
+
         if (isResolved) {
             const pAnsStr = String(pAns).trim();
             const isSkip = !hasAnswered || pAnsStr === 'skipped' || pAnsStr === 'null' || pAnsStr === 'undefined';
             const isC = !isSkip && isCorrect(q, pAnsStr);
-            const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
-            const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
-            const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
-            
-            html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid ${cColor};">
-                <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
-                <span style="font-size:12px; color:${cColor}; font-weight:800;">${ansText} ${cIcon}</span>
-            </div>`;
-        } else {
-            const icon = hasAnswered ? '✅' : '⏳';
-            const color = hasAnswered ? 'var(--ans)' : 'var(--text2)';
-            html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
-                <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
-                <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${hasAnswered ? 'Locked' : 'Thinking...'}</span>
-            </div>`;
+            cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
+            cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
+            ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
         }
+        
+        const totalQ = roomData.totalQuestions || 1;
+        const pct = Math.round((p.attempted/totalQ)*100);
+
+        html += `<div style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-family:'Outfit'; font-size:14px; color: ${p.name===myName?'var(--accent)':'var(--text)'};">${p.name}</span>
+                <span style="font-size:12px; color:${cColor}; font-weight:800; background:var(--surface2); padding:4px 8px; border-radius:6px; border:1px solid ${cColor};">${ansText} ${cIcon}</span>
+            </div>
+            <div class="progress-wrap" style="height: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
+                <div class="progress-fill" style="width:${pct}%; background:var(--accent);"></div>
+            </div>
+        </div>`;
     });
 
     if (isResolved) {
@@ -1852,7 +1840,6 @@ function updateGroupUI() {
     if(el('group-status-list')) el('group-status-list').innerHTML = html;
     if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
 
-    // Trigger Resolution Toasts exactly ONCE
     if (isResolved && !window.localResolvedTracker[q.id]) {
         window.localResolvedTracker[q.id] = true;
         const myAnsStr = (roomData.players[myId].groupAnswers || {})[q.id];
@@ -1866,17 +1853,17 @@ function updateGroupUI() {
         updateCompactStats();
     }
     
-    // Manage bottom bar buttons
     const isViewingActive = q.id === roomData.activeGroupQ;
     const myAns = (roomData.players[myId].groupAnswers || {})[q.id];
     
-    if (isViewingActive) {
-        if (isResolved) {
-            el('group-wait-text').style.display = 'block';
-            el('group-wait-text').innerHTML = '<span style="color:var(--ans);">✅ Resolved. Jumping soon...</span>';
-            el('btn-group-save').style.display = 'none';
-            el('btn-group-skip').style.display = 'none';
-        } else if (myAns !== undefined && myAns !== null) {
+    if (isResolved) {
+        el('btn-group-save').style.display = 'none';
+        el('btn-group-skip').style.display = 'none';
+        el('group-wait-text').style.display = 'none';
+        el('btn-group-next').style.display = 'block';
+    } else if (isViewingActive) {
+        el('btn-group-next').style.display = 'none';
+        if (myAns !== undefined && myAns !== null) {
             el('btn-group-save').style.display = 'none';
             el('btn-group-skip').style.display = 'none';
             el('group-wait-text').style.display = 'block';
@@ -1889,10 +1876,10 @@ function updateGroupUI() {
             el('group-wait-text').style.display = 'none';
         }
     } else {
-        // Viewing non-active question
         el('btn-group-save').style.display = 'none';
         el('btn-group-skip').style.display = 'none';
         el('group-wait-text').style.display = 'none';
+        el('btn-group-next').style.display = 'none';
     }
 }
 
@@ -1908,25 +1895,20 @@ window.submitWarningBtn = () => {
 window.forceSubmit = () => {
     el('submit-warning-modal').classList.remove('show');
     if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
-    // Record time on last question
     if(allQuestions[currentQIdx]) { const qId = allQuestions[currentQIdx].id; const spent = Math.round((Date.now()-questionEnterTime)/1000); questionTimes[qId]=(questionTimes[qId]||0)+spent; }
     
     pushProgressToHost(true);
     
-    // UI changes lock options
     if(el('btn-top-submit')) { el('btn-top-submit').disabled = true; el('btn-top-submit').textContent = "Submitted"; }
     if(el('btn-mob-submit')) { el('btn-mob-submit').disabled = true; el('btn-mob-submit').textContent = "Submitted"; }
     ['btn-mark', 'btn-clear', 'btn-save'].forEach(id => {if(el(id)) el(id).disabled = true;});
     
     document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true); document.querySelectorAll('.nat-input').forEach(b => b.disabled = true);
     
-    showFinalResults(true); // Jump to results
+    showFinalResults(true); 
 }
 
 // ── ANSWER HELPERS ──
-// Returns {ops: string[], label: string} for a question's correct answer
-// ops: array of string option numbers for MCQ (e.g. ["2"]), or [value] for NAT
-// label: human-readable correct answer string
 function getCorrectInfo(q) {
     if (!q || q.correctAnswer === undefined || q.correctAnswer === null) {
         return { ops: [], label: null, hasAnswer: false };
@@ -1948,25 +1930,50 @@ function isCorrect(q, selectedStr) {
     return q.type === 'mcq' ? ops.includes(sel) : ops[0] === sel;
 }
 
+window.hostSetAnswerKey = (qId, ans) => {
+    const q = allQuestions.find(x => x.id === qId);
+    if(q) {
+        q.correctAnswer = ans;
+        if(masterQuestions) {
+             const mq = masterQuestions.find(x => x.id === qId);
+             if(mq) mq.correctAnswer = ans;
+        }
+        for(let id in connections) connections[id].send({ type: 'update_answer_key', qId, ans });
+        renderAnswerArea(q);
+        updateGroupUI();
+        showToast('success', 'Answer key set globally!');
+    }
+};
+
+
 // ── 6. DATA PARSING ──
 function buildQuestions(data) {
   masterQuestions = []; masterSectionMap = {}; imageCache = {};
   const pD = data.pdfCropperData || data.questions || {};
   const aK = data.testAnswerKey || data.answerKey || {};
+  
+  // Flatten Answer Key by global Question Number to avoid Topic naming mismatches
+  const flatAnswers = {};
+  for (const s of Object.keys(aK)) {
+    for (const t of Object.keys(aK[s])) {
+      for (const qKey of Object.keys(aK[s][t])) {
+        flatAnswers[qKey] = aK[s][t][qKey];
+      }
+    }
+  }
+
   let i = 0;
   for (const s of Object.keys(pD)) {
     for (const t of Object.keys(pD[s])) {
       const tq = pD[s][t] || {};
-      // Answer key uses same subject/section keys
-      const ta = (aK[s] || {})[t] || {};
       const sk = `${s} › ${t}`;
       masterSectionMap[sk] = [];
       for (const q of Object.keys(tq)) {
         const qd = tq[q] || {};
-        const ad = ta[q] || {};
-        // correctAnswer lives in testAnswerKey entry: array for MCQ, string for NAT
+        const globalNumStr = String(qd.que || q);
+        
+        const ad = flatAnswers[globalNumStr] || {};
         const correctAnswer = (ad.correctAnswer !== undefined && ad.correctAnswer !== null) ? ad.correctAnswer : null;
-        // type: prefer answer key (more reliable), fallback to pdfCropperData
         const type = ad.type || qd.type || 'mcq';
         const images = [];
         for (let j = 1; j <= Math.max((qd.pdfData || []).length || 1, 1); j++) {
@@ -1974,7 +1981,7 @@ function buildQuestions(data) {
         }
         masterQuestions.push({
           id: `${s}__${t}__${q}`,
-          globalNum: parseInt(q),
+          globalNum: parseInt(globalNumStr),
           type,
           marks: qd.marks || { cm: 4, im: -1 },
           answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
@@ -2065,7 +2072,6 @@ window.saveNext = () => {
 };
 
 function showNextBtn() {
-    // Swap save button to a "Next →" button after saving
     const saveBtn = el('btn-save');
     if (!saveBtn) return;
     saveBtn.textContent = 'Next →';
@@ -2075,7 +2081,6 @@ function showNextBtn() {
     saveBtn.style.color = 'white';
     saveBtn.style.boxShadow = '0 4px 15px rgba(99,102,241,0.4)';
     saveBtn.onclick = () => {
-        // Reset button
         saveBtn.textContent = 'Save & Next →';
         saveBtn.classList.add('save');
         saveBtn.style.background = '';
@@ -2126,7 +2131,6 @@ function updateCompactStats() {
         if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
         if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = overall;
     });
-    // Per-Q timer update
     if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true' && !hasSubmitted) {
         const spent = Math.round((Date.now() - questionEnterTime) / 1000);
         if(el('per-q-timer')) el('per-q-timer').textContent = spent + 's';
@@ -2155,7 +2159,7 @@ function renderQuestion() {
     }
   }
   if (!hasI) imgA.innerHTML = `<div style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
-  questionEnterTime = Date.now(); // reset per-Q timer on each render
+  questionEnterTime = Date.now(); 
   renderAnswerArea(q); updateCompactStats();
 }
 
@@ -2171,7 +2175,6 @@ function renderAnswerArea(q) {
   const myGroupAns = isGroupMode ? (roomData.players[myId].groupAnswers || {})[q.id] : null;
   const iAmLockedInGroup = isGroupMode && myGroupAns && myGroupAns !== 'null';
   
-  // Grey out condition: We are in group mode, but not looking at the active question AND it hasn't been resolved yet
   const shouldGreyOut = isGroupMode && !isViewingActive && !isResolvedInGroup;
   
   if (shouldGreyOut) {
@@ -2182,14 +2185,13 @@ function renderAnswerArea(q) {
       return;
   }
 
-  // Review Mode Helpers
   const { ops: correctOptions, label: correctAnsLabel, hasAnswer } = getCorrectInfo(q);
 
   if (q.type === 'mcq') {
     const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
     for (let i = 1; i <= no; i++) {
       const b = document.createElement('button'); b.className = 'opt-btn'; 
-      b.disabled = hasSubmitted || iAmLockedInGroup; 
+      b.disabled = hasSubmitted || iAmLockedInGroup || isResolvedInGroup; 
       
       const isLocallySelected = ans && ans.selected === i;
       const isGroupSelected = isGroupMode && parseInt(myGroupAns) === i;
@@ -2197,7 +2199,6 @@ function renderAnswerArea(q) {
       
       b.innerHTML = `<div class="opt-key">${lbls[i-1]}</div><span>Option ${lbls[i-1]}</span>`;
 
-      // Paint Review Colors and Inject Labels
       if (shouldPaintColors && hasAnswer) {
           if (correctOptions.includes(String(i))) {
               b.classList.add('correct-ans');
@@ -2208,7 +2209,7 @@ function renderAnswerArea(q) {
           }
       }
 
-      if(!hasSubmitted && !iAmLockedInGroup) b.onclick = () => { answers[q.id].selected = i; renderAnswerArea(q); }; grid.appendChild(b);
+      if(!hasSubmitted && !iAmLockedInGroup && !isResolvedInGroup) b.onclick = () => { answers[q.id].selected = i; renderAnswerArea(q); }; grid.appendChild(b);
     }
     area.innerHTML = ''; area.appendChild(grid);
   } else {
@@ -2217,7 +2218,7 @@ function renderAnswerArea(q) {
     if (isGroupMode && myGroupAns && myGroupAns !== 'skipped') inp.value = myGroupAns;
     else if (ans && ans.selected) inp.value = ans.selected; 
     
-    inp.disabled = hasSubmitted || iAmLockedInGroup;
+    inp.disabled = hasSubmitted || iAmLockedInGroup || isResolvedInGroup;
     
     if (shouldPaintColors) {
         const val = inp.value;
@@ -2236,6 +2237,35 @@ function renderAnswerArea(q) {
         area.appendChild(inp);
     }
   }
+
+  // Host: Inject Set Answer Key feature if missing
+  if (!hasAnswer && isHost && !hasSubmitted && !isResolvedInGroup) {
+      const hostDiv = document.createElement('div');
+      hostDiv.style.cssText = "margin-top: 24px; padding: 16px; background: rgba(99,102,241,0.08); border: 2px dashed var(--accent); border-radius: 12px; text-align: center;";
+      hostDiv.innerHTML = `<div style="font-size:13px; font-weight:800; color:var(--accent2); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">👑 Host: Set Correct Answer</div>`;
+
+      if (q.type === 'mcq') {
+          const btns = document.createElement('div');
+          btns.style.display = 'flex'; btns.style.gap = '8px'; btns.style.justifyContent = 'center';
+          const no = q.answerOptions || 4;
+          for(let i=1; i<=no; i++) {
+              const b = document.createElement('button');
+              b.className = 'action-btn';
+              b.textContent = 'Opt ' + ['A','B','C','D'][i-1];
+              b.onclick = () => window.hostSetAnswerKey(q.id, [i]);
+              btns.appendChild(b);
+          }
+          hostDiv.appendChild(btns);
+      } else {
+          const wrp = document.createElement('div'); wrp.style.display = 'flex'; wrp.style.gap = '8px'; wrp.style.justifyContent = 'center';
+          wrp.innerHTML = `
+              <input type="text" id="host-ans-inp" class="input-styled" style="width:120px; padding:10px; font-size:16px;" placeholder="0.00">
+              <button class="btn btn-primary" style="width:auto; padding:10px 20px;" onclick="window.hostSetAnswerKey('${q.id}', [document.getElementById('host-ans-inp').value.trim()])">Set</button>
+          `;
+          hostDiv.appendChild(wrp);
+      }
+      area.appendChild(hostDiv);
+  }
 }
 
 function renderSidebar() {
@@ -2245,12 +2275,9 @@ function renderSidebar() {
     if (idx === currentQIdx) d.classList.add('active'); d.textContent = q.globalNum;
     
     if (!hasSubmitted && roomData && roomData.settings.showLiveStats === 'true') {
-        // Count players who attempted this q (proxy: we track by p.attempted vs q position)
-        // Use currentQ tracking: if any player's currentQ matches or they've passed this q
         const players = Object.values(roomData.players).filter(p => p.name !== myName);
         const total = players.length;
         if(total > 0) {
-            // Show fraction of players who have attempted at least up to this question
             const qSeqIdx = getSeq().indexOf(idx);
             const done = players.filter(p => {
                 const theirQ = allQuestions.findIndex(aq => aq.id === p.currentQ);
@@ -2266,7 +2293,6 @@ function renderSidebar() {
         }
     }
 
-    // Ghost initials – who is on this question
     if (!hasSubmitted && roomData && roomData.settings.showGhosts === 'true') {
         const ghosts = Object.values(roomData.players).filter(p => p.currentQ === q.id && p.name !== myName);
         if (ghosts.length) {
@@ -2279,7 +2305,6 @@ function renderSidebar() {
         }
     }
 
-    // Review Mode / Resolved Group Mode Dot Colors
     const isResolvedInGroup = roomData.settings.timerMode === 'group' && roomData.groupResolved && roomData.groupResolved[q.id];
     const myAns = answers[q.id].selected || (roomData.players[myId] ? (roomData.players[myId].groupAnswers || {})[q.id] : null);
 
@@ -2297,7 +2322,6 @@ function updateRaceBar() {
     if(!roomData || roomData.settings.addonRace !== 'true') return;
     const players = Object.values(roomData.players);
     const total = roomData.totalQuestions || 1;
-    // Find furthest player for the fill
     const myPlayer = roomData.players[myId];
     const myPct = myPlayer ? Math.round((myPlayer.attempted/total)*100) : 0;
     
@@ -2361,7 +2385,7 @@ function renderSidebarLeaderboard() {
 window.enterReviewMode = () => {
     el('final-results-layer').classList.remove('show');
     el('review-banner').classList.add('show');
-    renderQuestion(); // triggers color painting
+    renderQuestion(); 
     renderSidebar();
 };
 
@@ -2401,7 +2425,6 @@ window.showFinalResults = (forceShow = false) => {
         }
     });
 
-    // Time Analysis viewable globally when either everyone has submitted or the room state explicitly reports it is finished
     const anaBtn = el('btn-open-analysis');
     if(anaBtn) anaBtn.style.display = ((isAllDone || roomData.status === 'finished') && roomData.settings.showAnalysis === 'true') ? 'flex' : 'none';
 }
@@ -2428,7 +2451,6 @@ function renderAnalysis(mode) {
         players.forEach(p => html += `<th>${p.name}</th>`);
         html += '</tr></thead><tbody>';
         allQuestions.forEach(q => {
-            // Find fastest for this question
             const times = players.map(p => (p.questionTimes||{})[q.id]).filter(t => t!=null);
             const minT = times.length ? Math.min(...times) : null;
             html += `<tr><td>Q${q.globalNum}</td>`;
