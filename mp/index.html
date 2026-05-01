@@ -202,18 +202,23 @@
   #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
 
   #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 95; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
-  #mob-chat-wrapper.show-mob { bottom: 0; }
+  #mob-chat-wrapper.show-mob { bottom: 0; display: flex !important; } /* Only active when toggled explicitly */
 
-  /* FAB Buttons default to NONE, strictly enabled via JS for mobile ONLY */
-  .mobile-fab { display: none; position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  /* FAB Buttons */
+  .mobile-fab { position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .mobile-fab:active { transform: scale(0.9); }
   #mob-chat-fab { bottom: 85px; background: var(--accent); }
   #mob-group-fab { bottom: 155px; background: var(--accent2); }
 
   /* SECURITY: Ensure mobile floating elements NEVER appear on Desktop */
   @media (min-width: 851px) {
-    #mob-chat-fab, #mob-group-fab, #mob-chat-wrapper, #mob-group-wrapper {
+    .mobile-fab, #mob-chat-wrapper, #mob-group-wrapper {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
     }
   }
 
@@ -302,22 +307,6 @@
   .screen { -webkit-overflow-scrolling: touch; }
   .q-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .grid-wrap { -webkit-overflow-scrolling: touch; }
-  
-  /* ── MOBILE APP LAYOUT FIXES ── */
-  @media (max-width: 850px) {
-    #app { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
-    .main-stage { flex: 1; min-height: 0; overflow: hidden; }
-    .q-area { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-    .ans-area { flex-shrink: 0; padding: 10px 10px 4px; overflow-y: auto; max-height: 42dvh; -webkit-overflow-scrolling: touch; }
-    .opts-grid { grid-template-columns: 1fr 1fr; gap: 6px; max-width: 100%; }
-    .opt-btn { padding: 8px 10px; font-size: 13px; gap: 8px; }
-    .opt-key { width: 26px; height: 26px; font-size: 13px; }
-    .header { height: 50px; padding: 0 10px; }
-    .timer-box { font-size: 17px; padding: 4px 12px; }
-    .sidebar { top: 50px; }
-    .q-images img { border-radius: 8px; }
-    .nat-input { font-size: 20px; padding: 10px 16px; }
-  }
 </style>
 </head>
 <body>
@@ -616,10 +605,9 @@
             
             <!-- Group Practice Bottom Bar -->
             <div id="btm-bar-group" style="display:none; width:100%; justify-content:center; gap: 12px; align-items:center;">
+                <button class="action-btn" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
                 <button class="action-btn save" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
-                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2;">Waiting for others...</div>
-                <button class="action-btn" id="btn-group-next" onclick="window.groupNext()" style="display:none;" disabled>Next Group Question →</button>
-                <button class="action-btn save" id="btn-group-submit" onclick="window.forceSubmit()" style="display:none;">Submit Test</button>
+                <div id="group-wait-text" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
             </div>
         </div>
       </div>
@@ -764,6 +752,15 @@
             dragging=false; fab.style.transition='';
           },{passive:false});
       });
+      // Safety resize clear
+      window.addEventListener('resize', () => {
+          if (window.innerWidth > 850) {
+              const cw = document.getElementById('mob-chat-wrapper');
+              const gw = document.getElementById('mob-group-wrapper');
+              if(cw) cw.classList.remove('show-mob');
+              if(gw) gw.classList.remove('show-mob');
+          }
+      });
     })();
   </script>
 
@@ -818,6 +815,8 @@
 </div>
 
 <script>
+window.localResolvedTracker = {}; // For one-time toasts in group mode
+
 // ── PARALLEL DOWNLOADER ──
 // Splits file into N parallel Range requests for max speed on GitHub/CDN.
 // Falls back to single stream if server doesn't support Range requests.
@@ -1105,20 +1104,32 @@ function initPeerAsHost() {
                         const actQ = roomData.activeGroupQ;
                         let allAnswered = true;
                         for (let id in roomData.players) {
-                            if (!roomData.players[id].groupAnswers || !roomData.players[id].groupAnswers[actQ]) {
+                            if (!roomData.players[id].groupAnswers || roomData.players[id].groupAnswers[actQ] === undefined) {
                                 allAnswered = false; break;
                             }
                         }
                         if (allAnswered && !roomData.groupResolved[actQ]) {
                             roomData.groupResolved[actQ] = true;
+                            broadcastRoomState();
+                            
+                            // Auto Jump logic
+                            setTimeout(() => {
+                                if (roomData.activeGroupQ === actQ && !hasSubmitted) {
+                                    const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                                    const nextIdx = getSeq()[actIdx + 1];
+                                    if (nextIdx !== undefined) {
+                                        roomData.activeGroupQ = allQuestions[nextIdx].id;
+                                        broadcastRoomState();
+                                    } else {
+                                        for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                                        window.forceSubmit();
+                                    }
+                                }
+                            }, 4000); // 4 seconds review time
                         }
                     }
                     broadcastRoomState(); checkAllSubmitted(); 
                 } 
-            }
-            if(data.type === 'group_next_req') {
-                roomData.activeGroupQ = data.qId;
-                broadcastRoomState();
             }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
@@ -1215,6 +1226,7 @@ function initPeerAsPlayer() {
                 sendLobbyProgress(`[P2P Host] Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
                 await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
             }
+            if(data.type === 'force_submit_trigger') { window.forceSubmit(); }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
             if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
         });
@@ -1298,14 +1310,18 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
     // Live results refresh
     if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
+    
     if(roomData.status === 'playing' && el('app').style.display === 'flex') { 
         updateRaceBar(); 
         
-        // Group Practice: If host advanced active question, jump to it!
-        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ !== lastActiveGroupQ) {
+        // Group Practice: If host advanced active question, jump to it automatically!
+        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ && roomData.activeGroupQ !== lastActiveGroupQ) {
              lastActiveGroupQ = roomData.activeGroupQ;
              const targetIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
-             if (targetIdx !== -1) window.goToQ(targetIdx);
+             if (targetIdx !== -1) {
+                 if (targetIdx > currentQIdx) showToast('success', '⏩ Next Question!');
+                 window.goToQ(targetIdx);
+             }
         }
         updateGroupUI();
     }
@@ -1434,6 +1450,7 @@ function launchGame() {
             t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
             t.dataset.key = k;
             t.onclick = () => {
+                if(roomData.settings.timerMode === 'group') return; // disabled in group mode
                 el('section-select').value = k; window.changeSection();
                 tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
                 t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
@@ -1553,16 +1570,19 @@ function calculateLiveStats() {
         const isGroup = roomData.settings.timerMode === 'group';
         const myPlayer = roomData.players[myId];
         if (isGroup && myPlayer && myPlayer.groupAnswers) {
-             const ansStr = myPlayer.groupAnswers[q.id];
-             if (ansStr && ansStr !== 'skipped' && ansStr !== 'null') {
-                 const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+             const ansStr = String(myPlayer.groupAnswers[q.id]).trim();
+             if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') {
+                 const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+                 const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
                  const isC = q.type==='mcq' ? correctOps.includes(ansStr) : correctOps[0] === ansStr;
                  if(isC) correct++; else wrong++;
              }
         } else {
             const a = answers[q.id];
             if(a && (a.status === 'ans' || a.status === 'mark-ans')) {
-                const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+                const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+                const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
+                const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
                 if(isC) correct++; else wrong++;
             }
         }
@@ -1577,14 +1597,17 @@ function calculateScore() {
         let selectedAns = null;
         if (roomData.settings.timerMode === 'group') {
              const pAns = (roomData.players[myId].groupAnswers || {})[q.id];
-             if(pAns && pAns !== 'skipped' && pAns !== 'null') selectedAns = pAns;
+             if(pAns && pAns !== 'skipped' && pAns !== 'null' && pAns !== 'undefined') selectedAns = pAns;
         } else {
              const a = answers[q.id]; 
              if(a && a.selected) selectedAns = a.selected;
         }
 
         if(selectedAns) {
-            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(selectedAns)) : String(q.correctAnswer).trim() === String(selectedAns);
+            const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+            const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
+            const isC = q.type==='mcq' ? correctOps.includes(String(selectedAns)) : correctOps[0] === String(selectedAns);
+            
             if(isC) {
                 let bonus = q.marks.cm || 4;
                 if(roomData.settings.speedBonus === 'true') {
@@ -1622,12 +1645,27 @@ function pushProgressToHost(isFinal = false) {
             const actQ = roomData.activeGroupQ;
             let allAnswered = true;
             for (let id in roomData.players) {
-                if (!roomData.players[id].groupAnswers || !roomData.players[id].groupAnswers[actQ]) {
+                if (!roomData.players[id].groupAnswers || roomData.players[id].groupAnswers[actQ] === undefined) {
                     allAnswered = false; break;
                 }
             }
             if (allAnswered && !roomData.groupResolved[actQ]) {
                 roomData.groupResolved[actQ] = true;
+                
+                // HOST ONLY auto-jump logic 
+                setTimeout(() => {
+                    if (roomData.activeGroupQ === actQ && !hasSubmitted) {
+                        const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                        const nextIdx = getSeq()[actIdx + 1];
+                        if (nextIdx !== undefined) {
+                            roomData.activeGroupQ = allQuestions[nextIdx].id;
+                            broadcastRoomState();
+                        } else {
+                            for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                            window.forceSubmit();
+                        }
+                    }
+                }, 4000); // 4 seconds review time before yank
             }
         }
 
@@ -1639,14 +1677,21 @@ function pushProgressToHost(isFinal = false) {
 function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) { roomData.status = 'finished'; broadcastRoomState(); showFinalResults(true); } }
 
 // ── GROUP PRACTICE SPECIFIC LOGIC ──
-window.groupSave = () => {
+
+window.groupSkip = () => {
+    answers[allQuestions[currentQIdx].id].status = 'unans';
+    answers[allQuestions[currentQIdx].id].selected = null;
+    window.groupSave(true);
+};
+
+window.groupSave = (isSkip = false) => {
     const qId = allQuestions[currentQIdx].id;
     const ans = answers[qId];
     
     // Save to our groupAnswers record
     if(!roomData.players[myId].groupAnswers) roomData.players[myId].groupAnswers = {};
     
-    if(!ans.selected) {
+    if(isSkip || !ans.selected) {
         ans.status = 'unans';
         roomData.players[myId].groupAnswers[qId] = 'skipped';
     } else {
@@ -1657,50 +1702,12 @@ window.groupSave = () => {
     pushProgressToHost();
     
     el('btn-group-save').style.display = 'none';
+    el('btn-group-skip').style.display = 'none';
     el('group-wait-text').style.display = 'block';
+    el('group-wait-text').textContent = 'Waiting for others...';
     
     renderAnswerArea(allQuestions[currentQIdx]); // Rerender to disable buttons
     updateGroupUI(); 
-};
-
-window.executeGroupNext = (qId) => {
-    if(roomData.settings.timerMode !== 'group') return;
-    const tgtIdx = getSeq().findIndex(i => allQuestions[i].id === qId);
-    if(tgtIdx !== -1 && currentQIdx !== tgtIdx) {
-        // Reset UI
-        el('btn-group-next').style.display = 'none';
-        el('btn-group-submit').style.display = 'none';
-        el('btn-group-save').style.display = 'block';
-        el('btn-group-save').disabled = false;
-        el('group-wait-text').style.display = 'none';
-
-        // Track time
-        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-        questionTimes[allQuestions[currentQIdx].id] = (questionTimes[allQuestions[currentQIdx].id] || 0) + spent;
-        
-        currentQIdx = tgtIdx;
-        
-        pushProgressToHost();
-        renderSidebar(); renderQuestion(); updateGroupUI();
-    }
-};
-
-window.groupNext = () => {
-    const actIdx = getSeq().findIndex(i => allQuestions[i].id === roomData.activeGroupQ);
-    const nextIdx = getSeq()[actIdx + 1];
-    
-    if(nextIdx !== undefined) {
-        const nextQId = allQuestions[nextIdx].id;
-        if(isHost) {
-            roomData.activeGroupQ = nextQId;
-            broadcastRoomState();
-        } else if(hostConn && hostConn.open) {
-            hostConn.send({ type: 'group_next_req', qId: nextQId });
-        }
-    } else {
-        // Last question reached
-        window.forceSubmit();
-    }
 };
 
 function updateGroupUI() {
@@ -1712,18 +1719,20 @@ function updateGroupUI() {
     const players = Object.values(roomData.players);
     
     let html = '';
-    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+    const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
     
     players.forEach(p => {
         const pAns = (p.groupAnswers || {})[q.id];
         const hasAnswered = pAns !== undefined && pAns !== null;
         
         if (isResolved) {
-            const isC = pAns !== 'skipped' && (q.type === 'mcq' ? correctOps.includes(String(pAns)) : correctOps[0] === String(pAns));
-            const isSkip = !hasAnswered || pAns === 'skipped' || pAns === 'null';
+            const pAnsStr = String(pAns).trim();
+            const isC = pAnsStr !== 'skipped' && pAnsStr !== 'null' && pAnsStr !== 'undefined' && (q.type === 'mcq' ? correctOps.includes(pAnsStr) : correctOps[0] === pAnsStr);
+            const isSkip = !hasAnswered || pAnsStr === 'skipped' || pAnsStr === 'null' || pAnsStr === 'undefined';
             const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
             const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
-            const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAns)-1] : pAns);
+            const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
             
             html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid ${cColor};">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
@@ -1742,29 +1751,27 @@ function updateGroupUI() {
     if (isResolved) {
         html += `<div style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
             <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
-            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${q.correctAnswer}</div>
+            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${correctAnsStr}</div>
         </div>`;
     }
     
     if(el('group-status-list')) el('group-status-list').innerHTML = html;
     if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
 
-    // Auto resolution triggers (Once)
-    let allLockedGlobal = players.length > 0;
-    players.forEach(p => { if(!(p.groupAnswers || {})[q.id]) allLockedGlobal = false; });
-    
-    if (allLockedGlobal && isResolved && groupResolvedForQ !== q.id && roomData.activeGroupQ === q.id) {
-        groupResolvedForQ = q.id;
+    // Trigger Resolution Toasts exactly ONCE
+    if (isResolved && !window.localResolvedTracker[q.id]) {
+        window.localResolvedTracker[q.id] = true;
         
-        // Show correct/wrong Toast for myself
         const myAnsStr = String((roomData.players[myId].groupAnswers || {})[q.id]).trim();
-        if (myAnsStr && myAnsStr !== 'skipped' && myAnsStr !== 'null') {
+        if (myAnsStr && myAnsStr !== 'skipped' && myAnsStr !== 'null' && myAnsStr !== 'undefined') {
              const isMyC = q.type==='mcq' ? correctOps.includes(myAnsStr) : correctOps[0] === myAnsStr;
              if(isMyC) showToast('success', '✅ Correct Answer!');
              else showToast('error', '❌ Wrong Answer!');
+        } else {
+             showToast('error', '➖ Skipped!');
         }
 
-        renderAnswerArea(q); // Repaint colors for correct answers
+        renderAnswerArea(q); // Repaint colors
         updateCompactStats();
     }
     
@@ -1774,31 +1781,26 @@ function updateGroupUI() {
     
     if (isViewingActive) {
         if (isResolved) {
-            el('group-wait-text').style.display = 'none';
+            el('group-wait-text').style.display = 'block';
+            el('group-wait-text').innerHTML = '<span style="color:var(--ans);">✅ Resolved. Jumping soon...</span>';
             el('btn-group-save').style.display = 'none';
-            if(q.id === allQuestions[getSeq()[getSeq().length - 1]].id) {
-                el('btn-group-submit').style.display = 'block';
-                el('btn-group-next').style.display = 'none';
-            } else {
-                el('btn-group-next').style.display = 'block';
-                el('btn-group-next').disabled = false;
-                el('btn-group-submit').style.display = 'none';
-            }
-        } else if (myAns) {
+            el('btn-group-skip').style.display = 'none';
+        } else if (myAns !== undefined && myAns !== null) {
             el('btn-group-save').style.display = 'none';
-            el('btn-group-next').style.display = 'none';
+            el('btn-group-skip').style.display = 'none';
             el('group-wait-text').style.display = 'block';
             el('group-wait-text').textContent = 'Waiting for others...';
         } else {
             el('btn-group-save').style.display = 'block';
+            el('btn-group-skip').style.display = 'block';
             el('btn-group-save').disabled = false;
-            el('btn-group-next').style.display = 'none';
+            el('btn-group-skip').disabled = false;
             el('group-wait-text').style.display = 'none';
         }
     } else {
         // Viewing non-active question
         el('btn-group-save').style.display = 'none';
-        el('btn-group-next').style.display = 'none';
+        el('btn-group-skip').style.display = 'none';
         el('group-wait-text').style.display = 'none';
     }
 }
@@ -1838,7 +1840,8 @@ function buildQuestions(data) {
       const tq = pD[s][t] || {}; const ta = (aK[s] || {})[t] || {}; const sk = `${s} › ${t}`; masterSectionMap[sk] = [];
       for (const q of Object.keys(tq)) {
         const qd = tq[q] || {}; const ad = ta[q] || {};
-        masterQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: ad.correctAnswer, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
+        const safeCorrectAns = ad.correctAnswer !== undefined ? ad.correctAnswer : (ad.answer !== undefined ? ad.answer : (ad.a !== undefined ? ad.a : 'N/A'));
+        masterQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: safeCorrectAns, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
         masterSectionMap[sk].push(i++);
       }
     }
@@ -1893,9 +1896,10 @@ window.saveNext = () => {
     const a = answers[allQuestions[currentQIdx].id]; 
     if(a.selected) {
         a.status = 'ans'; 
-        // Toast
+        // Sync Practice mode Toast
         const q = allQuestions[currentQIdx];
-        const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+        const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+        const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
         const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
         if (isC) showToast('success', '✅ Correct Answer!');
         else showToast('error', '❌ Wrong Answer!');
@@ -1908,7 +1912,9 @@ function checkStreakBomb() {
     if(roomData.settings.bombs !== 'true') return;
     const q = allQuestions[currentQIdx]; const a = answers[q.id];
     if(!a || !a.selected) { correctStreak = 0; return; }
-    const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+    const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
+    const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
     if(isC) { correctStreak++; } else { correctStreak = 0; }
     if(correctStreak > 0 && correctStreak % 5 === 0) {
         const msgs = ['🔥 5-streak! Youre on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
@@ -1988,7 +1994,7 @@ function renderAnswerArea(q) {
   const shouldPaintColors = hasSubmitted || isResolvedInGroup;
   
   const myGroupAns = isGroupMode ? (roomData.players[myId].groupAnswers || {})[q.id] : null;
-  const iAmLockedInGroup = isGroupMode && myGroupAns;
+  const iAmLockedInGroup = isGroupMode && myGroupAns && myGroupAns !== 'null';
   
   // Grey out condition: We are in group mode, but not looking at the active question AND it hasn't been resolved yet
   const shouldGreyOut = isGroupMode && !isViewingActive && !isResolvedInGroup;
@@ -2003,9 +2009,10 @@ function renderAnswerArea(q) {
 
   // Review Mode Helpers
   let correctOptions = [];
+  const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
   if (shouldPaintColors) {
-      if (Array.isArray(q.correctAnswer)) correctOptions = q.correctAnswer.map(Number);
-      else correctOptions = [parseInt(q.correctAnswer)]; 
+      if (Array.isArray(q.correctAnswer)) correctOptions = q.correctAnswer.map(String);
+      else correctOptions = [correctAnsStr]; 
   }
 
   if (q.type === 'mcq') {
@@ -2022,10 +2029,10 @@ function renderAnswerArea(q) {
 
       // Paint Review Colors and Inject Labels
       if (shouldPaintColors) {
-          if (correctOptions.includes(i)) {
+          if (correctOptions.includes(String(i))) {
               b.classList.add('correct-ans');
               b.innerHTML += `<span style="margin-left:auto; font-weight:900; font-size:12px;">✓ CORRECT</span>`;
-          } else if ((isLocallySelected || isGroupSelected) && !correctOptions.includes(i)) {
+          } else if ((isLocallySelected || isGroupSelected) && !correctOptions.includes(String(i))) {
               b.classList.add('wrong-ans');
               b.innerHTML += `<span style="margin-left:auto; font-weight:900; font-size:12px;">❌ WRONG</span>`;
           }
@@ -2044,11 +2051,11 @@ function renderAnswerArea(q) {
     
     if (shouldPaintColors) {
         const val = inp.value;
-        const isC = String(q.correctAnswer).trim() === String(val).trim();
+        const isC = correctAnsStr === String(val).trim();
         inp.classList.add(isC ? 'correct-ans' : 'wrong-ans');
 
         const corrTxt = document.createElement('div'); 
-        corrTxt.innerHTML = `<span style="font-size:12px; color:var(--text2); text-transform:uppercase; font-weight:800;">Correct Answer</span><br><b style="font-size:24px; color:var(--ans); margin-top:4px; display:inline-block;">${q.correctAnswer}</b>`;
+        corrTxt.innerHTML = `<span style="font-size:12px; color:var(--text2); text-transform:uppercase; font-weight:800;">Correct Answer</span><br><b style="font-size:24px; color:var(--ans); margin-top:4px; display:inline-block;">${correctAnsStr}</b>`;
         corrTxt.style.cssText = "text-align:center; margin-top:16px; font-family:Outfit;";
         
         area.appendChild(inp);
@@ -2106,7 +2113,8 @@ function renderSidebar() {
     const myAns = answers[q.id].selected || (roomData.players[myId] ? (roomData.players[myId].groupAnswers || {})[q.id] : null);
 
     if (myAns && myAns !== 'skipped' && (hasSubmitted || isResolvedInGroup)) {
-        const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(myAns)) : String(q.correctAnswer).trim() === String(myAns);
+        const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
+        const isC = q.type==='mcq' ? !!(Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String).includes(String(myAns)) : correctAnsStr === String(myAns)) : correctAnsStr === String(myAns);
         d.style.background = isC ? 'var(--ans)' : 'var(--unans)';
         d.style.color = 'white'; d.style.border = 'none';
     }
