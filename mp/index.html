@@ -1674,24 +1674,15 @@ function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padSt
 function calculateLiveStats() {
     let correct = 0; let wrong = 0;
     allQuestions.forEach(q => {
-        // Look deeply at the synced groupAnswers for accurate live stats
         const isGroup = roomData.settings.timerMode === 'group';
         const myPlayer = roomData.players[myId];
         if (isGroup && myPlayer && myPlayer.groupAnswers) {
-             const ansStr = String(myPlayer.groupAnswers[q.id]).trim();
-             if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') {
-                 const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-                 const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-                 const isC = q.type==='mcq' ? correctOps.includes(ansStr) : correctOps[0] === ansStr;
-                 if(isC) correct++; else wrong++;
-             }
+            const ansStr = myPlayer.groupAnswers[q.id];
+            if (isCorrect(q, ansStr)) correct++; else if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') wrong++;
         } else {
             const a = answers[q.id];
-            if(a && (a.status === 'ans' || a.status === 'mark-ans')) {
-                const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-                const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-                const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
-                if(isC) correct++; else wrong++;
+            if (a && (a.status === 'ans' || a.status === 'mark-ans')) {
+                if (isCorrect(q, a.selected)) correct++; else wrong++;
             }
         }
     });
@@ -1701,26 +1692,22 @@ function calculateLiveStats() {
 function calculateScore() {
     let net = 0;
     allQuestions.forEach(q => {
-        // Map local answering or group answers
         let selectedAns = null;
         if (roomData.settings.timerMode === 'group') {
-             const pAns = (roomData.players[myId].groupAnswers || {})[q.id];
-             if(pAns && pAns !== 'skipped' && pAns !== 'null' && pAns !== 'undefined') selectedAns = pAns;
+            const pAns = (roomData.players[myId].groupAnswers || {})[q.id];
+            if (pAns && pAns !== 'skipped' && pAns !== 'null' && pAns !== 'undefined') selectedAns = pAns;
         } else {
-             const a = answers[q.id]; 
-             if(a && a.selected) selectedAns = a.selected;
+            const a = answers[q.id];
+            if (a && a.selected) selectedAns = a.selected;
         }
-
-        if(selectedAns) {
-            const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-            const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-            const isC = q.type==='mcq' ? correctOps.includes(String(selectedAns)) : correctOps[0] === String(selectedAns);
-            
-            if(isC) {
+        if (selectedAns) {
+            const { hasAnswer } = getCorrectInfo(q);
+            if (!hasAnswer) return; // no answer key — don't score
+            if (isCorrect(q, selectedAns)) {
                 let bonus = q.marks.cm || 4;
-                if(roomData.settings.speedBonus === 'true') {
+                if (roomData.settings.speedBonus === 'true') {
                     const t = questionTimes[q.id] || 999;
-                    if(t <= 15) bonus += 2; else if(t <= 30) bonus += 1;
+                    if (t <= 15) bonus += 2; else if (t <= 30) bonus += 1;
                 }
                 net += bonus;
             } else { net -= Math.abs(q.marks.im || 1); }
@@ -1825,19 +1812,17 @@ function updateGroupUI() {
     // We update UI based on the *viewed* question
     const isResolved = roomData.groupResolved[q.id];
     const players = Object.values(roomData.players);
+    const { ops: correctOps, label: correctAnsStr } = getCorrectInfo(q);
     
     let html = '';
-    const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-    
     players.forEach(p => {
         const pAns = (p.groupAnswers || {})[q.id];
         const hasAnswered = pAns !== undefined && pAns !== null;
         
         if (isResolved) {
             const pAnsStr = String(pAns).trim();
-            const isC = pAnsStr !== 'skipped' && pAnsStr !== 'null' && pAnsStr !== 'undefined' && (q.type === 'mcq' ? correctOps.includes(pAnsStr) : correctOps[0] === pAnsStr);
             const isSkip = !hasAnswered || pAnsStr === 'skipped' || pAnsStr === 'null' || pAnsStr === 'undefined';
+            const isC = !isSkip && isCorrect(q, pAnsStr);
             const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
             const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
             const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
@@ -1857,9 +1842,10 @@ function updateGroupUI() {
     });
 
     if (isResolved) {
+        const dispAns = correctAnsStr || '—';
         html += `<div style="margin-top:12px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
             <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
-            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${correctAnsStr}</div>
+            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${dispAns}</div>
         </div>`;
     }
     
@@ -1869,17 +1855,14 @@ function updateGroupUI() {
     // Trigger Resolution Toasts exactly ONCE
     if (isResolved && !window.localResolvedTracker[q.id]) {
         window.localResolvedTracker[q.id] = true;
-        
-        const myAnsStr = String((roomData.players[myId].groupAnswers || {})[q.id]).trim();
+        const myAnsStr = (roomData.players[myId].groupAnswers || {})[q.id];
         if (myAnsStr && myAnsStr !== 'skipped' && myAnsStr !== 'null' && myAnsStr !== 'undefined') {
-             const isMyC = q.type==='mcq' ? correctOps.includes(myAnsStr) : correctOps[0] === myAnsStr;
-             if(isMyC) showToast('success', '✅ Correct Answer!');
-             else showToast('error', '❌ Wrong Answer!');
+            if (isCorrect(q, myAnsStr)) showToast('success', '✅ Correct!');
+            else showToast('error', '❌ Wrong!');
         } else {
-             showToast('error', '➖ Skipped!');
+            showToast('error', '➖ Skipped!');
         }
-
-        renderAnswerArea(q); // Repaint colors
+        renderAnswerArea(q);
         updateCompactStats();
     }
     
@@ -1940,20 +1923,64 @@ window.forceSubmit = () => {
     showFinalResults(true); // Jump to results
 }
 
+// ── ANSWER HELPERS ──
+// Returns {ops: string[], label: string} for a question's correct answer
+// ops: array of string option numbers for MCQ (e.g. ["2"]), or [value] for NAT
+// label: human-readable correct answer string
+function getCorrectInfo(q) {
+    if (!q || q.correctAnswer === undefined || q.correctAnswer === null) {
+        return { ops: [], label: null, hasAnswer: false };
+    }
+    const lbls = ['A','B','C','D','E'];
+    if (Array.isArray(q.correctAnswer)) {
+        const ops = q.correctAnswer.map(String);
+        const label = q.correctAnswer.map(n => lbls[n-1] || ('Opt '+n)).join(', ');
+        return { ops, label, hasAnswer: true };
+    }
+    const s = String(q.correctAnswer).trim();
+    return { ops: [s], label: s, hasAnswer: s !== '' };
+}
+function isCorrect(q, selectedStr) {
+    if (!selectedStr || selectedStr === 'skipped' || selectedStr === 'null' || selectedStr === 'undefined') return false;
+    const { ops, hasAnswer } = getCorrectInfo(q);
+    if (!hasAnswer) return false;
+    const sel = String(selectedStr).trim();
+    return q.type === 'mcq' ? ops.includes(sel) : ops[0] === sel;
+}
+
 // ── 6. DATA PARSING ──
 function buildQuestions(data) {
-  masterQuestions = []; masterSectionMap = {}; imageCache = {}; const pD = data.pdfCropperData || data.questions || {}; const aK = data.testAnswerKey || data.answerKey || {}; let i = 0;
+  masterQuestions = []; masterSectionMap = {}; imageCache = {};
+  const pD = data.pdfCropperData || data.questions || {};
+  const aK = data.testAnswerKey || data.answerKey || {};
+  let i = 0;
   for (const s of Object.keys(pD)) {
     for (const t of Object.keys(pD[s])) {
-      const tq = pD[s][t] || {}; const ta = (aK[s] || {})[t] || {}; const sk = `${s} › ${t}`; masterSectionMap[sk] = [];
+      const tq = pD[s][t] || {};
+      // Answer key uses same subject/section keys
+      const ta = (aK[s] || {})[t] || {};
+      const sk = `${s} › ${t}`;
+      masterSectionMap[sk] = [];
       for (const q of Object.keys(tq)) {
-        const qd = tq[q] || {}; const ad = ta[q] || {};
-        // Robust correct answer - try many possible field names, avoid false N/A
-        let safeCorrectAns = null;
-        for (const c of [ad.correctAnswer, ad.answer, ad.a, ad.correct, ad.key, qd.correctAnswer, qd.answer]) {
-          if (c !== undefined && c !== null && c !== '') { safeCorrectAns = c; break; }
+        const qd = tq[q] || {};
+        const ad = ta[q] || {};
+        // correctAnswer lives in testAnswerKey entry: array for MCQ, string for NAT
+        const correctAnswer = (ad.correctAnswer !== undefined && ad.correctAnswer !== null) ? ad.correctAnswer : null;
+        // type: prefer answer key (more reliable), fallback to pdfCropperData
+        const type = ad.type || qd.type || 'mcq';
+        const images = [];
+        for (let j = 1; j <= Math.max((qd.pdfData || []).length || 1, 1); j++) {
+          images.push(`${t}__--__${q}__--__${j}.png`);
         }
-        masterQuestions.push({ id: `${s}__${t}__${q}`, globalNum: parseInt(q), type: qd.type || ad.type || 'mcq', marks: qd.marks || { cm: 4, im: -1 }, answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4), correctAnswer: safeCorrectAns, images: (()=>{ const im=[]; for(let j=1;j<=Math.max((qd.pdfData||[]).length||1,1);j++) im.push(`${t}__--__${q}__--__${j}.png`); return im;})() });
+        masterQuestions.push({
+          id: `${s}__${t}__${q}`,
+          globalNum: parseInt(q),
+          type,
+          marks: qd.marks || { cm: 4, im: -1 },
+          answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
+          correctAnswer,
+          images
+        });
         masterSectionMap[sk].push(i++);
       }
     }
@@ -2017,16 +2044,13 @@ function resetSaveBtn() {
 }
 
 window.saveNext = () => { 
-    const a = answers[allQuestions[currentQIdx].id]; 
-    if(a.selected) {
-        a.status = 'ans'; 
-        // Show correct/wrong toast
-        const q = allQuestions[currentQIdx];
-        const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : null;
-        if (correctAnsStr && correctAnsStr !== 'N/A') {
-            const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-            const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
-            showToast(isC ? 'success' : 'error', isC ? '✅ Correct!' : '❌ Wrong!');
+    const q = allQuestions[currentQIdx];
+    const a = answers[q.id]; 
+    if (a.selected) {
+        a.status = 'ans';
+        const { hasAnswer } = getCorrectInfo(q);
+        if (hasAnswer) {
+            showToast(isCorrect(q, a.selected) ? 'success' : 'error', isCorrect(q, a.selected) ? '✅ Correct!' : '❌ Wrong!');
         } else {
             showToast('success', '💾 Saved!');
         }
@@ -2035,8 +2059,7 @@ window.saveNext = () => {
         showToast('error', '➖ No answer selected');
     }
     renderSidebar();
-    renderAnswerArea(allQuestions[currentQIdx]);
-    // Reveal the "Next" button instead of auto-jumping
+    renderAnswerArea(q);
     showNextBtn();
     checkStreakBomb(); 
 };
@@ -2067,10 +2090,7 @@ function checkStreakBomb() {
     if(roomData.settings.bombs !== 'true') return;
     const q = allQuestions[currentQIdx]; const a = answers[q.id];
     if(!a || !a.selected) { correctStreak = 0; return; }
-    const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [correctAnsStr];
-    const isC = q.type==='mcq' ? correctOps.includes(String(a.selected)) : correctOps[0] === String(a.selected);
-    if(isC) { correctStreak++; } else { correctStreak = 0; }
+    if(isCorrect(q, a.selected)) { correctStreak++; } else { correctStreak = 0; }
     if(correctStreak > 0 && correctStreak % 5 === 0) {
         const msgs = ['🔥 5-streak! Youre on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
         const idx = Math.min(Math.floor(correctStreak/5)-1, msgs.length-1);
@@ -2163,12 +2183,7 @@ function renderAnswerArea(q) {
   }
 
   // Review Mode Helpers
-  let correctOptions = [];
-  const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-  if (shouldPaintColors) {
-      if (Array.isArray(q.correctAnswer)) correctOptions = q.correctAnswer.map(String);
-      else correctOptions = [correctAnsStr]; 
-  }
+  const { ops: correctOptions, label: correctAnsLabel, hasAnswer } = getCorrectInfo(q);
 
   if (q.type === 'mcq') {
     const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
@@ -2183,7 +2198,7 @@ function renderAnswerArea(q) {
       b.innerHTML = `<div class="opt-key">${lbls[i-1]}</div><span>Option ${lbls[i-1]}</span>`;
 
       // Paint Review Colors and Inject Labels
-      if (shouldPaintColors) {
+      if (shouldPaintColors && hasAnswer) {
           if (correctOptions.includes(String(i))) {
               b.classList.add('correct-ans');
               b.innerHTML += `<span style="margin-left:auto; font-weight:900; font-size:12px;">✓ CORRECT</span>`;
@@ -2206,11 +2221,12 @@ function renderAnswerArea(q) {
     
     if (shouldPaintColors) {
         const val = inp.value;
-        const isC = correctAnsStr === String(val).trim();
+        const isC = hasAnswer && isCorrect(q, val);
         inp.classList.add(isC ? 'correct-ans' : 'wrong-ans');
 
         const corrTxt = document.createElement('div'); 
-        corrTxt.innerHTML = `<span style="font-size:12px; color:var(--text2); text-transform:uppercase; font-weight:800;">Correct Answer</span><br><b style="font-size:24px; color:var(--ans); margin-top:4px; display:inline-block;">${correctAnsStr}</b>`;
+        const dispAns = hasAnswer ? correctAnsLabel : '—';
+        corrTxt.innerHTML = `<span style="font-size:12px; color:var(--text2); text-transform:uppercase; font-weight:800;">Correct Answer</span><br><b style="font-size:24px; color:var(--ans); margin-top:4px; display:inline-block;">${dispAns}</b>`;
         corrTxt.style.cssText = "text-align:center; margin-top:16px; font-family:Outfit;";
         
         area.appendChild(inp);
@@ -2268,9 +2284,7 @@ function renderSidebar() {
     const myAns = answers[q.id].selected || (roomData.players[myId] ? (roomData.players[myId].groupAnswers || {})[q.id] : null);
 
     if (myAns && myAns !== 'skipped' && (hasSubmitted || isResolvedInGroup)) {
-        const correctAnsStr = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? String(q.correctAnswer).trim() : 'N/A';
-        const isC = q.type==='mcq' ? !!(Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String).includes(String(myAns)) : correctAnsStr === String(myAns)) : correctAnsStr === String(myAns);
-        d.style.background = isC ? 'var(--ans)' : 'var(--unans)';
+        d.style.background = isCorrect(q, myAns) ? 'var(--ans)' : 'var(--unans)';
         d.style.color = 'white'; d.style.border = 'none';
     }
     
