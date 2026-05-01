@@ -24,12 +24,12 @@
     --text: #ffffff;
     --text2: #94a3b8;
     
-    /* CBT Colors */
-    --ans: #10b981;    
-    --unans: #ef4444;  
-    --marked: #8b5cf6; 
-    --mark-ans: #14b8a6;
-    --not-vis: #334155; 
+    /* Strict CBT Logic Colors */
+    --ans: #10b981;       /* Correct / Answered */
+    --wrong: #ef4444;     /* Strictly Wrong */
+    --unans: #f97316;     /* Skipped / Unanswered (Orange) */
+    --waiting: #3b82f6;   /* Waiting / Locked / Unresolved (Blue) */
+    --not-vis: #334155;   /* Not Visited (Dark Grey) */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -82,7 +82,7 @@
   
   .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
   .timer-box { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 900; background: var(--surface2); padding: 6px 24px; border-radius: 20px; border: 1px solid var(--border); color: #fff; letter-spacing: 1.5px; display:flex; align-items:center; gap:8px;}
-  .timer-box.ending { color: var(--unans); border-color: var(--unans); background: rgba(239,68,68,0.1); }
+  .timer-box.ending { color: var(--wrong); border-color: var(--wrong); background: rgba(239,68,68,0.1); }
 
   .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
   .compact-stats-top { display: flex; gap: 10px; background: var(--bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); font-family: 'Outfit'; font-weight: 800; font-size: 13px; }
@@ -121,19 +121,18 @@
   
   .opt-btn.correct-ans { border-color: var(--ans) !important; background: rgba(16, 185, 129, 0.15) !important; color: white;}
   .opt-btn.correct-ans .opt-key { background: var(--ans) !important; color: white; }
-  .opt-btn.wrong-ans { border-color: var(--unans) !important; background: rgba(239, 68, 68, 0.15) !important; color: white;}
-  .opt-btn.wrong-ans .opt-key { background: var(--unans) !important; color: white; }
+  .opt-btn.wrong-ans { border-color: var(--wrong) !important; background: rgba(239, 68, 68, 0.15) !important; color: white;}
+  .opt-btn.wrong-ans .opt-key { background: var(--wrong) !important; color: white; }
 
   .nat-input { width: 100%; max-width: 300px; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; padding: 14px 20px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);}
   .nat-input.correct-ans { border-color: var(--ans); color: var(--ans); }
-  .nat-input.wrong-ans { border-color: var(--unans); color: var(--unans); }
+  .nat-input.wrong-ans { border-color: var(--wrong); color: var(--wrong); }
 
   .btm-bar { position: relative; overflow: hidden; z-index: 10; padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .btm-content-wrap { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; }
   .btm-left, .btm-right { display: flex; gap: 10px; z-index: 2;}
   .action-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
   .action-btn:hover:not(:disabled) { background: var(--surface3); }
-  .action-btn.mark { border-color: var(--marked); color: var(--marked); }
   .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
 
   /* SIDEBARS & WIDGETS */
@@ -144,10 +143,12 @@
   .grid-wrap { padding: 16px; overflow: visible; height: auto; flex: none; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
   .dot { width: 40px; height: 40px; border-radius: 10px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
   .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.3); z-index: 2;}
+  
   .dot.ans { background: var(--ans); color: #fff; }
+  .dot.wrong { background: var(--wrong); color: #fff; }
+  .dot.waiting { background: var(--waiting); color: #fff; }
   .dot.unans { background: var(--unans); color: #fff; }
-  .dot.marked { background: var(--marked); color: #fff; }
-  .dot.mark-ans { background: var(--mark-ans); color: #fff; }
+  .dot.not-vis { background: var(--not-vis); color: #fff; }
 
   /* Minimizable Widgets */
   .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden; height: auto;}
@@ -180,16 +181,14 @@
   /* Group Status Dynamic List */
   #group-status-list { height: auto; max-height: 400px; overflow-y: auto; }
 
-  /* Lobby Grid Layout (Responsive Expansion) */
+  /* Lobby Grid Layout */
   .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
   .lobby-left, .lobby-right { display: flex; flex-direction: column; gap: 20px; }
   
   .config-row { margin-bottom: 16px; }
   .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 14px; font-family: 'Outfit';}
   
-  .cfg-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px; }
-
-  .kick-btn { background: var(--unans); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); }
+  .kick-btn { background: var(--wrong); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); }
   .kick-btn:hover:not(:disabled) { background: #dc2626; }
 
   .join-wrap { display: flex; gap: 12px; width: 100%; }
@@ -256,7 +255,7 @@
   }
 
   .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase;}
-  .toast.error { border-color: var(--unans); color: #fca5a5; }
+  .toast.error { border-color: var(--wrong); color: #fca5a5; }
   .toast.success { border-color: var(--ans); color: #86efac; }
 
   /* ── LIGHT MODE ── */
@@ -292,7 +291,7 @@
   .analysis-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
   .analysis-table tr:nth-child(even) td:first-child { background: var(--surface2); }
   .cell-correct { background: rgba(16,185,129,0.15) !important; color: var(--ans); font-weight: 800; }
-  .cell-wrong { background: rgba(239,68,68,0.15) !important; color: var(--unans); font-weight: 800; }
+  .cell-wrong { background: rgba(239,68,68,0.15) !important; color: var(--wrong); font-weight: 800; }
   .cell-skip { color: var(--text2); }
   .analysis-tabs { display: flex; gap: 8px; padding: 0 20px 0; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
   .analysis-tab { font-family: 'Outfit'; font-size: 13px; font-weight: 700; padding: 12px 16px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
@@ -391,7 +390,7 @@
         <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click code to copy join link</div>
       </div>
 
-      <div class="glass-card spring-anim" style="padding: 16px; display:none; max-width: none;" id="host-controls">
+      <div class="glass-card spring-anim" style="padding: 16px; display:none; max-width: none; overflow:visible;" id="host-controls">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
           <div class="card-title" style="font-size:17px; margin:0; color:var(--accent2);">⚙️ Configuration</div>
         </div>
@@ -416,91 +415,104 @@
               <option value="group">🤝 Group Practice</option>
             </select>
           </div>
-          <div style="flex:1;">
+          <div style="flex:1;" id="dur-col">
             <label class="label-title">Minutes</label>
             <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
           </div>
+          <div style="flex:1; display:none;" id="timeout-col">
+            <label class="label-title">Auto-Skip</label>
+            <select id="cfg-group-timeout" class="config-select">
+                <option value="0">Never</option>
+                <option value="60">1 Min</option>
+                <option value="120">2 Min</option>
+                <option value="180">3 Min</option>
+                <option value="240" selected>4 Min</option>
+                <option value="300">5 Min</option>
+                <option value="600">10 Min</option>
+                <option value="1200">20 Min</option>
+            </select>
+          </div>
         </div>
 
-        <!-- WIDER GRID for Toggles -->
-        <div class="cfg-grid-container">
-
-          <!-- GROUP: Gameplay Features -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
-            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🎮 Gameplay <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 12px 8px;">
-              <div class="toggle-row">
-                <div class="toggle-label">Live Fair-Play Stats <small>Correct/wrong fraction bars on dots</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Who's On Each Q? <small>Ghost initials on navigator dots</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row" id="cfg-ghost-live-row" style="padding-left:14px; display:none;">
-                <div class="toggle-label" style="font-size:11px; color:var(--text2);">Full Live (1s) vs Semi-Live<small>Full = auto-refresh every 1s</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-full-live" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Streak Bombs 💣 <small>Popup after 5/10/15/20 streak</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Speed Bonus ⚡ <small>+2 if ≤15s, +1 if ≤30s correct</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
+        <!-- 3-COLUMN MASONRY GRID for Settings -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 14px; align-items: start;">
+            
+            <!-- Column 1: Gameplay -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">🎮 Gameplay</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Fair-Play Stats <small>Correct/wrong fraction bars on dots</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Who's On Each Q? <small>Ghost initials on navigator dots</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="cfg-ghost-live-row" style="padding-left:14px; display:none;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Full Live (1s) vs Semi-Live<small>Full = auto-refresh every 1s</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-full-live" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Streak Bombs 💣 <small>Popup after 5/10/15/20 streak</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Speed Bonus ⚡ <small>+2 if ≤15s, +1 if ≤30s correct</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
             </div>
-          </details>
 
-          <!-- GROUP: Display Addons -->
-          <details open style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
-            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">🧩 Addons <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 12px 8px;">
-              <div class="toggle-row">
-                <div class="toggle-label">Live Progress Sidebar <small>Player attempt bars in sidebar</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Colored Progress Bars <small>Show red/green segments live</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-color-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Race Progress Bar 🏎️ <small>Bottom progress background tracking</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Live Chat 💬 <small>In-game chat panel</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-chat" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Per-Question Timer ⏱ <small>Shows time spent on current Q</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-qtimer" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">NTA Section Tabs <small>Horizontal tabs instead of dropdown</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-tabs" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Photo in Chat 📷 <small>Send images in game chat</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-addon-photo" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
-            </div>
-          </details>
+            <!-- Column 2: Widgets -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">🧩 Widgets</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Progress Sidebar <small>Player attempt bars in sidebar</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-color-sidebar" style="padding-left:14px;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Color Sidebar Bar <small>Show red/green segments</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-color-sidebar" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                
+                <div class="toggle-row">
+                  <div class="toggle-label">Race Progress Bar 🏎️ <small>Bottom progress background tracking</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-color-race" style="padding-left:14px; display:none;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Color Race Bar <small>Show red/green segments</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-color-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
 
-          <!-- GROUP: Post-Game -->
-          <details style="background:var(--bg); border-radius:10px; border:1px solid var(--border); overflow:hidden;">
-            <summary class="spring-anim" style="padding:10px 12px; font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">📊 Post-Game <span style="color:var(--accent);">▾</span></summary>
-            <div style="padding:0 12px 8px; display:flex; flex-direction:column;">
-              <div class="toggle-row">
-                <div class="toggle-label">Detailed Time Analysis <small>Per-Q time breakdown table</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Auto-show Results <small>Jump to results on submit</small></div>
-                <label class="toggle-switch"><input type="checkbox" id="cfg-auto-results" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
-              </div>
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Per-Question Timer ⏱ <small>Shows time spent on current Q</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-qtimer" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
             </div>
-          </details>
+
+            <!-- Column 3: Chat & Post-Game -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">💬 Extras</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Chat <small>In-game chat panel</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-chat" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-addon-photo" style="padding-left:14px;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Photo in Chat 📷 <small>Send images in game chat</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-photo" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">NTA Section Tabs <small>Horizontal tabs instead of dropdown</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-tabs" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Detailed Time Analysis <small>Per-Q time breakdown table</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Auto-show Results <small>Jump to results on submit</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-auto-results" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+            </div>
 
         </div>
         <button class="btn btn-primary spring-anim" id="btn-start-game" disabled>🚀 Start Match</button>
@@ -552,13 +564,8 @@
       </div>
       <div class="timer-center" style="flex:0 0 auto;"><div class="timer-box" id="total-timer" style="font-size:clamp(15px,3vw,21px); padding:4px 14px;">00:00</div></div>
       <div class="header-right" style="flex:1; gap:6px;">
-        <div class="compact-stats-top" id="top-stats-desk" style="gap:5px; padding:4px 7px; font-size:12px;">
-          <div class="st-item" title="Answered"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
-          <div class="st-item" title="Mark+Ans"><div class="st-dot" style="background:var(--mark-ans); border-radius:50%;"></div><span id="st-mark-ans-desk">0</span></div>
-          <div class="st-item" title="Marked"><div class="st-dot" style="background:var(--marked);"></div><span id="st-marked-desk">0</span></div>
-          <div class="st-item" title="Unanswered"><div class="st-dot" style="background:var(--unans);"></div><span id="st-unans-desk">0</span></div>
-          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
-          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        <div class="compact-stats-top" id="top-stats-desk" style="display: flex; gap: 10px; background: var(--bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); font-family: 'Outfit'; font-weight: 800; font-size: 13px;">
+          <!-- Injected via JS -->
         </div>
         <button class="spring-anim" onclick="document.body.classList.toggle('light')" title="Light/Dark" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 7px; font-size:13px; color:var(--text); flex-shrink:0;">☀️</button>
         <button class="btn btn-primary spring-anim" style="padding:7px 12px; font-size:12px; width:auto; border-radius:9px; flex-shrink:0;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
@@ -610,7 +617,7 @@
         <div class="btm-content-wrap">
             <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
                 <div class="btm-left">
-                  <button class="action-btn mark spring-anim" id="btn-mark" onclick="window.markResponse()">Mark & Next</button>
+                  <button class="action-btn mark spring-anim" id="btn-mark" onclick="window.markResponse()" style="display:none;">Mark & Next</button>
                   <button class="action-btn spring-anim" id="btn-clear" onclick="window.clearResponse()">Clear</button>
                 </div>
                 <div class="btm-right">
@@ -781,9 +788,8 @@
     <div class="glass-card spring-anim" style="max-width: 400px; text-align:center;">
         <h2 style="font-family:'Syne'; font-size:28px; color:var(--text);">Submit Test?</h2>
         <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); font-size:16px; margin: 10px 0; line-height: 1.8;">
-            Attempted: <span id="warn-att" style="color:var(--ans);">0</span><br>
-            Marked: <span id="warn-mark" style="color:var(--marked);">0</span><br>
-            Unanswered: <span id="warn-unans" style="color:var(--unans);">0</span><br>
+            Answered: <span id="warn-ans" style="color:var(--ans);">0</span><br>
+            Skipped: <span id="warn-skip" style="color:var(--unans);">0</span><br>
             Not Visited: <span id="warn-notvis" style="color:var(--not-vis);">0</span>
         </div>
         <div style="display:flex; gap:12px; margin-top:10px;">
@@ -907,9 +913,9 @@ let myName = ""; let roomCode = "";
 
 let roomData = {
     hostId: null, status: 'waiting', testFile: null, testUrl: null, hasCustomFile: false,
-    settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, showLiveStats: 'false' },
+    settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, groupTimeout: 240, showLiveStats: 'false' },
     startTime: null, totalQuestions: 0, kickVotes: {}, players: {},
-    activeGroupQ: null, groupResolved: {} 
+    activeGroupQ: null, activeGroupQStartTime: null, groupResolved: {} 
 };
 
 let fileBuffer = null; 
@@ -919,7 +925,7 @@ let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};
 let imageCache = {}; let timerInterval = null; let syncInterval = null;
 let hasSubmitted = false; let gameFinished = false; 
 let isFileAcquisitionStarted = false; let isLaunchPending = false;
-let questionTimes = {}; let questionEnterTime = Date.now();
+let questionTimes = {}; 
 let correctStreak = 0;
 
 const el = id => document.getElementById(id);
@@ -1042,7 +1048,7 @@ window.toggleWidget = (id) => {
 
 let _lastWidthCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
 
-function mountChatCore(force = false) {
+function mountChatCore() {
     const core = el('chat-core-wrapper');
     if (!core) return;
     
@@ -1064,13 +1070,13 @@ function mountChatCore(force = false) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    mountChatCore(true);
+    mountChatCore();
 
     window.addEventListener('resize', () => {
         const currentCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
         if (currentCategory !== _lastWidthCategory) {
             _lastWidthCategory = currentCategory;
-            mountChatCore(true);
+            mountChatCore();
         }
     });
 
@@ -1142,7 +1148,6 @@ window.selectPaper = (url, btnElement) => {
     el('upload-zone').style.borderColor = 'var(--border)';
     el('upload-zone').style.background = 'var(--bg)';
 };
-
 
 async function processFileHost(source, isUrl) {
     el('host-file-progress').style.display = 'flex';
@@ -1217,7 +1222,7 @@ function initPeerAsHost() {
                     if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
                         const actQ = roomData.activeGroupQ;
                         let allAnswered = true;
-                        const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted);
+                        const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted); // Ignoring early quitters
                         if (activePlayers.length === 0) {
                             allAnswered = true;
                         } else {
@@ -1235,6 +1240,7 @@ function initPeerAsHost() {
                             const nextIdx = getSeq()[actIdx + 1];
                             if (nextIdx !== undefined) {
                                 roomData.activeGroupQ = allQuestions[nextIdx].id;
+                                roomData.activeGroupQStartTime = Date.now();
                             } else {
                                 roomData.activeGroupQ = null; // Finished
                                 for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
@@ -1295,29 +1301,63 @@ function attachHostSettingsListeners() {
             const chosen = Array.from(selEl.selectedOptions).map(o => o.value).filter(v => v !== 'ALL');
             roomData.settings.sections = chosen.length ? chosen : ['ALL'];
         } else { roomData.settings.sections = ['ALL']; }
+        
         roomData.settings.timerMode = el('cfg-timer-mode').value;
         roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
+        roomData.settings.groupTimeout = parseInt(el('cfg-group-timeout').value, 10) || 0;
+        
         roomData.settings.showLiveStats = el('cfg-live-stats-tog').checked ? 'true' : 'false';
         roomData.settings.showGhosts = el('cfg-ghost-tog').checked ? 'true' : 'false';
         roomData.settings.ghostFullLive = el('cfg-ghost-full-live').checked ? 'true' : 'false';
         roomData.settings.showAnalysis = el('cfg-analysis-tog').checked ? 'true' : 'false';
         roomData.settings.bombs = el('cfg-bombs-tog').checked ? 'true' : 'false';
         roomData.settings.speedBonus = el('cfg-speed-tog').checked ? 'true' : 'false';
+        
         roomData.settings.addonProgress = el('cfg-addon-progress').checked ? 'true' : 'false';
-        roomData.settings.colorProgress = el('cfg-color-progress').checked ? 'true' : 'false';
+        roomData.settings.colorSidebar = el('cfg-color-sidebar').checked ? 'true' : 'false';
+        
         roomData.settings.addonRace = el('cfg-addon-race').checked ? 'true' : 'false';
+        roomData.settings.colorRace = el('cfg-color-race').checked ? 'true' : 'false';
+        
         roomData.settings.addonChat = el('cfg-addon-chat').checked ? 'true' : 'false';
         roomData.settings.addonQtimer = el('cfg-addon-qtimer').checked ? 'true' : 'false';
         roomData.settings.addonTabs = el('cfg-addon-tabs').checked ? 'true' : 'false';
         roomData.settings.addonPhoto = el('cfg-addon-photo').checked ? 'true' : 'false';
         roomData.settings.autoResults = el('cfg-auto-results').checked ? 'true' : 'false';
         
+        // Show/Hide Dependent Elements based on Toggles
         el('cfg-ghost-live-row').style.display = el('cfg-ghost-tog').checked ? 'flex' : 'none';
+        el('row-color-sidebar').style.display = el('cfg-addon-progress').checked ? 'flex' : 'none';
+        el('row-color-race').style.display = el('cfg-addon-race').checked ? 'flex' : 'none';
+        el('row-addon-photo').style.display = el('cfg-addon-chat').checked ? 'flex' : 'none';
+
+        const mode = el('cfg-timer-mode').value;
+        if (mode === 'group') {
+            el('dur-col').style.display = 'none';
+            el('timeout-col').style.display = 'block';
+        } else {
+            el('dur-col').style.display = 'block';
+            el('timeout-col').style.display = 'none';
+        }
+
         if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length;
         else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
+        
         broadcastRoomState();
     };
-    ['cfg-sections', 'cfg-timer-mode', 'cfg-duration'].forEach(id => { const e = el(id); if(e) e.addEventListener('change', window.pushCfg); });
+
+    el('cfg-timer-mode').addEventListener('change', (e) => {
+        if (e.target.value === 'group') {
+             el('cfg-color-sidebar').checked = true;
+             el('cfg-color-race').checked = true;
+        } else {
+             el('cfg-color-sidebar').checked = false;
+             el('cfg-color-race').checked = false;
+        }
+        window.pushCfg();
+    });
+
+    ['cfg-sections', 'cfg-duration', 'cfg-group-timeout'].forEach(id => { const e = el(id); if(e) e.addEventListener('change', window.pushCfg); });
     window.pushCfg();
 }
 
@@ -1396,7 +1436,7 @@ async function handleRoomStateUpdatePlayer(oldStatus) {
     updateLobbyUI();
     el('view-file').textContent = roomData.testFile; el('view-sections').textContent = roomData.settings.sections.join(', ');
     el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : (roomData.settings.timerMode === 'group' ? 'Group Practice' : 'Countdown'); 
-    el('view-time').textContent = roomData.settings.timerDuration/60 + ' mins';
+    el('view-time').textContent = roomData.settings.timerMode === 'group' ? (roomData.settings.groupTimeout ? (roomData.settings.groupTimeout/60) + ' min skip' : 'No Limit') : (roomData.settings.timerDuration/60 + ' mins');
     
     if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
         if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard();
@@ -1535,6 +1575,81 @@ function broadcastChatPhoto(n, dataUrl) {
     for(let id in connections) connections[id].send({ type: 'chat_photo', name:n, dataUrl });
 }
 
+// ── HELPERS: LIVE GROUP STATS ──
+function getPlayerLiveStats(p) {
+    let correct = 0, wrong = 0, attempted = 0;
+    const isGroup = roomData && roomData.settings && roomData.settings.timerMode === 'group';
+    
+    if (isGroup) {
+        allQuestions.forEach(q => {
+            const ansStr = (p.groupAnswers || {})[q.id];
+            const hasAns = ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined';
+            if (hasAns) {
+                attempted++;
+                if (roomData.groupResolved && roomData.groupResolved[q.id]) {
+                    if (isCorrect(q, ansStr)) correct++; else wrong++;
+                }
+            }
+        });
+    } else {
+        correct = p.liveStats ? p.liveStats.correct : 0;
+        wrong = p.liveStats ? p.liveStats.wrong : 0;
+        attempted = p.attempted || 0;
+    }
+    return { correct, wrong, attempted };
+}
+
+function generateProgressBarHtml(p, totalQ, useColorSetting) {
+    const stats = getPlayerLiveStats(p);
+    const pct = totalQ ? Math.max(0, Math.min(100, (stats.attempted / totalQ) * 100)) : 0;
+    
+    if (useColorSetting === 'true' && stats.attempted > 0) {
+        const cPct = (stats.correct / stats.attempted) * 100;
+        const wPct = (stats.wrong / stats.attempted) * 100;
+        const uPct = 100 - cPct - wPct; // Blue (attempted but unresolved in group mode)
+        
+        return `
+            <div style="display:flex; width:${pct}%; height:100%; transition:width 0.3s; overflow:hidden; border-radius:4px;">
+               <div style="height:100%; background:var(--ans); width:${cPct}%; ${cPct>0?'box-shadow: 0 0 8px var(--ans);':''}"></div>
+               <div style="height:100%; background:var(--wrong); width:${wPct}%; ${wPct>0?'box-shadow: 0 0 8px var(--wrong);':''}"></div>
+               <div style="height:100%; background:var(--waiting); width:${uPct}%; ${uPct>0?'box-shadow: 0 0 8px var(--accent-glow);':''}"></div>
+            </div>
+        `;
+    } else {
+        return `<div class="progress-fill" style="width:${pct}%; box-shadow: 0 0 10px var(--accent-glow);"></div>`;
+    }
+}
+
+// ── TOP LEGEND RENDERER ──
+function renderTopLegends() {
+    if (!roomData) return;
+    const isGroup = roomData.settings.timerMode === 'group';
+    const desk = el('top-stats-desk');
+    const mob = el('top-stats-mob');
+    
+    let html = '';
+    if (isGroup) {
+        html = `
+          <div class="st-item" title="Correct"><div class="st-dot" style="background:var(--ans);"></div><span id="st-correct-desk">0</span></div>
+          <div class="st-item" title="Wrong"><div class="st-dot" style="background:var(--wrong);"></div><span id="st-wrong-desk">0</span></div>
+          <div class="st-item" title="Waiting"><div class="st-dot" style="background:var(--waiting);"></div><span id="st-wait-desk">0</span></div>
+          <div class="st-item" title="Skipped"><div class="st-dot" style="background:var(--unans);"></div><span id="st-skip-desk">0</span></div>
+          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        `;
+    } else {
+        html = `
+          <div class="st-item" title="Answered"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
+          <div class="st-item" title="Skipped"><div class="st-dot" style="background:var(--unans);"></div><span id="st-skip-desk">0</span></div>
+          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        `;
+    }
+    
+    if(desk) desk.innerHTML = html.replace(/-desk/g, '-desk');
+    if(mob) mob.innerHTML = html.replace(/-desk/g, '-mob');
+}
+
 // ── 5. GAME ENGINE ──
 function launchGame() {
     el('lobby-screen').classList.add('hidden'); el('app').style.display = 'flex'; 
@@ -1556,6 +1671,8 @@ function launchGame() {
     const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
     Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
     currentSection = 'ALL'; currentQIdx = 0;
+
+    renderTopLegends();
 
     function buildSectionTabs() {
         const tabsEl = el('section-tabs'); if(!tabsEl) return;
@@ -1580,12 +1697,13 @@ function launchGame() {
         });
     }
 
-    questionTimes = {}; questionEnterTime = Date.now();
+    questionTimes = {}; 
     correctStreak = 0;
     
     // Group Setup
     if (isHost) {
         roomData.activeGroupQ = allQuestions[0].id;
+        roomData.activeGroupQStartTime = Date.now();
         roomData.groupResolved = {};
     }
     
@@ -1671,7 +1789,8 @@ function launchGame() {
         if(el('final-results-layer').classList.contains('show')) showFinalResults(false);
     }, 1000);
     
-    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 3000);
+    // Faster Sync Interval
+    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 1500);
 }
 
 function startTimers() {
@@ -1681,30 +1800,73 @@ function startTimers() {
         const elps = Math.floor((Date.now() - roomData.startTime) / 1000);
         let correctedElps = elps < 0 ? 0 : elps;
         const t = el('total-timer');
+        
         if (roomData.settings.timerMode === 'countdown') { 
             const r = roomData.settings.timerDuration - correctedElps; 
             if(r <= 0) { t.textContent = "00:00"; forceSubmit(); } 
             else { t.textContent = formatTime(r); if(r < 300) t.parentElement.classList.add('ending'); }
-        } 
-        else { t.textContent = formatTime(correctedElps); }
+        } else if (roomData.settings.timerMode === 'group') {
+            t.textContent = "∞"; // Practice mode hides global timer limit
+        } else { 
+            t.textContent = formatTime(correctedElps); 
+        }
 
-        // Per Q Timer Accrual Tracker logic
-        if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true' && !hasSubmitted) {
+        // Host ONLY: Auto-Skip logic in Group Practice
+        if (isHost && roomData.status === 'playing' && roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+            const timeoutLimit = parseInt(roomData.settings.groupTimeout);
+            if (timeoutLimit > 0) {
+                if (!roomData.activeGroupQStartTime) roomData.activeGroupQStartTime = Date.now();
+                const elapsed = (Date.now() - roomData.activeGroupQStartTime) / 1000;
+                if (elapsed >= timeoutLimit) {
+                    const actQ = roomData.activeGroupQ;
+                    if (!roomData.groupResolved[actQ]) {
+                        roomData.groupResolved[actQ] = true;
+                        
+                        // Force missing active players to skipped
+                        for (let pid in roomData.players) {
+                             if (!roomData.players[pid].submitted) {
+                                 if (!roomData.players[pid].groupAnswers) roomData.players[pid].groupAnswers = {};
+                                 if (!roomData.players[pid].groupAnswers[actQ]) {
+                                     roomData.players[pid].groupAnswers[actQ] = 'skipped';
+                                 }
+                             }
+                        }
+                        
+                        // Advance to next
+                        const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                        const nextIdx = getSeq()[actIdx + 1];
+                        if (nextIdx !== undefined) {
+                            roomData.activeGroupQ = allQuestions[nextIdx].id;
+                            roomData.activeGroupQStartTime = Date.now();
+                        } else {
+                            roomData.activeGroupQ = null;
+                            for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                            window.forceSubmit();
+                        }
+                        broadcastRoomState();
+                    }
+                }
+            }
+        }
+
+        // Precise Per Q Timer Accrual Logic
+        if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true') {
             const qId = allQuestions[currentQIdx]?.id;
             const ans = answers[qId];
-            
             const isGroupMode = roomData.settings.timerMode === 'group';
-            const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
-            const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
-            
-            let activeTime = 0;
-            if (!isFrozenGroup && !isFrozenSolo) {
-                activeTime = Math.round((Date.now() - questionEnterTime) / 1000);
+            const isFrozen = (isGroupMode && roomData.groupResolved[qId]) || (!isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans'));
+
+            if (!isFrozen && qId) {
+                questionTimes[qId] = (questionTimes[qId] || 0) + 1;
             }
-            
-            const totalSpent = (questionTimes[qId] || 0) + activeTime;
-            if(el('per-q-timer')) el('per-q-timer').textContent = totalSpent + 's';
+            if (el('per-q-timer')) el('per-q-timer').textContent = (questionTimes[qId] || 0) + 's';
         }
+        
+        // Fast refresh for Group UI
+        if(roomData.settings.timerMode === 'group') {
+            updateGroupUI();
+        }
+
     }, 1000);
 }
 function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
@@ -1713,10 +1875,16 @@ function calculateLiveStats() {
     let correct = 0; let wrong = 0;
     allQuestions.forEach(q => {
         const isGroup = roomData.settings.timerMode === 'group';
-        const myPlayer = roomData.players[myId];
-        if (isGroup && myPlayer && myPlayer.groupAnswers) {
-            const ansStr = myPlayer.groupAnswers[q.id];
-            if (isCorrect(q, ansStr)) correct++; else if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') wrong++;
+        if (isGroup) {
+            const myPlayer = roomData.players[myId];
+            if (myPlayer && myPlayer.groupAnswers) {
+                const ansStr = myPlayer.groupAnswers[q.id];
+                if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') {
+                    if (roomData.groupResolved && roomData.groupResolved[q.id]) {
+                        if (isCorrect(q, ansStr)) correct++; else wrong++;
+                    }
+                }
+            }
         } else {
             const a = answers[q.id];
             if (a && (a.status === 'ans' || a.status === 'mark-ans')) {
@@ -1794,6 +1962,7 @@ function pushProgressToHost(isFinal = false) {
                 const nextIdx = getSeq()[actIdx + 1];
                 if (nextIdx !== undefined) {
                     roomData.activeGroupQ = allQuestions[nextIdx].id;
+                    roomData.activeGroupQStartTime = Date.now();
                 } else {
                     roomData.activeGroupQ = null; // Finished
                     for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
@@ -1860,15 +2029,15 @@ function updateGroupUI() {
         let ansText = hasAnswered ? 'Locked' : 'Thinking...';
         
         if (hasAnswered && !isResolved) {
-             cColor = 'var(--ans)';
-             cIcon = '✅';
+             cColor = 'var(--waiting)'; // Unresolved attempt renders as blue logic
+             cIcon = '🟦';
         }
 
         if (isResolved) {
             const pAnsStr = String(pAns).trim();
             const isSkip = !hasAnswered || pAnsStr === 'skipped' || pAnsStr === 'null' || pAnsStr === 'undefined';
             const isC = !isSkip && isCorrect(q, pAnsStr);
-            cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
+            cColor = isSkip ? 'var(--unans)' : (isC ? 'var(--ans)' : 'var(--wrong)');
             cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
             ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
         }
@@ -1879,25 +2048,15 @@ function updateGroupUI() {
         }
         
         const totalQ = roomData.totalQuestions || 1;
-        const pct = Math.round((p.attempted/totalQ)*100);
-
-        let barInner = `<div class="progress-fill" style="width:${pct}%; background:var(--accent);"></div>`;
-        if (roomData.settings.colorProgress === 'true' && p.liveStats && p.attempted > 0) {
-            const cPct = (p.liveStats.correct / p.attempted) * 100;
-            const wPct = (p.liveStats.wrong / p.attempted) * 100;
-            barInner = `
-                <div style="height:100%; background:var(--ans); width:${cPct}%; ${cPct>0?'border-right:1px solid rgba(0,0,0,0.3);':''}"></div>
-                <div style="height:100%; background:var(--unans); width:${wPct}%;"></div>
-            `;
-        }
+        const barHtml = generateProgressBarHtml(p, totalQ, roomData.settings.colorSidebar);
 
         html += `<div class="spring-anim" style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:700; font-family:'Outfit'; font-size:14px; color: ${p.name===myName?'var(--accent)':'var(--text)'};">${p.name}</span>
                 <span style="font-size:12px; color:${cColor}; font-weight:800; background:var(--surface2); padding:4px 8px; border-radius:6px; border:1px solid ${cColor};">${ansText} ${cIcon}</span>
             </div>
-            <div class="progress-wrap" style="height: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
-                ${barInner}
+            <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
+                ${barHtml}
             </div>
         </div>`;
     });
@@ -1961,25 +2120,14 @@ function updateGroupUI() {
 window.submitWarningBtn = () => {
     let a=0, m=0, u=0, n=0;
     Object.values(answers).forEach(ans => { if(ans.status === 'ans' || ans.status === 'mark-ans') a++; else if(ans.status === 'marked') m++; else if(ans.status === 'unans') u++; else n++; });
-    el('warn-att').textContent = a; el('warn-mark').textContent = m; el('warn-unans').textContent = u; el('warn-notvis').textContent = n;
+    
+    el('warn-ans').textContent = a; el('warn-skip').textContent = u; el('warn-notvis').textContent = n;
     el('submit-warning-modal').classList.add('show');
 };
 
 window.forceSubmit = () => {
     el('submit-warning-modal').classList.remove('show');
     if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
-    if(allQuestions[currentQIdx]) { 
-        const qId = allQuestions[currentQIdx].id; 
-        const ans = answers[qId];
-        const isGroupMode = roomData.settings.timerMode === 'group';
-        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
-        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
-        
-        if(!isFrozenGroup && !isFrozenSolo) {
-            const spent = Math.round((Date.now()-questionEnterTime)/1000); 
-            questionTimes[qId] = (questionTimes[qId]||0)+spent; 
-        }
-    }
     
     pushProgressToHost(true);
     
@@ -2095,16 +2243,6 @@ window.navigate = (dir, isSaveNext = false) => {
         const qId = allQuestions[currentQIdx].id;
         const ans = answers[qId]; 
         if(ans && ans.status === 'not-vis') ans.status = 'unans';
-        
-        const isGroupMode = roomData.settings.timerMode === 'group';
-        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
-        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
-        
-        if(!isFrozenGroup && !isFrozenSolo) {
-            const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-            questionTimes[qId] = (questionTimes[qId] || 0) + spent;
-        }
-        questionEnterTime = Date.now();
     }
     resetSaveBtn();
     const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; 
@@ -2123,16 +2261,6 @@ window.goToQ = (idx) => {
         const qId = allQuestions[currentQIdx].id;
         const ans = answers[qId]; 
         if(ans && ans.status === 'not-vis') ans.status = 'unans';
-        
-        const isGroupMode = roomData.settings.timerMode === 'group';
-        const isFrozenGroup = isGroupMode && roomData.groupResolved[qId];
-        const isFrozenSolo = !isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans');
-        
-        if(!isFrozenGroup && !isFrozenSolo) {
-            const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-            questionTimes[qId] = (questionTimes[qId] || 0) + spent;
-        }
-        questionEnterTime = Date.now();
     }
     resetSaveBtn();
     currentQIdx = idx; renderSidebar(); renderQuestion(); updateGroupUI();
@@ -2155,15 +2283,8 @@ window.saveNext = () => {
     const a = answers[q.id]; 
     if (a.selected) {
         a.status = 'ans';
-        const { hasAnswer } = getCorrectInfo(q);
-        if (hasAnswer) {
-            showToast(isCorrect(q, a.selected) ? 'success' : 'error', isCorrect(q, a.selected) ? '✅ Correct!' : '❌ Wrong!');
-        } else {
-            showToast('success', '💾 Saved!');
-        }
     } else { 
         a.status = 'unans';
-        showToast('error', '➖ No answer selected');
     }
     renderSidebar();
     renderAnswerArea(q);
@@ -2209,28 +2330,51 @@ function showStreakBomb(msg) {
     requestAnimationFrame(() => { d.style.transform = 'translate(-50%,-50%) scale(1)'; });
     setTimeout(() => { d.style.transform = 'translate(-50%,-50%) scale(0)'; d.style.opacity='0'; setTimeout(()=>d.remove(), 350); }, 2000);
 }
-window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'mark-ans' : 'marked'; navigate(1, true); };
+window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'ans' : 'unans'; navigate(1, true); };
 window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis', selected: null }; renderSidebar(); renderQuestion(); };
 
 function updateCompactStats() {
-    let a=0, ma=0, m=0, u=0, n=0;
-    Object.values(answers).forEach(ans => {
-        if(ans.status === 'ans') a++;
-        else if(ans.status === 'mark-ans') ma++;
-        else if(ans.status === 'marked') m++;
-        else if(ans.status === 'unans') u++;
-        else n++;
-    });
-    const total = allQuestions.length;
-    const overall = `${a+ma}/${total}`;
-    ['desk', 'mob'].forEach(pf => {
-        if(el('st-ans-'+pf)) el('st-ans-'+pf).textContent = a;
-        if(el('st-mark-ans-'+pf)) el('st-mark-ans-'+pf).textContent = ma;
-        if(el('st-marked-'+pf)) el('st-marked-'+pf).textContent = m;
-        if(el('st-unans-'+pf)) el('st-unans-'+pf).textContent = u;
-        if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
-        if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = overall;
-    });
+    if(!roomData) return;
+    const isGroup = roomData.settings.timerMode === 'group';
+    let total = allQuestions.length;
+    
+    if (isGroup) {
+        let c=0, w=0, wait=0, s=0, n=0;
+        allQuestions.forEach(q => {
+            const ans = (roomData.players[myId]?.groupAnswers || {})[q.id];
+            const isRes = roomData.groupResolved && roomData.groupResolved[q.id];
+            if (!ans || ans === 'null') { n++; return; }
+            
+            if (!isRes) {
+                wait++;
+            } else {
+                if (ans === 'skipped') s++;
+                else if (isCorrect(q, ans)) c++;
+                else w++;
+            }
+        });
+        ['desk', 'mob'].forEach(pf => {
+            if(el('st-correct-'+pf)) el('st-correct-'+pf).textContent = c;
+            if(el('st-wrong-'+pf)) el('st-wrong-'+pf).textContent = w;
+            if(el('st-wait-'+pf)) el('st-wait-'+pf).textContent = wait;
+            if(el('st-skip-'+pf)) el('st-skip-'+pf).textContent = s;
+            if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+            if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = `${c+w+s}/${total}`;
+        });
+    } else {
+        let a=0, u=0, n=0;
+        Object.values(answers).forEach(ans => {
+            if(ans.status === 'ans' || ans.status === 'mark-ans') a++;
+            else if(ans.status === 'unans' || ans.status === 'marked') u++;
+            else n++;
+        });
+        ['desk', 'mob'].forEach(pf => {
+            if(el('st-ans-'+pf)) el('st-ans-'+pf).textContent = a;
+            if(el('st-skip-'+pf)) el('st-skip-'+pf).textContent = u;
+            if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+            if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = `${a}/${total}`;
+        });
+    }
 }
 
 let imgFitMode = false;
@@ -2255,7 +2399,6 @@ function renderQuestion() {
     }
   }
   if (!hasI) imgA.innerHTML = `<div class="spring-anim" style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
-  questionEnterTime = Date.now(); 
   renderAnswerArea(q); updateCompactStats();
 }
 
@@ -2367,10 +2510,34 @@ function renderAnswerArea(q) {
 
 function renderSidebar() {
   const g = el('q-grid'); g.innerHTML = '';
+  const isGroup = roomData.settings.timerMode === 'group';
+
   getSeq().forEach(idx => {
-    const q = allQuestions[idx]; const d = document.createElement('div'); d.className = `dot spring-anim ${answers[q.id].status}`;
+    const q = allQuestions[idx]; 
+    const d = document.createElement('div'); 
+    d.className = `dot spring-anim`;
     if (idx === currentQIdx) d.classList.add('active'); d.textContent = q.globalNum;
     
+    if (isGroup) {
+        const isResolved = roomData.groupResolved && roomData.groupResolved[q.id];
+        const myAns = (roomData.players[myId]?.groupAnswers || {})[q.id];
+        const hasAns = myAns && myAns !== 'null';
+        
+        if (isResolved) {
+            if (hasAns && myAns !== 'skipped') d.classList.add(isCorrect(q, myAns) ? 'ans' : 'wrong');
+            else d.classList.add('unans'); 
+        } else if (hasAns) {
+            d.classList.add('waiting');
+        } else {
+            d.classList.add('not-vis');
+        }
+    } else {
+        const st = answers[q.id].status;
+        if (st === 'ans' || st === 'mark-ans') d.classList.add('ans');
+        else if (st === 'unans' || st === 'marked') d.classList.add('unans');
+        else d.classList.add('not-vis');
+    }
+
     if (!hasSubmitted && roomData && roomData.settings.showLiveStats === 'true') {
         const players = Object.values(roomData.players).filter(p => p.name !== myName);
         const total = players.length;
@@ -2401,14 +2568,6 @@ function renderSidebar() {
             d.appendChild(gWrap);
         }
     }
-
-    const isResolvedInGroup = roomData.settings.timerMode === 'group' && roomData.groupResolved && roomData.groupResolved[q.id];
-    const myAns = answers[q.id].selected || (roomData.players[myId] ? (roomData.players[myId].groupAnswers || {})[q.id] : null);
-
-    if (myAns && myAns !== 'skipped' && (hasSubmitted || isResolvedInGroup)) {
-        d.style.background = isCorrect(q, myAns) ? 'var(--ans)' : 'var(--unans)';
-        d.style.color = 'white'; d.style.border = 'none';
-    }
     
     d.onclick = () => window.goToQ(idx); g.appendChild(d);
   });
@@ -2420,18 +2579,22 @@ function updateRaceBar() {
     const players = Object.values(roomData.players);
     const total = roomData.totalQuestions || 1;
     const myPlayer = roomData.players[myId];
-    const myPct = myPlayer ? Math.round((myPlayer.attempted/total)*100) : 0;
+    
+    const stats = getPlayerLiveStats(myPlayer);
+    const myPct = total > 0 ? Math.round((stats.attempted/total)*100) : 0;
     
     const fill = el('btm-race-fill');
     if (fill) {
-        if (roomData.settings.colorProgress === 'true' && myPlayer && myPlayer.liveStats && myPlayer.attempted > 0) {
-            const cPct = (myPlayer.liveStats.correct / myPlayer.attempted) * 100;
-            const wPct = (myPlayer.liveStats.wrong / myPlayer.attempted) * 100;
+        if (roomData.settings.colorRace === 'true' && stats.attempted > 0) {
+            const cPct = (stats.correct / stats.attempted) * 100;
+            const wPct = (stats.wrong / stats.attempted) * 100;
+            const uPct = 100 - cPct - wPct;
             fill.style.background = 'transparent';
             fill.style.width = myPct + '%';
             fill.innerHTML = `
-                <div style="height:100%; background:rgba(16,185,129,0.25); width:${cPct}%; ${cPct>0?'border-right:2px solid var(--ans);':''}"></div>
-                <div style="height:100%; background:rgba(239,68,68,0.25); width:${wPct}%; ${wPct>0?'border-right:2px solid var(--unans);':''}"></div>
+                <div style="height:100%; background:var(--ans); width:${cPct}%; ${cPct>0?'border-right:2px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; background:var(--wrong); width:${wPct}%; ${wPct>0?'border-right:2px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; background:var(--waiting); width:${uPct}%;"></div>
             `;
         } else {
             fill.style.background = 'rgba(99, 102, 241, 0.15)';
@@ -2444,7 +2607,8 @@ function updateRaceBar() {
     const names = el('race-bar-names');
     if(names) {
         names.innerHTML = players.map(p => {
-            const pct = Math.round((p.attempted/total)*100);
+            const pStats = getPlayerLiveStats(p);
+            const pct = Math.round((pStats.attempted/total)*100);
             return `<span style="color:${p.name===myName?'var(--accent)':'var(--text2)'}; font-weight:${p.name===myName?900:600};">${p.name.charAt(0)}:${pct}%</span>`;
         }).join(' | ');
     }
@@ -2454,23 +2618,13 @@ function renderSidebarLeaderboard() {
     const list = el('sidebar-leaderboard'); if(!list) return;
     const pArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted); list.innerHTML = '';
     pArr.forEach(p => {
-        const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
-        
-        let barHtml = `<div class="progress-fill" style="width:${pct}%; box-shadow: 0 0 10px var(--accent-glow);"></div>`;
-        if(roomData.settings.colorProgress === 'true' && p.liveStats && p.attempted > 0) {
-            const cPct = (p.liveStats.correct / p.attempted) * pct;
-            const wPct = (p.liveStats.wrong / p.attempted) * pct;
-            barHtml = `
-                <div style="height:100%; background:var(--ans); width:${cPct}%; box-shadow: 0 0 8px var(--ans);"></div>
-                <div style="height:100%; background:var(--unans); width:${wPct}%; box-shadow: 0 0 8px var(--unans);"></div>
-            `;
-        }
+        const barHtml = generateProgressBarHtml(p, roomData.totalQuestions || 1, roomData.settings.colorSidebar);
 
         list.innerHTML += `
             <div class="lb-item spring-anim ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
                 <div class="lb-top" style="margin-bottom: 12px;">
                   <span class="lb-name" style="font-size: 16px;">${p.name} ${p.submitted?'🏁':''}</span>
-                  <span class="lb-stat" style="font-size: 16px;">${p.attempted} / ${roomData.totalQuestions}</span>
+                  <span class="lb-stat" style="font-size: 16px;">${getPlayerLiveStats(p).attempted} / ${roomData.totalQuestions}</span>
                 </div>
                 <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
                   ${barHtml}
@@ -2586,7 +2740,7 @@ function renderAnalysis(mode) {
                     </div>
                     <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
                         <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🐢 Slowest Q</div>
-                        <div style="font-size:18px;font-weight:900;color:var(--unans);">${slowest?slowest[1]+'s':'—'}</div>
+                        <div style="font-size:18px;font-weight:900;color:var(--wrong);">${slowest?slowest[1]+'s':'—'}</div>
                     </div>
                 </div>
                 <div style="margin-top:10px;font-size:12px;color:var(--text2);font-weight:600;font-family:'Outfit';">Total time tracked: ${formatTime(totalTime)} | Questions attempted: ${p.attempted}</div>
