@@ -455,6 +455,10 @@
                 <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
               </div>
               <div class="toggle-row">
+                <div class="toggle-label">Colored Progress Bars <small>Show red/green segments live</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="cfg-color-progress" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+              </div>
+              <div class="toggle-row">
                 <div class="toggle-label">Race Progress Bar 🏎️ <small>Slim glowing bar in top header</small></div>
                 <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
               </div>
@@ -521,9 +525,11 @@
       <div class="glass-card" style="padding: 0; flex: 1; max-height: 300px; display:flex; flex-direction:column;">
         <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
         <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 16px;"></div>
-        <div class="chat-input-wrap" style="padding: 12px 16px;">
-          <input type="text" id="lobby-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()">
-          <button onclick="window.sendLobbyChat()">Send</button>
+        <div class="chat-input-wrap" style="padding: 12px 16px; gap:6px;">
+          <input type="text" id="lobby-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()" style="flex:1; min-width:0;">
+          <input type="file" id="lobby-chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendLobbyChatPhoto(this)">
+          <button id="btn-lobby-chat-photo" onclick="document.getElementById('lobby-chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
+          <button onclick="window.sendLobbyChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
         </div>
       </div>
     </div>
@@ -757,16 +763,6 @@
   },{passive:false});
 })();
 </script>
-
-  <!-- GROUP RESOLUTION MODAL -->
-  <div class="modal-layer" id="group-resolve-modal" style="z-index: 100;">
-    <div class="glass-card" style="max-width: 450px;">
-       <h2 style="font-family:'Syne'; color:var(--text); text-align:center; font-size: 24px; margin-bottom: 4px;">Question Resolved!</h2>
-       <div style="font-family:'Outfit'; text-align:center; font-size:13px; color:var(--text2); margin-bottom:12px;">Everyone has locked their answers.</div>
-       <div id="group-resolve-list" style="display:flex; flex-direction:column; gap:8px; max-height: 40vh; overflow-y:auto; padding-right: 4px;"></div>
-       <button class="btn btn-primary" onclick="el('group-resolve-modal').classList.remove('show')" style="margin-top:12px;">Close & Review Board</button>
-    </div>
-  </div>
 
   <!-- SUBMIT WARNING MODAL -->
   <div class="modal-layer" id="submit-warning-modal">
@@ -1094,9 +1090,16 @@ function initPeerAsHost() {
                     p.currentQ = data.currentQ; 
                     p.groupLockedQ = data.groupLockedQ; // Group Practice tracking
                     p.groupAns = data.groupAns;
+                    p.liveStats = data.liveStats || { correct: 0, wrong: 0 }; // Colored Progress tracking
                     if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } 
                     broadcastRoomState(); checkAllSubmitted(); 
                 } 
+            }
+            if(data.type === 'group_next') {
+                for(let id in connections) {
+                    if(id !== conn.peer) connections[id].send({ type: 'group_next', qId: data.qId });
+                }
+                window.executeGroupNext(data.qId);
             }
             if(data.type === 'chat') broadcastChat(data.name, data.text);
             if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
@@ -1151,6 +1154,7 @@ function attachHostSettingsListeners() {
         roomData.settings.bombs = el('cfg-bombs-tog').checked ? 'true' : 'false';
         roomData.settings.speedBonus = el('cfg-speed-tog').checked ? 'true' : 'false';
         roomData.settings.addonProgress = el('cfg-addon-progress').checked ? 'true' : 'false';
+        roomData.settings.colorProgress = el('cfg-color-progress').checked ? 'true' : 'false';
         roomData.settings.addonRace = el('cfg-addon-race').checked ? 'true' : 'false';
         roomData.settings.addonChat = el('cfg-addon-chat').checked ? 'true' : 'false';
         roomData.settings.addonQtimer = el('cfg-addon-qtimer').checked ? 'true' : 'false';
@@ -1192,6 +1196,7 @@ function initPeerAsPlayer() {
                 sendLobbyProgress(`[P2P Host] Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
                 await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
             }
+            if(data.type === 'group_next') { window.executeGroupNext(data.qId); }
             if(data.type === 'chat') { appendChatUI(data.name, data.text); }
             if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
         });
@@ -1315,6 +1320,12 @@ function updateLobbyUI() {
         else { btn.textContent = "I'm Ready"; btn.style.background = "var(--ans)"; btn.style.borderColor = "var(--ans)"; btn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.4)"; }
     }
     if(isHost) el('btn-start-game').disabled = !allReady;
+
+    // Synchronize Photo Chat add-on visibility globally
+    const photoBtn = el('btn-chat-photo');
+    const lobbyPhotoBtn = el('btn-lobby-chat-photo');
+    if(photoBtn) photoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
+    if(lobbyPhotoBtn) lobbyPhotoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
 }
 
 window.copyJoinLink = () => { navigator.clipboard.writeText(window.location.href.split('?')[0] + '?join=' + roomCode); showToast('success', 'Copied!'); };
@@ -1340,6 +1351,7 @@ function appendChatUI(n, t, isPhoto = false) {
         requestAnimationFrame(() => { msgDiv.style.transform = 'scale(1) translateY(0)'; msgDiv.style.opacity = '1'; });
     });
 }
+window.sendLobbyChatPhoto = async (input) => window.sendChatPhoto(input);
 window.sendChatPhoto = async (input) => {
     if(!input.files[0]) return;
     const reader = new FileReader();
@@ -1416,10 +1428,6 @@ function launchGame() {
         el('wid-chat-desk') && (el('wid-chat-desk').style.display = 'none');
         el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
     }
-
-    // Show photo button only if enabled
-    const photoBtn = el('btn-chat-photo');
-    if(photoBtn) photoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
 
     // Race bar
     if(roomData.settings.addonRace === 'true') {
@@ -1500,6 +1508,18 @@ function startTimers() {
 }
 function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
 
+function calculateLiveStats() {
+    let correct = 0; let wrong = 0;
+    allQuestions.forEach(q => {
+        const a = answers[q.id];
+        if(a && (a.status === 'ans' || a.status === 'mark-ans')) {
+            const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(a.selected)) : String(q.correctAnswer).trim() === String(a.selected);
+            if(isC) correct++; else wrong++;
+        }
+    });
+    return { correct, wrong };
+}
+
 function calculateScore() {
     let net = 0;
     allQuestions.forEach(q => {
@@ -1524,14 +1544,19 @@ function pushProgressToHost(isFinal = false) {
     const pay = { 
         attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, 
         currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined,
-        groupLockedQ: myLockedQId, groupAns: myLockedAns
+        groupLockedQ: myLockedQId, groupAns: myLockedAns,
+        liveStats: calculateLiveStats()
     };
+    
     if(isHost) { 
-        const p = roomData.players[myId]; p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupLockedQ = pay.groupLockedQ; p.groupAns = pay.groupAns;
+        const p = roomData.players[myId]; 
+        p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupLockedQ = pay.groupLockedQ; p.groupAns = pay.groupAns;
+        p.liveStats = pay.liveStats;
         if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } 
         broadcastRoomState(); checkAllSubmitted(); 
-    } 
-    else { if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); }
+    } else { 
+        if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); 
+    }
 }
 function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) { roomData.status = 'finished'; broadcastRoomState(); showFinalResults(true); } }
 
@@ -1557,23 +1582,41 @@ window.groupSave = () => {
     updateGroupUI(); 
 };
 
+window.executeGroupNext = (qId) => {
+    if(roomData.settings.timerMode !== 'group') return;
+    const tgtIdx = getSeq().findIndex(i => allQuestions[i].id === qId);
+    if(tgtIdx !== -1 && currentQIdx !== tgtIdx) {
+        // Reset UI
+        el('btn-group-next').style.display = 'none';
+        el('btn-group-submit').style.display = 'none';
+        el('btn-group-save').style.display = 'block';
+        el('btn-group-save').disabled = false;
+        el('group-wait-text').style.display = 'none';
+
+        // Track time
+        const spent = Math.round((Date.now() - questionEnterTime) / 1000);
+        questionTimes[allQuestions[currentQIdx].id] = (questionTimes[allQuestions[currentQIdx].id] || 0) + spent;
+        
+        myLockedQId = null;
+        myLockedAns = null;
+        currentQIdx = tgtIdx;
+        
+        pushProgressToHost();
+        renderSidebar(); renderQuestion(); updateGroupUI();
+    }
+};
+
 window.groupNext = () => {
-    el('btn-group-next').style.display = 'none';
-    el('btn-group-submit').style.display = 'none';
-    el('btn-group-save').style.display = 'block';
-    el('btn-group-save').disabled = false;
+    const nextIdx = getSeq()[getSeq().indexOf(currentQIdx) + 1];
+    if(nextIdx === undefined) return;
+    const nextQId = allQuestions[nextIdx].id;
     
-    // Track per-Q time
-    const qId = allQuestions[currentQIdx].id;
-    const spent = Math.round((Date.now() - questionEnterTime) / 1000);
-    questionTimes[qId] = (questionTimes[qId] || 0) + spent;
-    
-    myLockedQId = null;
-    myLockedAns = null;
-    currentQIdx++;
-    
-    pushProgressToHost();
-    renderSidebar(); renderQuestion(); updateGroupUI();
+    if(isHost) {
+        for(let id in connections) { connections[id].send({ type: 'group_next', qId: nextQId }); }
+        window.executeGroupNext(nextQId);
+    } else if(hostConn && hostConn.open) {
+        hostConn.send({ type: 'group_next', qId: nextQId });
+    }
 };
 
 function updateGroupUI() {
@@ -1582,56 +1625,56 @@ function updateGroupUI() {
     const players = Object.values(roomData.players);
     
     let html = '';
-    let allLocked = true;
+    let allLocked = players.length > 0;
     
+    // Determine if all are locked for THIS specific question
     players.forEach(p => {
-        const isLocked = p.groupLockedQ === q.id;
-        if(!isLocked) allLocked = false;
-        const icon = isLocked ? '✅' : '⏳';
-        const color = isLocked ? 'var(--ans)' : 'var(--text2)';
-        html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
-            <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
-            <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${isLocked ? 'Locked' : 'Thinking...'}</span>
-        </div>`;
+        if(p.groupLockedQ !== q.id) allLocked = false;
     });
-    
-    if(el('group-status-list')) el('group-status-list').innerHTML = html;
-    if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
     
     // Auto resolution trigger
     if(allLocked && groupResolvedForQ !== q.id && myLockedQId === q.id) {
         groupResolvedForQ = q.id;
         el('group-wait-text').style.display = 'none';
         
-        if(currentQIdx === allQuestions.length - 1) {
+        if(currentQIdx === getSeq()[getSeq().length - 1]) {
             el('btn-group-submit').style.display = 'block';
         } else {
             el('btn-group-next').style.display = 'block';
             el('btn-group-next').disabled = false;
         }
         
-        let mHtml = '';
-        const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
-        
-        players.forEach(p => {
+        renderAnswerArea(q); // Repaint colors for correct answers
+        updateCompactStats();
+    }
+
+    const correctOps = Array.isArray(q.correctAnswer) ? q.correctAnswer.map(String) : [String(q.correctAnswer).trim()];
+    
+    players.forEach(p => {
+        const isLocked = p.groupLockedQ === q.id;
+        if(groupResolvedForQ === q.id) {
             const pAns = String(p.groupAns).trim();
             const isC = pAns !== 'skipped' && (q.type === 'mcq' ? correctOps.includes(pAns) : correctOps[0] === pAns);
             const isSkip = pAns === 'skipped' || pAns === 'null';
             const cColor = isSkip ? 'var(--text2)' : (isC ? 'var(--ans)' : 'var(--unans)');
             const cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
             const ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAns)-1] : pAns);
-            mHtml += `<div style="display:flex; justify-content:space-between; background:var(--surface3); padding:10px 14px; border-radius:10px; border:1px solid ${cColor};">
-                <span style="font-weight:700;">${p.name}</span>
-                <span style="color:${cColor}; font-weight:800;">${ansText} ${cIcon}</span>
+            html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid ${cColor};">
+                <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
+                <span style="font-size:12px; color:${cColor}; font-weight:800;">${ansText} ${cIcon}</span>
             </div>`;
-        });
-        
-        el('group-resolve-list').innerHTML = mHtml;
-        el('group-resolve-modal').classList.add('show');
-        
-        renderAnswerArea(q); // Repaint colors for correct answers
-        updateCompactStats();
-    }
+        } else {
+            const icon = isLocked ? '✅' : '⏳';
+            const color = isLocked ? 'var(--ans)' : 'var(--text2)';
+            html += `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                <span style="font-weight:700; font-family:'Outfit'; font-size:14px;">${p.name}</span>
+                <span style="font-size:12px; color:${color}; font-weight:800;">${icon} ${isLocked ? 'Locked' : 'Thinking...'}</span>
+            </div>`;
+        }
+    });
+    
+    if(el('group-status-list')) el('group-status-list').innerHTML = html;
+    if(el('mob-group-list')) el('mob-group-list').innerHTML = html;
 }
 
 
@@ -1895,8 +1938,8 @@ function renderSidebar() {
         }
     }
 
-    // Review Mode Dot Colors
-    if (hasSubmitted && answers[q.id].selected) {
+    // Review Mode / Resolved Group Mode Dot Colors
+    if (answers[q.id].selected && (hasSubmitted || (roomData.settings.timerMode === 'group' && groupResolvedForQ === q.id))) {
         const isC = q.type==='mcq' ? !!(q.correctAnswer && q.correctAnswer.includes(answers[q.id].selected)) : String(q.correctAnswer).trim() === String(answers[q.id].selected);
         d.style.background = isC ? 'var(--ans)' : 'var(--unans)';
         d.style.color = 'white'; d.style.border = 'none';
@@ -1914,8 +1957,30 @@ function updateRaceBar() {
     // Find furthest player for the fill
     const myPlayer = roomData.players[myId];
     const myPct = myPlayer ? Math.round((myPlayer.attempted/total)*100) : 0;
+    
     const fill = el('race-bar-fill');
-    if(fill) fill.style.width = myPct + '%';
+    if (fill) {
+        if (roomData.settings.colorProgress === 'true' && myPlayer && myPlayer.liveStats) {
+            const cPct = myPlayer.attempted ? (myPlayer.liveStats.correct / myPlayer.attempted) * 100 : 0;
+            const wPct = myPlayer.attempted ? (myPlayer.liveStats.wrong / myPlayer.attempted) * 100 : 0;
+            fill.style.background = 'transparent';
+            fill.style.boxShadow = 'none';
+            fill.style.display = 'flex';
+            fill.style.overflow = 'hidden';
+            fill.style.width = myPct + '%';
+            fill.innerHTML = `
+                <div style="height:100%; background:var(--ans); width:${cPct}%; box-shadow: 0 0 8px var(--ans);"></div>
+                <div style="height:100%; background:var(--unans); width:${wPct}%; box-shadow: 0 0 8px var(--unans);"></div>
+            `;
+        } else {
+            fill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent2))';
+            fill.style.boxShadow = '0 0 8px var(--accent)';
+            fill.style.display = 'block';
+            fill.style.width = myPct + '%';
+            fill.innerHTML = '';
+        }
+    }
+    
     const names = el('race-bar-names');
     if(names) {
         names.innerHTML = players.map(p => {
@@ -1930,14 +1995,25 @@ function renderSidebarLeaderboard() {
     const pArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted); list.innerHTML = '';
     pArr.forEach(p => {
         const pct = roomData.totalQuestions ? Math.round((p.attempted / roomData.totalQuestions) * 100) : 0;
+        
+        let barHtml = `<div class="progress-fill" style="width:${pct}%; box-shadow: 0 0 10px var(--accent-glow);"></div>`;
+        if(roomData.settings.colorProgress === 'true' && p.liveStats && p.attempted > 0) {
+            const cPct = (p.liveStats.correct / p.attempted) * pct;
+            const wPct = (p.liveStats.wrong / p.attempted) * pct;
+            barHtml = `
+                <div style="height:100%; background:var(--ans); width:${cPct}%; box-shadow: 0 0 8px var(--ans);"></div>
+                <div style="height:100%; background:var(--unans); width:${wPct}%; box-shadow: 0 0 8px var(--unans);"></div>
+            `;
+        }
+
         list.innerHTML += `
             <div class="lb-item ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
                 <div class="lb-top" style="margin-bottom: 12px;">
                   <span class="lb-name" style="font-size: 16px;">${p.name} ${p.submitted?'🏁':''}</span>
                   <span class="lb-stat" style="font-size: 16px;">${p.attempted} / ${roomData.totalQuestions}</span>
                 </div>
-                <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
-                  <div class="progress-fill" style="width:${pct}%; box-shadow: 0 0 10px var(--accent-glow);"></div>
+                <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
+                  ${barHtml}
                 </div>
             </div>`;
     });
@@ -1986,9 +2062,9 @@ window.showFinalResults = (forceShow = false) => {
         }
     });
 
-    // Show analysis button if enabled
+    // Time Analysis viewable globally when either everyone has submitted or the room state explicitly reports it is finished
     const anaBtn = el('btn-open-analysis');
-    if(anaBtn) anaBtn.style.display = isAllDone ? 'flex' : 'none';
+    if(anaBtn) anaBtn.style.display = ((isAllDone || roomData.status === 'finished') && roomData.settings.showAnalysis === 'true') ? 'flex' : 'none';
 }
 
 // ── ANALYSIS ENGINE ──
