@@ -321,6 +321,86 @@
   .screen { -webkit-overflow-scrolling: touch; }
   .q-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .grid-wrap { -webkit-overflow-scrolling: touch; }
+
+  /* ══ STAR RATING ══ */
+  .star-rating { display: flex; align-items: center; gap: 3px; }
+  .star-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 2px; line-height: 1; filter: grayscale(1) opacity(0.35); transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s; box-shadow: none !important; }
+  .star-btn:hover, .star-btn.lit { filter: none; }
+  .star-btn:hover { transform: scale(1.3) rotate(-5deg) !important; }
+  .star-btn.lit { filter: drop-shadow(0 0 3px rgba(245,158,11,0.7)); }
+
+  /* ══ FLOAT TAG BUBBLES ══ */
+  #float-tag-area {
+    position: absolute; z-index: 20; bottom: 14px; left: 14px;
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+    max-width: 220px; max-height: calc(100% - 28px);
+    pointer-events: none;
+  }
+  #float-tag-area > * { pointer-events: auto; }
+  #float-tag-bubbles {
+    display: flex; flex-direction: column-reverse; gap: 5px; align-items: flex-start;
+    overflow-y: auto; overflow-x: hidden; flex: 1 1 auto; min-height: 0;
+  }
+  #float-tag-bubbles::-webkit-scrollbar { width: 3px; }
+  #float-tag-bubbles::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+  .float-tag-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800;
+    padding: 4px 10px; border-radius: 20px;
+    background: rgba(28,32,48,0.9); backdrop-filter: blur(12px);
+    border: 1.5px solid var(--accent2); color: var(--accent2);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    animation: bubbleUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  @keyframes bubbleUp { from { opacity:0; transform:translateY(8px) scale(0.85); } to { opacity:1; transform:translateY(0) scale(1); } }
+  #float-tag-input-row .tag-input-wrap {
+    background: rgba(28,32,48,0.9); backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5); min-width: 100px; max-width: 180px;
+    padding: 5px 10px; border-radius: 20px; border: 1.5px solid var(--border);
+    display: flex; align-items: center; gap: 4px;
+  }
+  #float-tag-input-row .tag-input-wrap:focus-within { border-color: var(--accent); }
+  .tag-text-input { background: none; border: none; outline: none; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); min-width: 60px; flex: 1; }
+  .tag-suggestions { position: absolute; z-index: 9999; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); max-height: 150px; overflow-y: auto; min-width: 140px; }
+  .tag-suggestion-item { padding: 7px 12px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .tag-suggestion-item:hover { background: var(--surface2); color: var(--accent); }
+
+  /* ══ FLOATING FIT BUTTON ══ */
+  .fit-float-btn {
+    position: absolute; z-index: 20; bottom: 14px; right: 14px;
+    background: rgba(28,32,48,0.9); backdrop-filter: blur(12px);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 16px; padding: 7px 11px; cursor: pointer; color: var(--text2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4); transition: all 0.2s;
+  }
+  .fit-float-btn:hover { border-color: var(--accent); color: var(--text); transform: scale(1.05) !important; }
+
+  /* ══ TAG FILTER IN SIDEBAR ══ */
+  .sidebar-tag-filter { padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .sidebar-tag-filter-label { font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 800; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+  .filter-chips-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+  .filter-tag-chip { display: inline-flex; align-items: center; font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; border: 1.5px solid var(--border); color: var(--text2); background: var(--bg); cursor: pointer; transition: all 0.15s; }
+  .filter-tag-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.12); }
+  .filter-tag-chip:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ══ ANSWER IMAGE MODAL ══ */
+  #answer-img-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+  #answer-img-modal.show { display: flex; }
+  .answer-modal-box { position: relative; max-width: 90%; max-height: 90%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .answer-modal-box img { max-width: 100%; max-height: 80vh; border-radius: 12px; border: 2px solid var(--accent); box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+  .answer-modal-close { position: absolute; top: -12px; right: -12px; background: #ef4444; border: 2px solid #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 14px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 1; }
+  .img-bg-white { background: #ffffff; border-radius: 12px; }
+  .img-bg-black { background: #000000; border-radius: 12px; }
+
+  /* ══ QUE BG BUTTON ══ */
+  .que-bg-btn { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface3); color: var(--text2); cursor: pointer; white-space: nowrap; letter-spacing: 0.3px; }
+  .que-bg-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ══ ANSWER IMG BUTTON ══ */
+  .answer-img-btn { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface3); color: var(--text2); cursor: pointer; white-space: nowrap; }
+  .answer-img-btn.has-answer { border-color: var(--accent2); color: var(--accent2); background: rgba(168,85,247,0.1); }
+  .answer-img-btn.has-answer:hover { background: rgba(168,85,247,0.2); }
 </style>
 </head>
 <body>
@@ -603,9 +683,15 @@
 
     <div class="q-area">
       <div class="q-top-floating">
-         <div style="display:flex; gap:8px; align-items:center;">
+         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
              <div class="q-badge" id="q-num-badge">Q1</div>
              <div class="q-badge" id="q-type-badge" style="background: rgba(45, 51, 74, 0.85); color: var(--text2); border-color: var(--border);">MCQ</div>
+             <!-- Star rating (read-only in multiplayer; shows host's ratings) -->
+             <div class="star-rating" id="star-rating-mp" style="pointer-events:auto;"></div>
+             <!-- Answer image button -->
+             <button class="answer-img-btn" id="answer-img-btn-mp" onclick="window.showAnswerImg()" style="display:none;">📷 Answer</button>
+             <!-- Que Bg toggle -->
+             <button class="que-bg-btn" id="que-bg-btn-mp" onclick="window.cyclePngBg()" style="display:none;">☀️ Que Bg: White</button>
          </div>
          <div id="per-q-timer-wrap" class="timer-float spring-anim" style="display:none;">⏱ <span id="per-q-timer">0s</span></div>
       </div>
@@ -614,7 +700,18 @@
         <div class="q-scroll" id="q-scroll-area">
           <div class="q-images" id="q-image-container"></div>
         </div>
-        <button id="btn-img-fit" onclick="window.toggleImgFit()" title="Fit/Free image" style="position:absolute; top:8px; right:8px; z-index:5; background:rgba(17,19,28,0.85); border:1px solid var(--border); border-radius:8px; color:var(--text2); padding:4px 8px; font-size:12px; font-family:'Outfit'; font-weight:700; backdrop-filter:blur(4px);">⤢ FIT</button>
+        <!-- Floating fit button — bottom-right -->
+        <button class="fit-float-btn spring-anim" id="btn-img-fit" onclick="window.toggleImgFit()" title="Fit/Free image">⤢</button>
+        <!-- Floating tag bubbles — bottom-left -->
+        <div id="float-tag-area">
+          <div id="float-tag-bubbles"></div>
+          <div id="float-tag-input-row">
+            <div class="tag-input-wrap" id="tag-input-wrap-mp" style="position:relative;" title="Type tag, press Enter">
+              <input class="tag-text-input" id="tag-text-input-mp" placeholder="＋ tag…" autocomplete="off">
+              <div class="tag-suggestions" id="tag-suggestions-mp" style="display:none;bottom:calc(100%+4px);top:auto;left:0;position:absolute;"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Compact Group Area Injected Right Above Options -->
@@ -677,6 +774,20 @@
               <div class="sec-sel" id="sec-sel-wrap">
                   <select id="section-select" onchange="window.changeSection()" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:white;font-weight:800;font-size:13px;outline:none;font-family:'Outfit';display:block; text-transform:uppercase; letter-spacing:1px;"><option value="ALL">All Sections</option></select>
                   <div id="section-tabs" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-bottom:4px;"></div>
+              </div>
+              <!-- Tag + Star filter -->
+              <div class="sidebar-tag-filter" id="sidebar-tag-filter" style="display:none;">
+                <div class="sidebar-tag-filter-label">Filter by tag</div>
+                <div class="filter-chips-row" id="filter-tag-chips-mp"></div>
+                <div class="sidebar-tag-filter-label" style="margin-top:4px;">Filter by stars</div>
+                <div class="filter-chips-row" id="filter-star-chips-mp">
+                  <div class="filter-tag-chip active" id="filter-star-all-mp" onclick="window.setStarFilter(null)">All ⭐</div>
+                  <div class="filter-tag-chip" onclick="window.setStarFilter(1)">⭐×1</div>
+                  <div class="filter-tag-chip" onclick="window.setStarFilter(2)">⭐×2</div>
+                  <div class="filter-tag-chip" onclick="window.setStarFilter(3)">⭐×3</div>
+                  <div class="filter-tag-chip" onclick="window.setStarFilter(4)">⭐×4</div>
+                  <div class="filter-tag-chip" onclick="window.setStarFilter(5)">⭐×5</div>
+                </div>
               </div>
               <div class="grid-wrap" id="q-grid"></div>
           </div>
@@ -843,6 +954,15 @@
 </div>
 
 <!-- ANALYSIS LAYER -->
+<!-- ANSWER IMAGE MODAL -->
+<div id="answer-img-modal" onclick="if(event.target===this)window.closeAnswerImg()">
+  <div class="answer-modal-box">
+    <button class="answer-modal-close" onclick="window.closeAnswerImg()">✕</button>
+    <div style="font-family:'Outfit';font-size:13px;font-weight:800;color:var(--text2);" id="answer-img-label">Answer Image</div>
+    <img id="answer-img-el" src="" alt="Answer">
+  </div>
+</div>
+
 <div id="analysis-layer" class="spring-anim">
   <div class="analysis-header">
     <div style="font-family:'Syne'; font-size:20px; font-weight:900;">📊 Detailed Analysis</div>
@@ -2866,6 +2986,260 @@ function renderAnalysis(mode) {
         body.innerHTML = html;
     }
 }
+// ══ NEW FEATURES: Stars, Tags, Que Bg, Answer Image ══════════════
+
+// ── STATE ──
+let qConfig = {};        // { [qid]: { stars: 0-5, tags: [] } }
+let globalTags = [];     // all unique tags in this niso
+let activeTagFilter = null;
+let activeStarFilter = null;
+let pngBgMode = 'white'; // 'none'|'white'|'black'
+
+const PNG_BG_MODES = ['none', 'white', 'black'];
+const PNG_BG_LABELS = { none: '🔲 Que Bg: None', white: '☀️ Que Bg: White', black: '🌑 Que Bg: Black' };
+
+// Load nisoConfig from parsed data.json (called in buildQuestions)
+function loadNisoConfig(data) {
+    qConfig = (data.nisoConfig && data.nisoConfig.qConfig) || {};
+    globalTags = (data.nisoConfig && data.nisoConfig.tags) || [];
+}
+
+// ── STARS ──
+window.renderStarsMp = function(q) {
+    const wrap = el('star-rating-mp'); if (!wrap) return;
+    wrap.innerHTML = '';
+    const cfg = qConfig[q.id] || {};
+    const cur = cfg.stars || 0;
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'star-btn' + (i <= cur ? ' lit' : '');
+        btn.textContent = '⭐';
+        btn.title = `Rate ${i} star(s)`;
+        btn.addEventListener('click', () => {
+            if (!qConfig[q.id]) qConfig[q.id] = {};
+            qConfig[q.id].stars = (qConfig[q.id].stars === i) ? 0 : i;
+            window.renderStarsMp(allQuestions[currentQIdx]);
+        });
+        btn.addEventListener('mouseover', () => {
+            wrap.querySelectorAll('.star-btn').forEach((b, idx) => {
+                b.style.filter = idx < i ? 'none' : 'grayscale(1) opacity(0.35)';
+            });
+        });
+        btn.addEventListener('mouseout', () => window.renderStarsMp(allQuestions[currentQIdx]));
+        wrap.appendChild(btn);
+    }
+};
+
+// ── QUE BG ──
+window.cyclePngBg = function() {
+    const idx = PNG_BG_MODES.indexOf(pngBgMode);
+    pngBgMode = PNG_BG_MODES[(idx + 1) % PNG_BG_MODES.length];
+    const btn = el('que-bg-btn-mp');
+    if (btn) btn.textContent = PNG_BG_LABELS[pngBgMode];
+    applyPngBgToAll();
+};
+function applyPngBgToAll() {
+    document.querySelectorAll('#q-image-container img').forEach(applyImgBg);
+    const mImg = el('answer-img-el');
+    if (mImg) applyImgBg(mImg);
+}
+function applyImgBg(img) {
+    img.classList.remove('img-bg-white', 'img-bg-black');
+    if (pngBgMode === 'white') img.classList.add('img-bg-white');
+    else if (pngBgMode === 'black') img.classList.add('img-bg-black');
+}
+
+// ── ANSWER IMAGE ──
+window.showAnswerImg = function() {
+    const q = allQuestions[currentQIdx]; if (!q) return;
+    const names = buildAnswerImgNames(q);
+    const src = names.map(n => imageCache[n]).find(Boolean);
+    if (!src) return;
+    const modal = el('answer-img-modal');
+    const img = el('answer-img-el');
+    const label = el('answer-img-label');
+    img.src = src;
+    img.className = '';
+    applyImgBg(img);
+    if (label) label.textContent = `Q${q.globalNum} — Answer`;
+    if (modal) modal.classList.add('show');
+};
+window.closeAnswerImg = function() {
+    const m = el('answer-img-modal'); if (m) m.classList.remove('show');
+};
+function buildAnswerImgNames(q) {
+    const topic = q.images[0]?.split('__--__')[0] || '';
+    return [`ANSWER__${topic}__--__${q.globalNum}__--__1.png`];
+}
+function updateAnswerImgBtn(q) {
+    const btn = el('answer-img-btn-mp'); if (!btn) return;
+    const names = buildAnswerImgNames(q);
+    const has = names.some(n => imageCache[n]);
+    btn.style.display = '';
+    btn.classList.toggle('has-answer', has);
+    btn.style.opacity = has ? '1' : '0.3';
+    btn.style.pointerEvents = has ? '' : 'none';
+}
+
+// ── TAGS ──
+window.addTagMp = function(q, tagName) {
+    tagName = tagName.trim(); if (!tagName) return;
+    if (!qConfig[q.id]) qConfig[q.id] = {};
+    if (!qConfig[q.id].tags) qConfig[q.id].tags = [];
+    if (qConfig[q.id].tags.includes(tagName)) return;
+    qConfig[q.id].tags.push(tagName);
+    if (!globalTags.includes(tagName)) globalTags.push(tagName);
+    renderTagBubblesMp(q);
+    updateTagFilterUiMp();
+};
+window.removeTagMp = function(q, tagName) {
+    if (!qConfig[q.id]?.tags) return;
+    qConfig[q.id].tags = qConfig[q.id].tags.filter(t => t !== tagName);
+    const stillUsed = masterQuestions.some(qq => (qConfig[qq.id]?.tags||[]).includes(tagName));
+    if (!stillUsed) {
+        globalTags = globalTags.filter(t => t !== tagName);
+        if (activeTagFilter === tagName) activeTagFilter = null;
+    }
+    renderTagBubblesMp(q);
+    updateTagFilterUiMp();
+    renderSidebar();
+};
+function renderTagBubblesMp(q) {
+    const wrap = el('float-tag-bubbles'); if (!wrap) return;
+    wrap.innerHTML = '';
+    const tags = qConfig[q.id]?.tags || [];
+    for (const tag of tags) {
+        const chip = document.createElement('span');
+        chip.className = 'float-tag-chip';
+        chip.innerHTML = `${tag}<span style="cursor:pointer;opacity:0.5;margin-left:4px;font-size:13px;" title="Remove">×</span>`;
+        chip.querySelector('span').addEventListener('click', () => window.removeTagMp(q, tag));
+        wrap.appendChild(chip);
+    }
+}
+function setupTagInputMp() {
+    const input = el('tag-text-input-mp');
+    const sugg = el('tag-suggestions-mp');
+    if (!input || !sugg) return;
+    input.addEventListener('keydown', e => {
+        const q = allQuestions[currentQIdx]; if (!q) return;
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            window.addTagMp(q, input.value);
+            input.value = ''; sugg.style.display = 'none';
+        } else if (e.key === 'Escape') sugg.style.display = 'none';
+    });
+    input.addEventListener('input', () => {
+        const q = allQuestions[currentQIdx]; if (!q) return;
+        const val = input.value.trim().toLowerCase(); if (!val) { sugg.style.display = 'none'; return; }
+        const existing = qConfig[q.id]?.tags || [];
+        const matches = globalTags.filter(t => t.toLowerCase().includes(val) && !existing.includes(t));
+        if (!matches.length) { sugg.style.display = 'none'; return; }
+        sugg.innerHTML = '';
+        for (const m of matches.slice(0, 7)) {
+            const div = document.createElement('div');
+            div.className = 'tag-suggestion-item';
+            div.textContent = m;
+            div.addEventListener('mousedown', ev => {
+                ev.preventDefault();
+                window.addTagMp(allQuestions[currentQIdx], m);
+                input.value = ''; sugg.style.display = 'none';
+            });
+            sugg.appendChild(div);
+        }
+        sugg.style.display = 'block';
+    });
+    input.addEventListener('blur', () => setTimeout(() => { sugg.style.display = 'none'; }, 150));
+    el('tag-input-wrap-mp')?.addEventListener('click', () => input.focus());
+}
+
+// ── TAG + STAR FILTER ──
+function updateTagFilterUiMp() {
+    const container = el('sidebar-tag-filter');
+    const chipsEl = el('filter-tag-chips-mp');
+    if (!container || !chipsEl) return;
+    container.style.display = '';
+    chipsEl.innerHTML = '';
+    const allChip = document.createElement('div');
+    allChip.className = 'filter-tag-chip' + (!activeTagFilter ? ' active' : '');
+    allChip.textContent = 'All';
+    allChip.addEventListener('click', () => { activeTagFilter = null; updateTagFilterUiMp(); renderSidebar(); });
+    chipsEl.appendChild(allChip);
+    for (const tag of globalTags) {
+        const chip = document.createElement('div');
+        chip.className = 'filter-tag-chip' + (activeTagFilter === tag ? ' active' : '');
+        chip.textContent = tag;
+        chip.addEventListener('click', () => { activeTagFilter = activeTagFilter === tag ? null : tag; updateTagFilterUiMp(); renderSidebar(); });
+        chipsEl.appendChild(chip);
+    }
+}
+window.setStarFilter = function(n) {
+    activeStarFilter = n;
+    el('filter-star-all-mp')?.classList.toggle('active', n === null);
+    document.querySelectorAll('#filter-star-chips-mp .filter-tag-chip:not(#filter-star-all-mp)').forEach((c, i) => c.classList.toggle('active', n === i+1));
+    renderSidebar();
+};
+
+// ── HOOK into renderQuestion ──
+// Patch renderQuestion to also run new features
+const _origRenderQuestion = renderQuestion;
+function renderQuestion() {
+    _origRenderQuestion();
+    const q = allQuestions[currentQIdx]; if (!q) return;
+    // Apply que bg to newly rendered images
+    document.querySelectorAll('#q-image-container img').forEach(applyImgBg);
+    // Show buttons
+    const qBtn = el('que-bg-btn-mp');
+    if (qBtn) qBtn.style.display = '';
+    window.renderStarsMp(q);
+    updateAnswerImgBtn(q);
+    renderTagBubblesMp(q);
+}
+
+// ── HOOK into buildQuestions to load nisoConfig ──
+const _origBuildQuestions = buildQuestions;
+function buildQuestions(data) {
+    _origBuildQuestions(data);
+    loadNisoConfig(data);
+}
+
+// ── HOOK into renderSidebar to apply filters ──
+const _origRenderSidebar = renderSidebar;
+function renderSidebar() {
+    if (activeTagFilter !== null || activeStarFilter !== null) {
+        // We need to intercept the grid render — patch dot filtering
+        _renderSidebarFiltered();
+    } else {
+        _origRenderSidebar();
+    }
+}
+function _renderSidebarFiltered() {
+    // Call original to populate, then hide non-matching dots
+    _origRenderSidebar();
+    const grid = el('q-grid'); if (!grid) return;
+    const dots = grid.querySelectorAll('.dot');
+    const seq = getSeq();
+    dots.forEach((dot, dotIdx) => {
+        const qIdx = seq[dotIdx];
+        if (qIdx === undefined) return;
+        const q = allQuestions[qIdx];
+        const cfg = qConfig[q?.id] || {};
+        let show = true;
+        if (activeTagFilter && !(cfg.tags || []).includes(activeTagFilter)) show = false;
+        if (activeStarFilter !== null && (cfg.stars || 0) !== activeStarFilter) show = false;
+        dot.style.opacity = show ? '1' : '0.15';
+        dot.style.pointerEvents = show ? '' : 'none';
+    });
+}
+
+// ── INIT after launchGame ──
+const _origLaunchGame = launchGame;
+function launchGame() {
+    _origLaunchGame();
+    updateTagFilterUiMp();
+    setupTagInputMp();
+    // Show que bg btn
+    const qBtn = el('que-bg-btn-mp'); if (qBtn) qBtn.style.display = '';
+}
+
 </script>
-</body>
 </html>
