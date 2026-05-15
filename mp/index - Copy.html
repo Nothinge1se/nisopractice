@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NPRAQ – Pro P2P Live CBT</title>
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800;900&display=swap');
+
+  :root {
+    --bg: #07080c;
+    --surface: #11131c;
+    --surface2: #1c2030;
+    --surface3: #262b40;
+    --border: #2d334a;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --accent-glow: rgba(99, 102, 241, 0.4);
+    --accent2: #a855f7;
+    --text: #ffffff;
+    --text2: #94a3b8;
+    
+    /* Strict CBT Logic Colors */
+    --ans: #10b981;       /* Correct / Answered (Green) */
+    --wrong: #ef4444;     /* Strictly Wrong (Red) */
+    --unans: #eab308;     /* Skipped / Unanswered (Yellow) */
+    --waiting: #3b82f6;   /* Waiting / Locked / Unresolved (Blue) */
+    --not-vis: #334155;   /* Not Visited (Dark Grey) */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+  body { background-color: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+  
+  /* SPRING ANIMATION BASE */
+  .spring-anim { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  
+  button { cursor: pointer; border: none; outline: none; }
+  button:active:not(:disabled) { transform: scale(0.95); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* --- SHARED MENUS & CARDS --- */
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: radial-gradient(circle at top, #11131c 0%, #07080c 100%); z-index: 10; padding: 40px 20px; overflow-y: auto; transition: opacity 0.3s; }
+  .screen.hidden { display: none !important; opacity: 0; pointer-events: none; }
+  
+  .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 8vw, 64px); font-weight: 900; background: linear-gradient(135deg, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(99,102,241,0.2); }
+  .hero-sub { font-family: 'Outfit', sans-serif; color: var(--text2); font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .glass-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: clamp(20px, 5vw, 32px); width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
+  .card-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; color: #fff;}
+
+  .input-styled { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: white; padding: 16px; font-size: 16px; font-weight: 700; outline: none; width: 100%; text-align: center; font-family: 'Outfit'; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); }
+  .input-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 4px 10px rgba(0,0,0,0.3); }
+
+  .btn { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 800; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--border); background: var(--surface2); color: var(--text); width: 100%; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+  .btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface3); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border:none;}
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6); }
+
+  .paper-btn { justify-content: flex-start; padding: 16px; font-size: 14px; text-transform: none; font-weight: 700; }
+  
+  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; cursor: pointer; background: var(--bg); transition: all 0.2s; }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.08); }
+
+  .label-title { font-size: 12px; font-weight: 800; color: var(--text2); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Outfit'; }
+
+  /* --- FILE PROGRESS UI --- */
+  .progress-container { display: flex; flex-direction: column; gap: 12px; padding: 20px; background: var(--bg); border-radius: 16px; border: 2px solid var(--accent); box-shadow: 0 0 20px rgba(99,102,241,0.2); }
+  .progress-wrap { background: var(--surface3); border-radius: 8px; overflow: hidden; height: 10px; width: 100%; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px var(--accent-glow); }
+  .progress-text { font-size: 14px; color: var(--text); font-weight: 800; text-align: center; font-family: 'Outfit'; letter-spacing: 0.5px;}
+  .progress-sub { font-size: 12px; color: var(--text2); font-weight: 600; text-align: center; font-family: 'Outfit';}
+
+  /* --- APP LAYOUT --- */
+  #app { display: none; height: 100dvh; flex-direction: column; }
+  
+  .header { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  .brand { font-family: 'Syne', sans-serif; font-weight: 900; font-size: clamp(20px, 4vw, 24px); color: var(--text); letter-spacing: -1px; flex: 1;}
+  
+  .timer-center { flex: 1; display: flex; justify-content: center; align-items: center; }
+  .timer-box { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 900; background: var(--surface2); padding: 6px 24px; border-radius: 20px; border: 1px solid var(--border); color: #fff; letter-spacing: 1.5px; display:flex; align-items:center; gap:8px;}
+  .timer-box.ending { color: var(--wrong); border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+
+  .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+  .compact-stats-top { display: flex; gap: 10px; background: var(--bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); font-family: 'Outfit'; font-weight: 800; font-size: 13px; }
+  .st-item { display: flex; align-items: center; gap: 5px; }
+  .st-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  .main-stage { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
+
+  /* DOCK PANELS */
+  .dock-panel { display: none; flex-direction: column; width: 300px; min-width: 300px; max-width: 300px; background: var(--surface); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden; flex-shrink: 0; transition: transform 0.3s; }
+  #left-dock { border-right: 1px solid var(--border); }
+  #right-dock { display: none !important; } 
+
+  /* QUESTION AREA */
+  .q-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
+  
+  .review-banner { display: none; background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid var(--accent); padding: 12px 24px; justify-content: space-between; align-items: center; z-index: 15; font-family: 'Outfit'; font-weight: 700; flex-shrink: 0;}
+  .review-banner.show { display: flex; }
+
+  /* FLOATING TOP Q INDICATOR */
+  .q-top-floating { position: absolute; top: 16px; left: 16px; z-index: 20; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; pointer-events: none; }
+  .q-badge { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; background: rgba(28, 32, 48, 0.85); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #fff; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto;}
+  .timer-float { background: rgba(28, 32, 48, 0.85); backdrop-filter: blur(8px); border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 12px; font-weight: 800; color: var(--accent2); padding: 4px 12px; border-radius: 8px; font-family: 'Outfit'; pointer-events: auto; }
+  
+  .q-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 80px 20px 24px; display: flex; flex-direction: column; align-items: center; }
+  .q-images { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; }
+  .q-images img { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+  .ans-area { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.3); z-index: 10; flex-shrink:0; min-height:120px; display:flex; flex-direction:column; justify-content:center; }
+  .opts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 800px; margin: 0 auto; width:100%; }
+  .opt-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 600; font-family: 'Outfit'; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--surface2); }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); box-shadow: 0 0 0 2px var(--accent-glow), inset 0 2px 5px rgba(0,0,0,0.2); }
+  .opt-key { width: 32px; height: 32px; border-radius: 8px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: var(--text2); flex-shrink: 0;}
+  .opt-btn.selected .opt-key { background: var(--accent); color: white; }
+  
+  .opt-btn.correct-ans { border-color: var(--ans) !important; background: rgba(16, 185, 129, 0.15) !important; color: white;}
+  .opt-btn.correct-ans .opt-key { background: var(--ans) !important; color: white; }
+  .opt-btn.wrong-ans { border-color: var(--wrong) !important; background: rgba(239, 68, 68, 0.15) !important; color: white;}
+  .opt-btn.wrong-ans .opt-key { background: var(--wrong) !important; color: white; }
+
+  .nat-input { width: 100%; max-width: 300px; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; padding: 14px 20px; border-radius: 12px; background: var(--bg); border: 2px solid var(--border); color: white; outline: none; margin: 0 auto; display: block; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);}
+  .nat-input.correct-ans { border-color: var(--ans); color: var(--ans); }
+  .nat-input.wrong-ans { border-color: var(--wrong); color: var(--wrong); }
+
+  .btm-bar { position: relative; overflow: hidden; z-index: 10; padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .btm-content-wrap { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; }
+  .btm-left, .btm-right { display: flex; gap: 10px; z-index: 2;}
+  .action-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+  .action-btn:hover:not(:disabled) { background: var(--surface3); }
+  .action-btn.save { background: var(--ans); border-color: var(--ans); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
+
+  /* SIDEBARS & WIDGETS */
+  .sidebar { width: 340px; min-width: 340px; max-width: 340px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.3); overflow-y: auto; overflow-x: hidden;}
+  .sec-sel { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-shrink:0;}
+  .sec-sel select { width: 100%; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: white; font-weight: 800; font-size: 13px; outline: none; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px;}
+
+  .grid-wrap { padding: 16px; overflow: visible; height: auto; flex: none; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; border-bottom: 1px solid var(--border); background: var(--bg);}
+  .dot { width: 40px; height: 40px; border-radius: 10px; background: var(--not-vis); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
+  .dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.3); z-index: 2;}
+  
+  .dot.ans { background: var(--ans); color: #fff; }
+  .dot.wrong { background: var(--wrong); color: #fff; }
+  .dot.waiting { background: var(--waiting); color: #fff; }
+  .dot.unans { background: var(--unans); color: #fff; }
+  .dot.not-vis { background: var(--not-vis); color: #fff; }
+
+  /* Minimizable Widgets */
+  .widget { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: var(--surface); transition: height 0.3s ease; flex-shrink:0; overflow: hidden; height: auto;}
+  .widget-header { padding: 7px 12px; font-size: 11px; font-weight: 800; color: var(--text); text-transform: uppercase; background: var(--surface2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Outfit'; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+  .widget-body { display: flex; flex-direction: column; flex: none; height: auto; }
+  .widget.minimized { height: 36px !important; flex: none !important; }
+  .widget.minimized .widget-body { display: none; }
+
+  .chat-wrapper { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; }
+  .chat-msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; background: var(--bg); font-family: 'Outfit'; font-weight: 500;}
+  .msg { background: var(--surface3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); word-break: break-word; flex-shrink: 0;}
+  .msg-name { font-weight: 800; color: var(--accent2); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;}
+  
+  /* Padded bottom strictly for mobile keyboards and home bars */
+  .chat-input-wrap { display: flex; padding: 12px; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--surface2); border-top: 1px solid var(--border); flex-shrink: 0; }
+  .chat-input-wrap input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: white; outline: none; font-size: 13px; font-weight: 500; font-family: 'Outfit'; min-width: 0;}
+  .chat-input-wrap input:focus { border-color: var(--accent); }
+  .chat-input-wrap button { background: var(--accent); color: white; border-radius: 8px; padding: 0 16px; margin-left: 8px; font-weight: 700; font-family: 'Outfit'; text-transform: uppercase; flex-shrink: 0;}
+  
+  .controls-row { display: flex; gap: 6px; }
+  .control-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-family: 'Inter'; text-transform: none; font-weight: 600;}
+  .control-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* Leaderboard UI */
+  .lb-list { overflow: visible; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: auto; max-height: none; background: var(--bg); }
+  .lb-item { display: flex; flex-direction: column; background: var(--surface2); padding: 16px; border-radius: 12px; border: 2px solid var(--border); }
+  .lb-item.me { border-color: var(--accent); background: rgba(99, 102, 241, 0.05);}
+  .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .lb-name { font-weight: 700; font-size: 16px; font-family: 'Outfit';}
+  .lb-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent2); }
+
+  /* Group Status Dynamic List */
+  #group-status-list { height: auto; max-height: 400px; overflow-y: auto; }
+
+  /* Lobby Grid Layout */
+  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width: 1100px; align-items: start;}
+  .lobby-left, .lobby-right { display: flex; flex-direction: column; gap: 20px; }
+  
+  .config-row { margin-bottom: 16px; }
+  .config-select { width: 100%; background: var(--bg); color: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; outline: none; font-weight: 600; font-size: 14px; font-family: 'Outfit';}
+  
+  .settings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 14px; align-items: start; }
+  
+  .kick-btn { background: var(--wrong); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 800; font-family: 'Outfit'; text-transform: uppercase; margin-left: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.4); }
+  .kick-btn:hover:not(:disabled) { background: #dc2626; }
+
+  .join-wrap { display: flex; gap: 12px; width: 100%; }
+  .room-code { font-family: 'Outfit', monospace; font-size: clamp(32px, 8vw, 48px); font-weight: 900; color: #ffffff; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 16px; border: 2px solid var(--border); text-align: center; letter-spacing: clamp(4px, 2vw, 8px); transition: all 0.3s ease; width: 100%; margin-bottom: 8px; }
+
+  /* Modals */
+  .modal-layer { position: absolute; inset: 0; background: rgba(7, 8, 12, 0.9); z-index: 60; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); display: none; padding: 20px;}
+  .modal-layer.show { display: flex; }
+
+  .medal { font-size: 28px; }
+  .lb-result-item { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:16px 20px; border-radius:16px; border:2px solid var(--border); margin-bottom: 12px; flex-shrink: 0;}
+  .lb-result-item.me { border-color: var(--accent); background: rgba(99,102,241,0.1); }
+  .lb-result-item.waiting { opacity: 0.6; border-style: dashed; }
+
+  /* Mobile Overrides */
+  .mob-menu-btn { display: none; font-size: 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: white; flex-shrink: 0;}
+  #mob-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 35; display: none; backdrop-filter: blur(4px);}
+
+  #mob-chat-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; height: 50dvh; background: var(--surface); border-top: 2px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 200; display: none; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius: 20px 20px 0 0; }
+  #mob-chat-wrapper.show-mob { bottom: 0; display: flex !important; } 
+
+  /* FAB Buttons */
+  .mobile-fab { position: fixed; right: 16px; width: 56px; height: 56px; border-radius: 50%; color: white; font-size: 24px; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; display: none; }
+  .mobile-fab:active { transform: scale(0.9); }
+  #mob-chat-fab { bottom: 85px; background: var(--accent); }
+  #mob-group-fab { bottom: 155px; background: var(--accent2); }
+
+  @media (min-width: 851px) {
+    .mobile-fab, #mob-chat-wrapper, #mob-group-wrapper { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; height: 0 !important; width: 0 !important; }
+  }
+
+  @media (max-width: 850px) {
+    .header { padding: 0 12px; height: 60px;}
+    .mob-menu-btn { display: block; }
+    .header-right { flex: 0; }
+    .header-right .btn-primary { display: none; } 
+
+    .sidebar { position: fixed; right: 0; top: 60px; bottom: 0; transform: translateX(100%); width: 85%; max-width: 340px; overflow-y: auto; }
+    .sidebar.open { transform: translateX(0); }
+    #mob-overlay.open { display: block; }
+    
+    .settings-grid { grid-template-columns: 1fr !important; }
+
+    .btm-bar { padding: 12px; height: auto;}
+    .btm-content-wrap { gap: 8px; }
+    .btm-left, .btm-right { width: 100%; justify-content: space-between; }
+    .action-btn { flex: 1; padding: 10px 8px; font-size: 12px; text-align: center; justify-content: center;}
+    
+    /* 2 Column Mobile Grid constraint */
+    .opts-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+    .opt-btn { padding: 8px 12px !important; font-size: 13px !important; justify-content: flex-start; }
+    .opt-key { width: 28px !important; height: 28px !important; font-size: 13px !important; flex-shrink: 0; }
+
+    .lobby-grid { grid-template-columns: 1fr; }
+    .q-scroll { padding: 60px 16px 16px; }
+    .ans-area { padding: 16px 12px; }
+    .q-top-floating { top: 12px; left: 12px; }
+
+    #wid-chat-desk { display: none !important; }
+    #wid-group-status { display: none !important; }
+    .dock-panel { display: none !important; }
+  }
+  
+  @media (max-width: 480px) {
+    .join-wrap { flex-direction: column; gap: 10px; }
+    .join-wrap button { flex: none !important; width: 100%; }
+    .hero-title { font-size: 36px; }
+    .hero-sub { font-size: 14px; margin-bottom: 20px;}
+    .screen { padding: 20px 16px; }
+  }
+
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 2px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999; pointer-events: none; font-family: 'Outfit'; white-space: nowrap; text-transform: uppercase;}
+  .toast.error { border-color: var(--wrong); color: #fca5a5; }
+  .toast.success { border-color: var(--ans); color: #86efac; }
+
+  /* ── LIGHT MODE ── */
+  body.light { --bg:#f0f2f8; --surface:#ffffff; --surface2:#e8eaf2; --surface3:#d8dce8; --border:#c4c8da; --text:#0f172a; --text2:#64748b; --not-vis:#94a3b8; }
+
+  /* ── GHOST LETTERS ── */
+  .dot { position: relative; }
+  .dot-ghosts { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; pointer-events: none; }
+  .dot-ghost-letter { font-size: 7px; font-weight: 900; opacity: 0.55; line-height: 1; font-family: 'Outfit'; color: #fff; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+
+  /* ── TOGGLE SWITCHES ── */
+  .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-family: 'Outfit'; font-size: 13px; font-weight: 700; color: var(--text); }
+  .toggle-label small { display: block; color: var(--text2); font-size: 11px; font-weight: 500; margin-top: 2px; }
+  .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: var(--surface3); border-radius: 24px; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); }
+  .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--text2); top: 2px; left: 2px; transition: 0.2s; }
+  .toggle-switch input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
+  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: white; }
+
+  /* ── ANALYSIS MODAL ── */
+  #analysis-layer { position: fixed; inset: 0; background: rgba(7,8,12,0.97); z-index: 200; display: none; flex-direction: column; }
+  #analysis-layer.show { display: flex; }
+  .analysis-header { padding: 16px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .analysis-scroll { flex: 1; overflow: auto; padding: 20px; }
+  .analysis-table { border-collapse: collapse; width: 100%; font-family: 'Outfit'; font-size: 13px; min-width: 600px; }
+  .analysis-table th { background: var(--surface2); padding: 10px 12px; text-align: center; font-weight: 800; color: var(--text2); border: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; }
+  .analysis-table th:first-child { text-align: left; position: sticky; left: 0; top: 0; z-index: 3; }
+  .analysis-table td { padding: 8px 10px; text-align: center; border: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  .analysis-table td:first-child { text-align: left; font-weight: 700; background: var(--surface); position: sticky; left: 0; z-index: 1; white-space: nowrap; }
+  .analysis-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .analysis-table tr:nth-child(even) td:first-child { background: var(--surface2); }
+  .cell-correct { background: rgba(16,185,129,0.15) !important; color: var(--ans); font-weight: 800; }
+  .cell-wrong { background: rgba(239,68,68,0.15) !important; color: var(--wrong); font-weight: 800; }
+  .cell-skip { color: var(--text2); }
+  .analysis-tabs { display: flex; gap: 8px; padding: 0 20px 0; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .analysis-tab { font-family: 'Outfit'; font-size: 13px; font-weight: 700; padding: 12px 16px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+  .analysis-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── DRAGGABLE WIDGETS ── */
+  .widget.floating { position: fixed; z-index: 55; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.6); border: 1px solid var(--border); overflow: hidden; min-width: 260px; resize: both; }
+  .widget.floating .widget-header { cursor: grab; user-select: none; }
+  .widget.floating .widget-header:active { cursor: grabbing; }
+  .dock-snap-indicator { position: fixed; pointer-events: none; background: rgba(99,102,241,0.2); border: 2px dashed var(--accent); border-radius: 8px; z-index: 54; display: none; transition: all 0.15s; }
+
+  /* ── PROGRESS BAR (bottom race) ── */
+  #btm-race-fill { position: absolute; inset: 0; z-index: 0; display: none; overflow: hidden; pointer-events: none; }
+  #race-bar-names { position: absolute; bottom: 100%; right: 16px; margin-bottom: 2px; font-size: 10px; z-index: 10; display: none; gap: 6px; font-family: 'Outfit'; }
+
+  /* ── MOBILE SCROLL FIXES ── */
+  .screen { -webkit-overflow-scrolling: touch; }
+  .q-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .grid-wrap { -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+<body>
+
+<!-- 1. MERGED INTRO/HOST SCREEN -->
+<div id="intro-screen" class="screen spring-anim">
+  <div style="margin-top: 4vh;"></div>
+  <div class="hero-title">NPRAQ</div>
+  <div class="hero-sub">Live CBT Multiplayer</div>
+  
+  <div class="lobby-grid">
+      <!-- Left: Identity & Actions -->
+      <div class="lobby-left" id="intro-left-card">
+          <div class="glass-card spring-anim">
+             <div class="card-title" style="font-size:20px;">Join a Room</div>
+             <input type="text" id="player-name" class="input-styled spring-anim" placeholder="Enter your Name" maxlength="15">
+             <div class="join-wrap">
+               <input type="text" id="join-code" class="input-styled spring-anim" placeholder="CODE" style="text-transform: uppercase; letter-spacing: 2px; font-weight: 800;" maxlength="6">
+               <button class="btn btn-primary spring-anim" id="btn-join-room" style="flex: 0 0 110px;">Join</button>
+             </div>
+             
+             <div style="height: 1px; background: var(--border); margin: 8px 0; opacity: 0.5;"></div>
+             
+             <div class="card-title" style="font-size:20px; color:var(--accent2);">Host a Room</div>
+             <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-8px; font-family:'Outfit';">Select a paper from the list first</div>
+             <button class="btn btn-primary spring-anim" id="btn-host-trigger" style="background:var(--accent2); border-color:var(--accent2);">Host New Match</button>
+             
+             <div style="height: 1px; background: var(--border); margin: 4px 0; opacity: 0.5;"></div>
+             <button class="btn spring-anim" onclick="window.location.href='https://nisopractice.vercel.app'" style="background: transparent; border-color: var(--border); color: var(--text2); font-size: 14px; padding: 12px;">Solo Practice (Singleplayer)</button>
+          </div>
+      </div>
+      
+      <!-- Right: File Selection or Progress -->
+      <div class="lobby-right">
+          <div class="glass-card spring-anim" id="file-select-card">
+             <div class="card-title" style="font-size:20px; text-align:left;">Select Test Paper</div>
+             <div style="display:flex; flex-direction:column; gap:10px;">
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../1D.niso', this)">🚀 Demo Module (NEET)</button>
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../TOP_200_PYQ_2021_JEE.niso', this)">🚀 2021 Top 200 PYQ</button>
+               <button class="btn paper-btn spring-anim" onclick="window.selectPaper('../TOP_200_PYQ_2022_JEE.niso', this)">🚀 2022 Top 200 PYQ</button>
+             </div>
+             <div class="upload-zone spring-anim" id="upload-zone">
+               <div style="font-family:'Outfit'; font-weight:900; font-size:16px; margin-bottom: 6px; color: var(--text); text-transform: uppercase; letter-spacing: 1px;">Upload Custom (.niso)</div>
+               <div style="font-size: 12px; color: var(--text2); font-weight:600;">Secure P2P transfer, no server uploads</div>
+               <input type="file" id="file-input" accept=".zip,.niso" style="display:none;">
+             </div>
+          </div>
+          
+          <div class="glass-card spring-anim" style="display:none; align-items: center; justify-content: center; text-align: center;" id="host-file-progress">
+             <div class="progress-container" style="width: 100%; max-width: 400px; text-align: center;">
+                 <div class="progress-text" id="host-file-status">Processing File...</div>
+                 <div class="progress-wrap" style="height:12px;"><div class="progress-fill" id="host-file-fill"></div></div>
+                 <div class="progress-sub" id="host-file-sub">Please wait...</div>
+             </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- 2. LOBBY SCREEN -->
+<div id="lobby-screen" class="screen hidden spring-anim">
+  <div style="width:100%; max-width:1100px; display:flex; justify-content:flex-start; margin-bottom:10px;">
+      <button class="btn spring-anim" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.location.reload()">← Back / Leave</button>
+  </div>
+  
+  <div class="hero-title" style="font-size: clamp(28px, 6vw, 40px); margin-bottom:4px;" id="lobby-title">Room Lobby</div>
+  <div class="hero-sub" id="lobby-status-text" style="color: var(--accent2); margin-bottom: 20px;">Connecting to Peer Network...</div>
+  
+  <div class="lobby-grid">
+    <!-- LEFT: Settings -->
+    <div class="lobby-left">
+      <div class="glass-card spring-anim" style="padding: 20px;">
+        <div class="label-title" style="text-align:center; font-size: 13px;">Invite Friends</div>
+        <div style="width: 100%; display: flex; justify-content: center;">
+            <div class="room-code spring-anim" id="lobby-room-code" onclick="window.copyJoinLink()" title="Click to copy join link">------</div>
+        </div>
+        <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:-4px; font-weight:700; font-family:'Outfit';">Click code to copy join link</div>
+      </div>
+
+      <div class="glass-card spring-anim" style="padding: 16px; display:none; max-width: none; overflow:visible;" id="host-controls">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div class="card-title" style="font-size:17px; margin:0; color:var(--accent2);">⚙️ Configuration</div>
+        </div>
+
+        <!-- Sections: All or Custom -->
+        <div class="config-row">
+          <label class="label-title">Sections</label>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button id="sec-mode-all" onclick="window.setSectionMode('all')" class="spring-anim" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--accent); border:2px solid var(--accent); color:white;">ALL</button>
+            <button id="sec-mode-custom" onclick="window.setSectionMode('custom')" class="spring-anim" style="flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:800; font-family:'Outfit'; background:var(--surface2); border:2px solid var(--border); color:var(--text);">CUSTOM</button>
+          </div>
+          <select id="cfg-sections" class="config-select spring-anim" multiple style="height:72px; display:none;"></select>
+        </div>
+
+        <!-- Timer row -->
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <div style="flex:1.5;">
+            <label class="label-title">Timer Mode</label>
+            <select id="cfg-timer-mode" class="config-select">
+              <option value="countdown">⏳ Countdown</option>
+              <option value="race">🏁 Race (Up)</option>
+              <option value="group">🤝 Group Practice</option>
+            </select>
+          </div>
+          <div style="flex:1;" id="dur-col">
+            <label class="label-title">Minutes</label>
+            <input type="number" id="cfg-duration" class="config-select" value="30" min="1">
+          </div>
+          <div style="flex:1; display:none;" id="timeout-col">
+            <label class="label-title">Auto-Skip</label>
+            <select id="cfg-group-timeout" class="config-select">
+                <option value="0">Never</option>
+                <option value="60">1 Min</option>
+                <option value="120">2 Min</option>
+                <option value="180">3 Min</option>
+                <option value="240" selected>4 Min</option>
+                <option value="300">5 Min</option>
+                <option value="600">10 Min</option>
+                <option value="1200">20 Min</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- STRICT 3-COLUMN MASONRY GRID for Settings -->
+        <div class="settings-grid">
+            
+            <!-- Column 1: Gameplay -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">🎮 Gameplay</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Fair-Play Stats <small>Correct/wrong fraction bars on dots</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-live-stats-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Who's On Each Q? <small>Ghost initials on navigator dots</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="cfg-ghost-live-row" style="padding-left:14px; display:none;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Full Live (1s) vs Semi-Live<small>Full = auto-refresh every 1s</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-ghost-full-live" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Streak Bombs 💣 <small>Popup after 5/10/15/20 streak</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-bombs-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Speed Bonus ⚡ <small>+2 if ≤15s, +1 if ≤30s correct</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-speed-tog" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+            </div>
+
+            <!-- Column 2: Widgets -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">🧩 Widgets</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Progress Sidebar <small>Player attempt bars in sidebar</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-progress" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-color-sidebar" style="padding-left:14px;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Color Sidebar Bar <small>Show red/green segments</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-color-sidebar" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Compact Group UI <small>Mobile: Move progress to answers</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-compact-group" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Race Progress Bar 🏎️ <small>Bottom progress background tracking</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-color-race" style="padding-left:14px; display:none;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Color Race Bar <small>Show red/green segments</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-color-race" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Per-Question Timer ⏱ <small>Shows time spent on current Q</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-qtimer" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+            </div>
+
+            <!-- Column 3: Chat & Post-Game -->
+            <div class="glass-card" style="padding: 14px; border-radius: 12px; gap: 8px;">
+                <div style="font-family:'Outfit'; font-size:12px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">💬 Extras</div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Live Chat <small>In-game chat panel</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-chat" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row spring-anim" id="row-addon-photo" style="padding-left:14px;">
+                  <div class="toggle-label" style="font-size:11px; color:var(--text2);">Photo in Chat 📷 <small>Send images in game chat</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-photo" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">NTA Section Tabs <small>Horizontal tabs instead of dropdown</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-addon-tabs" onchange="window.pushCfg()"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-label">Detailed Time Analysis <small>Per-Q time breakdown table</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-analysis-tog" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row" style="border:none;">
+                  <div class="toggle-label">Auto-show Results <small>Jump to results on submit</small></div>
+                  <label class="toggle-switch"><input type="checkbox" id="cfg-auto-results" onchange="window.pushCfg()" checked><span class="toggle-track"></span></label>
+                </div>
+            </div>
+
+        </div>
+        <button class="btn btn-primary spring-anim" id="btn-start-game" disabled>🚀 Start Match</button>
+      </div>
+
+      <div class="glass-card spring-anim" style="padding: 20px; max-width: none;" id="player-view-cfg">
+        <div class="card-title" style="font-size:18px; margin-bottom:16px; color:var(--text2); text-transform:uppercase;">Room Settings</div>
+        <div style="font-size:14px; font-weight:700; line-height:1.8; font-family:'Outfit'; background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+          <span style="color:var(--text2);">PAPER:</span> <span id="view-file" style="color:white; word-break: break-all;">...</span><br>
+          <span style="color:var(--text2);">SECTIONS:</span> <span id="view-sections" style="color:white;">...</span><br>
+          <span style="color:var(--text2);">MODE:</span> <span id="view-mode" style="color:white;">...</span><br>
+          <span style="color:var(--text2);">TIME:</span> <span id="view-time" style="color:white;">...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Players & Chat -->
+    <div class="lobby-right">
+      <div class="glass-card spring-anim" style="padding: 16px; flex: 1; min-height: 350px; display:flex; flex-direction:column; max-width: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span class="label-title" style="margin:0;">Players</span>
+          <span style="font-family:'Outfit'; font-weight:900; font-size:16px; color:var(--text); background:var(--surface2); padding:4px 12px; border-radius:8px;" id="player-count">0</span>
+        </div>
+        <div id="players-list-ui" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; padding-right: 4px;"></div>
+        <button class="btn btn-primary spring-anim" id="btn-ready-up" style="margin-top:16px; background:var(--ans); border-color:var(--ans); display:none;" onclick="window.toggleReady()">I'm Ready</button>
+      </div>
+
+      <div class="glass-card spring-anim" style="padding: 0; flex: 1; min-height: 350px; display:flex; flex-direction:column; max-width: none;">
+        <div class="label-title" style="padding: 16px 16px 0; margin:0;">Lobby Chat</div>
+        <div class="chat-msgs" id="lobby-chat-msgs" style="padding: 16px;"></div>
+        <div class="chat-input-wrap" style="padding: 12px 16px; gap:6px;">
+          <input type="text" id="lobby-chat-input" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendLobbyChat()" style="flex:1; min-width:0;">
+          <input type="file" id="lobby-chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendLobbyChatPhoto(this)">
+          <button id="btn-lobby-chat-photo" onclick="document.getElementById('lobby-chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
+          <button class="spring-anim" onclick="window.sendLobbyChat()" style="padding:0 12px; flex-shrink:0;">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. MAIN APP SCREEN -->
+<div id="app" class="spring-anim">
+  <div class="header" style="height:auto; flex-direction:column; padding:0;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 10px; height:50px; width:100%; gap:8px;">
+      <div style="display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden;">
+        <div class="brand" style="font-size:clamp(13px,3vw,18px); letter-spacing:-0.5px;" id="header-brand">NPRAQ</div>
+        <div id="header-paper-name" style="font-size:9px; color:var(--text2); font-weight:700; font-family:'Outfit'; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:none;"></div>
+      </div>
+      <div class="timer-center" style="flex:0 0 auto;"><div class="timer-box" id="total-timer" style="font-size:clamp(15px,3vw,21px); padding:4px 14px;">00:00</div></div>
+      <div class="header-right" style="flex:1; gap:6px;">
+        <div class="compact-stats-top" id="top-stats-desk" style="display: flex; gap: 10px; background: var(--bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); font-family: 'Outfit'; font-weight: 800; font-size: 13px;">
+          <!-- Injected via JS -->
+        </div>
+        <button class="spring-anim" onclick="document.body.classList.toggle('light')" title="Light/Dark" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 7px; font-size:13px; color:var(--text); flex-shrink:0;">☀️</button>
+        <button class="btn btn-primary spring-anim" style="padding:7px 12px; font-size:12px; width:auto; border-radius:9px; flex-shrink:0;" id="btn-top-submit" onclick="window.submitWarningBtn()">Submit</button>
+        <button class="mob-menu-btn" onclick="window.toggleMobMenu()">☰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Banner -->
+  <div class="review-banner spring-anim" id="review-banner">
+      <div style="display:flex; align-items:center; gap:12px;">
+         <span>👀 <b>Review Mode</b> (Test Submitted)</span>
+         <span style="font-size:12px; color:var(--text2);">Green = Correct, Red = Wrong</span>
+      </div>
+      <button class="btn-primary spring-anim" style="padding: 6px 12px; border-radius:8px; font-size: 13px;" onclick="window.showFinalResults(true)">🏆 View Results</button>
+  </div>
+
+  <div class="main-stage">
+    
+    <!-- LEFT DOCK FOR CHAT & GROUP PROGRESS -->
+    <div id="left-dock" class="dock-panel spring-anim"></div>
+
+    <div class="q-area">
+      <div class="q-top-floating">
+         <div style="display:flex; gap:8px; align-items:center;">
+             <div class="q-badge" id="q-num-badge">Q1</div>
+             <div class="q-badge" id="q-type-badge" style="background: rgba(45, 51, 74, 0.85); color: var(--text2); border-color: var(--border);">MCQ</div>
+         </div>
+         <div id="per-q-timer-wrap" class="timer-float spring-anim" style="display:none;">⏱ <span id="per-q-timer">0s</span></div>
+      </div>
+      
+      <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column;">
+        <div class="q-scroll" id="q-scroll-area">
+          <div class="q-images" id="q-image-container"></div>
+        </div>
+        <button id="btn-img-fit" onclick="window.toggleImgFit()" title="Fit/Free image" style="position:absolute; top:8px; right:8px; z-index:5; background:rgba(17,19,28,0.85); border:1px solid var(--border); border-radius:8px; color:var(--text2); padding:4px 8px; font-size:12px; font-family:'Outfit'; font-weight:700; backdrop-filter:blur(4px);">⤢ FIT</button>
+      </div>
+
+      <!-- Compact Group Area Injected Right Above Options -->
+      <div id="compact-group-container" style="display:none; flex-direction:column; padding: 12px 20px 0; background:var(--surface); border-top: 1px solid var(--border); z-index:10; flex-shrink:0;"></div>
+
+      <div class="ans-area" id="answer-area">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- MAIN BOTTOM BAR -->
+      <div class="btm-bar" id="main-btm-bar">
+        <!-- Race/Colored Progress Fill Background -->
+        <div id="btm-race-fill"></div>
+        <div id="race-bar-names"></div>
+
+        <div class="btm-content-wrap">
+            <div id="btm-bar-standard" style="display:flex; width:100%; justify-content:space-between;">
+                <div class="btm-left">
+                  <button class="action-btn mark spring-anim" id="btn-mark" onclick="window.markResponse()" style="display:none;">Mark & Next</button>
+                  <button class="action-btn spring-anim" id="btn-clear" onclick="window.clearResponse()">Clear</button>
+                </div>
+                <div class="btm-right">
+                  <button class="action-btn spring-anim" id="btn-back" onclick="window.navigate(-1)">← Back</button>
+                  <button class="action-btn save spring-anim" id="btn-save" onclick="window.saveNext()">Save & Next →</button>
+                </div>
+            </div>
+            
+            <div id="btm-bar-group" style="display:none; width:100%; justify-content:space-between; align-items:center;">
+                <div class="btm-left">
+                     <button class="action-btn spring-anim" id="btn-group-back" onclick="window.navigate(-1)">← Back</button>
+                </div>
+                <div class="btm-right" style="display:flex; gap:10px; align-items:center;">
+                    <button class="action-btn spring-anim" id="btn-group-skip" onclick="window.groupSkip()">Skip</button>
+                    <button class="action-btn save spring-anim" id="btn-group-save" onclick="window.groupSave()">Save Answer</button>
+                    <div id="group-wait-text" class="spring-anim" style="display:none; font-family:'Outfit'; font-weight:700; color:var(--text2); font-size:14px; text-transform:uppercase; letter-spacing:1px; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Waiting for others...</div>
+                    <button class="action-btn save spring-anim" id="btn-group-next" style="display:none; background:var(--ans); border-color:var(--ans); color:white;" onclick="window.navigate(1)">Next Question →</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT DOCK FOR GENERIC WIDGETS -->
+    <div id="right-dock" class="dock-panel spring-anim"></div>
+
+    <div id="mob-overlay" onclick="window.toggleMobMenu()"></div>
+    
+    <div class="sidebar spring-anim" id="main-sidebar">
+      <!-- Navigator Wrapped in a Widget -->
+      <div class="widget spring-anim" id="wid-q-nav">
+          <div class="widget-header">
+            <span>📍 Navigator</span> 
+            <div class="controls-row">
+              <button class="control-btn btn-dock" onclick="window.toggleDock('wid-q-nav', 'left')" title="Dock Left">◨ L</button>
+              <button class="control-btn btn-dock" onclick="window.toggleDock('wid-q-nav', 'sidebar')" title="To Right">◨ R</button>
+              <button class="control-btn" onclick="window.toggleWidget('wid-q-nav')">Min</button>
+            </div>
+          </div>
+          <div class="widget-body">
+              <div class="sec-sel" id="sec-sel-wrap">
+                  <select id="section-select" onchange="window.changeSection()" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:white;font-weight:800;font-size:13px;outline:none;font-family:'Outfit';display:block; text-transform:uppercase; letter-spacing:1px;"><option value="ALL">All Sections</option></select>
+                  <div id="section-tabs" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-bottom:4px;"></div>
+              </div>
+              <div class="grid-wrap" id="q-grid"></div>
+          </div>
+      </div>
+
+      <!-- Group Status Widget -->
+      <div class="widget spring-anim" id="wid-group-status" style="display:none;">
+        <div class="widget-header">
+          <span>🤝 Group Progress</span> 
+          <div class="controls-row">
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-group-status', 'sidebar')" title="To Right">◨ R</button>
+            <button class="control-btn" onclick="window.toggleWidget('wid-group-status')">Min</button>
+          </div>
+        </div>
+        <div class="widget-body" style="padding:12px; gap:8px;" id="group-status-list"></div>
+      </div>
+
+      <div class="widget spring-anim" id="wid-lb">
+        <div class="widget-header">
+          <span><span style="color:var(--ans);">●</span> Live Progress</span> 
+          <div class="controls-row">
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-lb', 'sidebar')" title="To Right">◨ R</button>
+            <button class="control-btn" onclick="window.toggleWidget('wid-lb')">Min</button>
+          </div>
+        </div>
+        <div class="widget-body">
+          <div class="lb-list" id="sidebar-leaderboard"></div>
+        </div>
+      </div>
+
+      <div class="widget spring-anim" id="wid-chat-desk" style="border-bottom:none;">
+        <div class="widget-header">
+          <span>Live Chat</span> 
+          <div class="controls-row">
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'left')" title="Dock Left">◨ L</button>
+            <button class="control-btn btn-dock" onclick="window.toggleDock('wid-chat-desk', 'sidebar')" title="To Right">◨ R</button>
+            <button class="control-btn" onclick="window.toggleWidget('wid-chat-desk')">Min</button>
+          </div>
+        </div>
+        <div class="widget-body" id="desk-chat-target">
+            <!-- Chat core injected here on desktop -->
+        </div>
+      </div>
+      
+      <div style="padding: 16px; background:var(--surface2); border-top:1px solid var(--border); display:none;" id="mob-submit-area">
+        <button class="btn btn-primary spring-anim" style="width:100%; font-size: 14px; padding: 12px;" id="btn-mob-submit" onclick="window.submitWarningBtn()">Submit Test</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat-core-wrapper" class="chat-wrapper" style="display: flex; flex-direction: column; flex: none; height: auto;">
+      <div class="widget-header" id="mob-chat-header" style="display:none;">
+          <span>Live Chat</span>
+          <span onclick="document.getElementById('mob-chat-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
+      </div>
+      <div class="chat-msgs" id="game-chat-msgs"></div>
+      <div class="chat-input-wrap" style="gap:6px;">
+        <input type="text" id="game-chat-input" placeholder="Message..." onkeypress="if(event.key==='Enter') window.sendGameChat()" style="flex:1; min-width:0;">
+        <input type="file" id="chat-photo-input" accept="image/*" style="display:none;" onchange="window.sendChatPhoto(this)">
+        <button id="btn-chat-photo" onclick="document.getElementById('chat-photo-input').click()" style="padding:0 10px; background:var(--surface3); border:1px solid var(--border); border-radius:8px; font-size:16px;" title="Send photo">📷</button>
+        <button onclick="window.sendGameChat()" class="spring-anim" style="padding:0 12px; flex-shrink:0;">Send</button>
+      </div>
+  </div>
+
+  <!-- MOBILE FLOATING SHELLS -->
+  <div id="mob-chat-wrapper">
+      <div class="widget-body" id="mob-chat-target" style="display:flex; flex-direction:column; flex:1;"></div>
+  </div>
+  <button id="mob-chat-fab" class="mobile-fab spring-anim">💬</button>
+
+  <div id="mob-group-wrapper" style="position:fixed; bottom:-100%; left:0; right:0; height:45dvh; background:var(--surface); border-top:2px solid var(--border); box-shadow:0 -10px 30px rgba(0,0,0,0.8); z-index:95; display:none; flex-direction:column; transition:bottom 0.3s cubic-bezier(0.4,0,0.2,1); border-radius:20px 20px 0 0;">
+      <div class="widget-header">
+          <span>🤝 Group Progress</span>
+          <span onclick="document.getElementById('mob-group-wrapper').classList.remove('show-mob')" style="cursor:pointer; color:var(--text2); font-size: 20px;">✕</span>
+      </div>
+      <div id="mob-group-list" style="padding:16px; gap:8px; display:flex; flex-direction:column; overflow-y:auto;"></div>
+  </div>
+  <button id="mob-group-fab" class="mobile-fab spring-anim">🤝</button>
+
+  <script>
+    (function(){
+      // Robust draggable logic + clean click detection
+      ['mob-chat-fab', 'mob-group-fab'].forEach(id => {
+          const fab = document.getElementById(id);
+          if(!fab) return;
+          let dragging=false, startX, startY, origX, origY, moved=false;
+          fab.addEventListener('touchstart', e=>{
+            if(window.innerWidth > 850) return;
+            const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
+            const r=fab.getBoundingClientRect(); origX=r.left; origY=r.top;
+            dragging=true; moved=false; fab.style.transition='none';
+          },{passive:true});
+          document.addEventListener('touchmove', e=>{
+            if(!dragging) return;
+            const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
+            if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true;
+            if(!moved) return;
+            let nx=origX+dx; let ny=origY+dy;
+            nx=Math.max(8,Math.min(nx,window.innerWidth-fab.offsetWidth-8));
+            ny=Math.max(8,Math.min(ny,window.innerHeight-fab.offsetHeight-8));
+            fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
+            e.preventDefault();
+          },{passive:false});
+          document.addEventListener('touchend', e=>{
+            if(!dragging) return;
+            if(!moved) {
+                // Was a click
+                const targetId = id === 'mob-chat-fab' ? 'mob-chat-wrapper' : 'mob-group-wrapper';
+                const wrap = document.getElementById(targetId);
+                if(wrap) wrap.classList.toggle('show-mob');
+                if(e.cancelable) e.preventDefault();
+            } else {
+                if(e.cancelable) e.preventDefault();
+            }
+            dragging=false; fab.style.transition='';
+          },{passive:false});
+      });
+      // Safety resize clear
+      window.addEventListener('resize', () => {
+          if (window.innerWidth > 850) {
+              const cw = document.getElementById('mob-chat-wrapper');
+              const gw = document.getElementById('mob-group-wrapper');
+              if(cw) cw.classList.remove('show-mob');
+              if(gw) gw.classList.remove('show-mob');
+          }
+      });
+    })();
+  </script>
+
+  <!-- SUBMIT WARNING MODAL -->
+  <div class="modal-layer spring-anim" id="submit-warning-modal">
+    <div class="glass-card spring-anim" style="max-width: 400px; text-align:center;">
+        <h2 style="font-family:'Syne'; font-size:28px; color:var(--text);">Submit Test?</h2>
+        <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); font-size:16px; margin: 10px 0; line-height: 1.8;">
+            Answered: <span id="warn-ans" style="color:var(--ans);">0</span><br>
+            Skipped: <span id="warn-skip" style="color:var(--unans);">0</span><br>
+            Not Visited: <span id="warn-notvis" style="color:var(--not-vis);">0</span>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button class="btn spring-anim" onclick="document.getElementById('submit-warning-modal').classList.remove('show')">Cancel</button>
+            <button class="btn btn-primary spring-anim" onclick="window.forceSubmit()">Yes, Submit</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- FINAL LEADERBOARD / VICTORY LAYER -->
+  <div class="modal-layer spring-anim" id="final-results-layer" style="background:var(--bg); z-index:80;">
+    <div class="hero-title" style="font-size:clamp(32px, 8vw, 56px); margin-bottom:8px;">Live Results 🏆</div>
+    <div style="font-family:'Outfit'; font-weight:600; color:var(--text2); text-align:center; margin-bottom:20px;" id="results-wait-text">Waiting for others to finish...</div>
+    
+    <div class="glass-card spring-anim" style="max-width: 650px; width: 100%; max-height:65vh; overflow-y:auto; padding:24px;">
+      <div id="final-lb-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+    
+    <div style="display:flex; gap:16px; margin-top:24px; flex-wrap:wrap; justify-content:center;">
+        <button class="btn spring-anim" style="width:auto; padding: 12px 24px;" onclick="window.enterReviewMode()">👀 See Answers</button>
+        <button class="btn spring-anim" id="btn-open-analysis" style="width:auto; padding: 12px 24px; display:none; border-color:var(--accent2); color:var(--accent2);" onclick="window.openAnalysis()">📊 Time Analysis</button>
+        <button class="btn btn-primary spring-anim" style="width:auto; padding: 12px 24px;" onclick="window.location.reload()">Home</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ANALYSIS LAYER -->
+<div id="analysis-layer" class="spring-anim">
+  <div class="analysis-header">
+    <div style="font-family:'Syne'; font-size:20px; font-weight:900;">📊 Detailed Analysis</div>
+    <button class="btn spring-anim" style="width:auto; padding:8px 16px; font-size:13px;" onclick="window.closeAnalysis()">✕ Close</button>
+  </div>
+  <div class="analysis-tabs">
+    <div class="analysis-tab active spring-anim" id="atab-time" onclick="window.switchAnalysisTab('time')">⏱ Time per Q</div>
+    <div class="analysis-tab spring-anim" id="atab-summary" onclick="window.switchAnalysisTab('summary')">📋 Summary</div>
+  </div>
+  <div class="analysis-scroll" id="analysis-body">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<script>
+window.localResolvedTracker = {}; 
+let selectedFileUrl = null;
+
+// ── PARALLEL DOWNLOADER ──
+async function parallelFetch(url, onProgress, numStreams = 4) {
+    let total = 0, supportsRange = false;
+    try {
+        const head = await fetch(url, { method: 'HEAD' });
+        total = parseInt(head.headers.get('content-length') || '0', 10);
+        supportsRange = head.headers.get('accept-ranges') === 'bytes' && total > 0;
+    } catch(e) {}
+
+    if (!supportsRange || total < 2 * 1024 * 1024) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Download failed');
+        let loaded = 0; const reader = res.body.getReader(); const chunks = [];
+        while(true) {
+            const {done, value} = await reader.read(); if(done) break;
+            chunks.push(value); loaded += value.length;
+            if(onProgress) onProgress(loaded, total || 0);
+        }
+        return await new Blob(chunks).arrayBuffer();
+    }
+
+    const chunkSize = Math.ceil(total / numStreams);
+    let loaded = 0;
+    const ranges = Array.from({ length: numStreams }, (_, i) => ({
+        start: i * chunkSize, end: Math.min((i + 1) * chunkSize - 1, total - 1)
+    }));
+
+    const buffers = await Promise.all(ranges.map(async ({ start, end }) => {
+        const res = await fetch(url, { headers: { Range: `bytes=${start}-${end}` } });
+        if (!res.ok) throw new Error(`Range request failed: ${res.status}`);
+        const reader = res.body.getReader(); const chunks = [];
+        while(true) {
+            const {done, value} = await reader.read(); if(done) break;
+            chunks.push(value); loaded += value.length;
+            if(onProgress) onProgress(loaded, total);
+        }
+        return await new Blob(chunks).arrayBuffer();
+    }));
+
+    const combined = new Uint8Array(total);
+    let offset = 0;
+    for(const buf of buffers) { combined.set(new Uint8Array(buf), offset); offset += buf.byteLength; }
+    return combined.buffer;
+}
+
+// ── CACHING ENGINE (IndexedDB) ──
+const DB_NAME = 'NisoCacheDB'; const STORE_NAME = 'files';
+function getDB() {
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject('IDB Timeout'), 1500);
+        try {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+            req.onsuccess = (e) => { clearTimeout(timeout); resolve(e.target.result); };
+            req.onerror = () => { clearTimeout(timeout); reject('IDB Error'); };
+        } catch(e) { clearTimeout(timeout); reject(e); }
+    });
+}
+async function saveToCache(fileName, arrayBuffer) {
+    try { const db = await getDB(); db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(arrayBuffer, fileName); } catch(e) {}
+}
+async function loadFromCache(fileName) {
+    try {
+        const db = await getDB();
+        return new Promise((resolve) => {
+            const req = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(fileName);
+            req.onsuccess = () => resolve(req.result); req.onerror = () => resolve(null);
+        });
+    } catch(e) { return null; }
+}
+
+// ── P2P MULTIPLAYER CORE ──
+let peer = null; let myId = null; let isHost = false; let hostConn = null; let connections = {}; 
+let myName = ""; let roomCode = "";
+
+let roomData = {
+    hostId: null, status: 'waiting', testFile: null, testUrl: null, hasCustomFile: false,
+    settings: { sections: ['ALL'], timerMode: 'countdown', timerDuration: 1800, groupTimeout: 240, showLiveStats: 'false', compactGroup: 'true' },
+    startTime: null, totalQuestions: 0, kickVotes: {}, players: {},
+    activeGroupQ: null, activeGroupQStartTime: null, groupResolved: {} 
+};
+
+let fileBuffer = null; 
+let masterQuestions = []; let masterSectionMap = {}; 
+let allQuestions = []; let sectionMap = {}; 
+let currentSection = 'ALL'; let currentQIdx = 0; let answers = {};   
+let imageCache = {}; let timerInterval = null; let syncInterval = null;
+let hasSubmitted = false; let gameFinished = false; 
+let isFileAcquisitionStarted = false; let isLaunchPending = false;
+let questionTimes = {}; 
+let correctStreak = 0;
+
+const el = id => document.getElementById(id);
+const showToast = (type, msg) => { 
+    if (roomData && roomData.settings && roomData.settings.timerMode !== 'group' && type !== 'error') return; // Silence success toasts in standard mode
+    const t = document.createElement('div'); t.className = `toast spring-anim ${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); 
+};
+const generateCode = () => Math.random().toString(36).substring(2, 7).toUpperCase();
+
+// UI Toggles & Setup
+window.toggleMobMenu = () => { const sb = el('main-sidebar'); const ov = el('mob-overlay'); if(sb && ov) { sb.classList.toggle('open'); ov.classList.toggle('open'); } };
+
+window.toggleDock = (widgetId, target) => {
+    if(window.innerWidth <= 850) return;
+    const widget = el(widgetId);
+    if(!widget) return;
+    const leftDock = el('left-dock');
+    const sidebar = el('main-sidebar');
+
+    if (target === 'left') { 
+        leftDock.appendChild(widget); 
+    } else { 
+        const mobSubmit = el('mob-submit-area');
+        if (mobSubmit) sidebar.insertBefore(widget, mobSubmit);
+        else sidebar.appendChild(widget);
+    }
+    
+    leftDock.style.display = leftDock.children.length > 0 ? 'flex' : 'none';
+};
+
+// ── DRAGGABLE FLOATING WIDGETS ──
+(function() {
+    const snapIndicator = document.createElement('div');
+    snapIndicator.className = 'dock-snap-indicator';
+    document.body.appendChild(snapIndicator);
+
+    function makeDraggable(widget) {
+        const header = widget.querySelector('.widget-header');
+        if (!header || header._draggable) return;
+        header._draggable = true;
+        let isDragging = false, startX, startY, origLeft, origTop, origW, origH;
+
+        header.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'BUTTON' || window.innerWidth <= 850) return;
+            if (!widget.classList.contains('floating')) {
+                const rect = widget.getBoundingClientRect();
+                origW = rect.width; origH = rect.height;
+                widget.classList.add('floating');
+                widget.style.width = origW + 'px';
+                widget.style.height = origH + 'px';
+                widget.style.left = rect.left + 'px';
+                widget.style.top = rect.top + 'px';
+                const ph = document.createElement('div');
+                ph.id = 'drag-placeholder-' + widget.id;
+                ph.style.cssText = `width:${origW}px; height:${origH}px; flex-shrink:0;`;
+                widget.parentElement.insertBefore(ph, widget);
+                document.body.appendChild(widget);
+            }
+            isDragging = true;
+            startX = e.clientX; startY = e.clientY;
+            origLeft = parseInt(widget.style.left); origTop = parseInt(widget.style.top);
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX; const dy = e.clientY - startY;
+            let newLeft = origLeft + dx; let newTop = origTop + dy;
+            newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - widget.offsetWidth));
+            newTop = Math.max(0, Math.min(newTop, window.innerHeight - widget.offsetHeight));
+            widget.style.left = newLeft + 'px'; widget.style.top = newTop + 'px';
+            
+            const inLeft = newLeft < 60;
+            const inRight = newLeft + widget.offsetWidth > window.innerWidth - 60;
+            if (inLeft) {
+                snapIndicator.style.cssText = `display:block; left:0; top:64px; width:300px; bottom:0; border-radius:0 8px 8px 0;`;
+            } else if (inRight) {
+                snapIndicator.style.cssText = `display:block; right:0; top:64px; width:340px; bottom:0; border-radius:8px 0 0 8px;`;
+            } else {
+                snapIndicator.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('mouseup', e => {
+            if (!isDragging) return;
+            isDragging = false;
+            document.body.style.userSelect = '';
+            snapIndicator.style.display = 'none';
+            const rect = widget.getBoundingClientRect();
+            const ph = document.getElementById('drag-placeholder-' + widget.id);
+
+            if (rect.left < 60) {
+                widget.classList.remove('floating');
+                widget.style.left = ''; widget.style.top = ''; widget.style.width = ''; widget.style.height = '';
+                el('left-dock').appendChild(widget);
+                el('left-dock').style.display = 'flex';
+                if (ph) ph.remove();
+            } else if (rect.right > window.innerWidth - 60) {
+                widget.classList.remove('floating');
+                widget.style.left = ''; widget.style.top = ''; widget.style.width = ''; widget.style.height = '';
+                const sidebar = el('main-sidebar');
+                const mobSubmit = el('mob-submit-area');
+                if (mobSubmit) sidebar.insertBefore(widget, mobSubmit);
+                else sidebar.appendChild(widget);
+                if (ph) ph.remove();
+            }
+        });
+    }
+
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('.widget').forEach(makeDraggable);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.widget').forEach(makeDraggable);
+    });
+})();
+
+window.toggleWidget = (id) => {
+    const w = el(id);
+    if(w) w.classList.toggle('minimized');
+};
+
+let _lastWidthCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
+
+function mountChatCore() {
+    const core = el('chat-core-wrapper');
+    if (!core) return;
+    
+    if(window.innerWidth <= 850) {
+        const mobTarget = el('mob-chat-target');
+        if (mobTarget && core.parentElement !== mobTarget) mobTarget.appendChild(core);
+        const mobHeader = el('mob-chat-header');
+        if (mobHeader) mobHeader.style.display = 'flex';
+        core.style.display = 'flex';
+    } else {
+        const mobHeader = el('mob-chat-header');
+        if (mobHeader) mobHeader.style.display = 'none';
+        const deskTarget = el('desk-chat-target');
+        if (deskTarget && core.parentElement !== deskTarget) deskTarget.appendChild(core);
+        core.style.display = 'flex';
+    }
+    const box = el('game-chat-msgs');
+    if(box) setTimeout(() => { box.scrollTop = box.scrollHeight; }, 50);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    mountChatCore();
+
+    window.addEventListener('resize', () => {
+        const currentCategory = window.innerWidth <= 850 ? 'mobile' : 'desktop';
+        if (currentCategory !== _lastWidthCategory) {
+            _lastWidthCategory = currentCategory;
+            mountChatCore();
+        }
+        updateGroupUI(); // Refresh compact toggle
+    });
+
+    if(window.innerWidth <= 850) { 
+        const mobArea = el('mob-submit-area'); if(mobArea) mobArea.style.display = 'block'; 
+    }
+    
+    el('btn-host-trigger').addEventListener('click', async () => {
+        myName = el('player-name').value.trim() || 'Player_' + Math.floor(Math.random()*1000);
+        
+        if(roomData.hasCustomFile && fileBuffer) {
+            el('file-select-card').style.display = 'none';
+            el('intro-left-card').style.display = 'none';
+            await saveToCache(roomData.testFile, fileBuffer);
+            await processFileHost(fileBuffer, false);
+        } else if (selectedFileUrl) {
+            roomData.testUrl = selectedFileUrl; roomData.testFile = selectedFileUrl; roomData.hasCustomFile = false;
+            el('file-select-card').style.display = 'none';
+            el('intro-left-card').style.display = 'none';
+            await processFileHost(selectedFileUrl, true);
+        } else {
+            showToast('error', 'Select a test paper first from the right list!');
+        }
+    });
+
+    el('btn-join-room').addEventListener('click', () => {
+        myName = el('player-name').value.trim() || 'Player_' + Math.floor(Math.random()*1000);
+        const code = el('join-code').value.trim().toUpperCase();
+        if(!code) return showToast('error', 'Enter room code!');
+        isHost = false; roomCode = code;
+        el('intro-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden'); el('lobby-room-code').textContent = roomCode;
+        initPeerAsPlayer();
+    });
+
+    el('upload-zone').addEventListener('click', () => el('file-input').click());
+    el('file-input').addEventListener('change', async (e) => {
+        if (e.target.files[0]) {
+            const file = e.target.files[0];
+            selectedFileUrl = null; roomData.hasCustomFile = true;
+            roomData.testFile = file.name; roomData.testUrl = null;
+            
+            fileBuffer = await file.arrayBuffer();
+            
+            document.querySelectorAll('.paper-btn').forEach(b => {
+                b.style.borderColor = 'var(--border)'; b.style.background = 'var(--surface2)'; b.style.color = 'var(--text)';
+            });
+            el('upload-zone').style.borderColor = 'var(--accent)';
+            el('upload-zone').style.background = 'rgba(99,102,241,0.1)';
+        }
+    });
+
+    el('btn-start-game').addEventListener('click', () => {
+        if(!isHost) return;
+        roomData.status = 'playing'; roomData.startTime = Date.now();
+        broadcastRoomState(); launchGame();
+    });
+
+    const urlCode = new URLSearchParams(window.location.search).get('join');
+    if (urlCode && el('join-code')) el('join-code').value = urlCode.toUpperCase();
+});
+
+window.selectPaper = (url, btnElement) => {
+    selectedFileUrl = url; roomData.hasCustomFile = false;
+    document.querySelectorAll('.paper-btn').forEach(b => {
+        b.style.borderColor = 'var(--border)'; b.style.background = 'var(--surface2)'; b.style.color = 'var(--text)';
+    });
+    btnElement.style.borderColor = 'var(--accent)'; btnElement.style.background = 'rgba(99,102,241,0.1)'; btnElement.style.color = 'white';
+    
+    el('upload-zone').style.borderColor = 'var(--border)';
+    el('upload-zone').style.background = 'var(--bg)';
+};
+
+async function processFileHost(source, isUrl) {
+    el('host-file-progress').style.display = 'flex';
+    try {
+        if(isUrl) {
+            el('host-file-status').textContent = "Checking Cache..."; let cached = await loadFromCache(source);
+            if(cached) { fileBuffer = cached; } else {
+                el('host-file-status').textContent = "Downloading Paper...";
+                fileBuffer = await parallelFetch(source, (loaded, total) => {
+                    el('host-file-status').textContent = `[Direct Web] Downloading...`;
+                    el('host-file-sub').textContent = total
+                        ? `${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`
+                        : `${(loaded/1024/1024).toFixed(2)} MB`;
+                    if(total) el('host-file-fill').style.width = Math.floor((loaded/total)*40) + '%';
+                });
+                await saveToCache(source, fileBuffer);
+            }
+        }
+        el('host-file-status').textContent = "Unpacking Zip..."; el('host-file-sub').textContent = 'Extracting data...'; el('host-file-fill').style.width = '60%';
+        const zip = await JSZip.loadAsync(fileBuffer); const jf = zip.file('data.json');
+        if (!jf) throw new Error('Invalid format: No data.json');
+        const data = JSON.parse(await jf.async('string')); buildQuestions(data);
+        
+        await preloadImages(zip, (current, total) => {
+            el('host-file-status').textContent = `Processing Images...`;
+            el('host-file-sub').textContent = `${current} / ${total} files`;
+            el('host-file-fill').style.width = (60 + Math.floor((current/total)*40)) + '%';
+        });
+        
+        el('host-file-status').textContent = "Ready!"; el('host-file-sub').textContent = 'Opening Lobby...'; el('host-file-fill').style.width = '100%';
+        const sel = el('cfg-sections'); sel.innerHTML = '';
+        Object.keys(masterSectionMap).forEach(k => { const o = document.createElement('option'); o.value=k; o.textContent=k; o.selected=true; sel.appendChild(o); });
+
+        setTimeout(() => {
+            el('intro-screen').classList.add('hidden'); el('lobby-screen').classList.remove('hidden');
+            el('host-controls').style.display = 'block'; el('player-view-cfg').style.display = 'none'; el('btn-ready-up').style.display = 'block'; 
+            initPeerAsHost();
+        }, 800);
+
+    } catch(err) { 
+        showToast('error', err.message); 
+        el('host-file-progress').style.display = 'none';
+        el('file-select-card').style.display = 'flex';
+        el('intro-left-card').style.display = 'flex';
+    }
+}
+
+function initPeerAsHost() {
+    isHost = true; roomCode = generateCode(); peer = new Peer(roomCode);
+    peer.on('open', (id) => {
+        myId = id; roomData.hostId = myId; el('lobby-status-text').textContent = "Waiting for players to join..."; el('lobby-room-code').textContent = roomCode;
+        roomData.players[myId] = { name: myName, ready: true, state: 'ready', progressText: 'Ready', progressPct: 100, submitted: false, attempted: 0, score: 0, timeTaken: 0, groupAnswers: {} };
+        updateLobbyUI(); attachHostSettingsListeners();
+    });
+    peer.on('connection', (conn) => {
+        connections[conn.peer] = conn;
+        conn.on('data', (data) => {
+            if(data.type === 'join') { roomData.players[conn.peer] = { name: data.name, ready: false, state: 'downloading', progressText: 'Joining...', progressPct: 0, submitted: false, attempted: 0, score: 0, timeTaken: 0, groupAnswers: {} }; broadcastRoomState(); }
+            if(data.type === 'lobby_progress') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].progressText = data.text; roomData.players[conn.peer].progressPct = data.pct; broadcastRoomState(); } }
+            if(data.type === 'toggle_ready') { if(roomData.players[conn.peer]) { roomData.players[conn.peer].ready = data.ready; roomData.players[conn.peer].state = data.ready ? 'ready' : 'downloading'; roomData.players[conn.peer].progressText = data.ready ? 'Ready' : 'Not Ready'; roomData.players[conn.peer].progressPct = 100; broadcastRoomState(); } }
+            if(data.type === 'request_file') { sendP2PFileChunks(conn); }
+            if(data.type === 'sync_progress') { 
+                if(roomData.players[conn.peer]) { 
+                    const p = roomData.players[conn.peer]; 
+                    p.attempted = data.attempted; 
+                    p.currentQ = data.currentQ; 
+                    p.groupAnswers = data.groupAnswers || {}; 
+                    p.liveStats = data.liveStats || { correct: 0, wrong: 0 }; 
+                    if(data.submitted) { p.submitted = true; p.score = data.score; p.timeTaken = data.timeTaken; p.questionTimes = data.questionTimes || {}; } 
+                    
+                    // Host checks Auto-Resolution for Group Practice Mode
+                    if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+                        const actQ = roomData.activeGroupQ;
+                        let allAnswered = true;
+                        const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted); // Ignoring early quitters
+                        if (activePlayers.length === 0) {
+                            allAnswered = true;
+                        } else {
+                            for (let pl of activePlayers) {
+                                if (!pl.groupAnswers || pl.groupAnswers[actQ] === undefined) {
+                                    allAnswered = false; break;
+                                }
+                            }
+                        }
+                        if (allAnswered && !roomData.groupResolved[actQ]) {
+                            roomData.groupResolved[actQ] = true;
+                            
+                            // Advance active group Q instantly to unlock it for everyone
+                            const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                            const nextIdx = getSeq()[actIdx + 1];
+                            if (nextIdx !== undefined) {
+                                roomData.activeGroupQ = allQuestions[nextIdx].id;
+                                roomData.activeGroupQStartTime = Date.now();
+                            } else {
+                                roomData.activeGroupQ = null; // Finished
+                                for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                                window.forceSubmit();
+                            }
+                            broadcastRoomState();
+                        }
+                    }
+                    broadcastRoomState(); checkAllSubmitted(); 
+                } 
+            }
+            if(data.type === 'chat') broadcastChat(data.name, data.text);
+            if(data.type === 'chat_photo') broadcastChatPhoto(data.name, data.dataUrl);
+            if(data.type === 'vote_kick') handleVoteKick(data.target, conn.peer);
+            
+            // Allow anyone to request host to update answer key
+            if(data.type === 'update_answer_key' && isHost) {
+                window.hostSetAnswerKey(data.qId, data.ans);
+            }
+        });
+        conn.on('close', () => { delete connections[conn.peer]; delete roomData.players[conn.peer]; if(roomData.kickVotes[conn.peer]) delete roomData.kickVotes[conn.peer]; broadcastRoomState(); });
+    });
+    peer.on('error', err => { showToast('error', 'Network Error'); el('lobby-status-text').textContent = "Connection Failed."; });
+}
+
+function handleVoteKick(targetId, voterId) {
+    if(!roomData.kickVotes[targetId]) roomData.kickVotes[targetId] = [];
+    if(!roomData.kickVotes[targetId].includes(voterId)) roomData.kickVotes[targetId].push(voterId);
+    const activePlayers = Object.keys(roomData.players).length; const requiredVotes = Math.max(1, activePlayers - 1);
+    if (roomData.kickVotes[targetId].length >= requiredVotes && connections[targetId]) {
+        connections[targetId].send({ type: 'kicked' });
+        setTimeout(() => { connections[targetId].close(); delete connections[targetId]; delete roomData.players[targetId]; delete roomData.kickVotes[targetId]; broadcastRoomState(); }, 500);
+    } else { broadcastRoomState(); }
+}
+
+window.voteKick = (targetId) => { if (isHost) handleVoteKick(targetId, myId); else if(hostConn && hostConn.open) hostConn.send({ type: 'vote_kick', target: targetId }); };
+
+function attachHostSettingsListeners() {
+    window.setSectionMode = (mode) => {
+        const allBtn = el('sec-mode-all'); const custBtn = el('sec-mode-custom');
+        const sel = el('cfg-sections');
+        if(mode === 'all') {
+            allBtn.style.background='var(--accent)'; allBtn.style.borderColor='var(--accent)'; allBtn.style.color='white';
+            custBtn.style.background='var(--surface2)'; custBtn.style.borderColor='var(--border)'; custBtn.style.color='var(--text)';
+            sel.style.display = 'none';
+            roomData.settings.sections = ['ALL']; roomData.totalQuestions = masterQuestions.length;
+        } else {
+            custBtn.style.background='var(--accent)'; custBtn.style.borderColor='var(--accent)'; custBtn.style.color='white';
+            allBtn.style.background='var(--surface2)'; allBtn.style.borderColor='var(--border)'; allBtn.style.color='var(--text)';
+            sel.style.display = 'block';
+        }
+        broadcastRoomState();
+    };
+
+    window.pushCfg = () => {
+        const selEl = el('cfg-sections');
+        if(selEl.style.display !== 'none') {
+            const chosen = Array.from(selEl.selectedOptions).map(o => o.value).filter(v => v !== 'ALL');
+            roomData.settings.sections = chosen.length ? chosen : ['ALL'];
+        } else { roomData.settings.sections = ['ALL']; }
+        
+        roomData.settings.timerMode = el('cfg-timer-mode').value;
+        roomData.settings.timerDuration = (parseInt(el('cfg-duration').value, 10) || 30) * 60;
+        roomData.settings.groupTimeout = parseInt(el('cfg-group-timeout').value, 10) || 0;
+        
+        roomData.settings.showLiveStats = el('cfg-live-stats-tog').checked ? 'true' : 'false';
+        roomData.settings.showGhosts = el('cfg-ghost-tog').checked ? 'true' : 'false';
+        roomData.settings.ghostFullLive = el('cfg-ghost-full-live').checked ? 'true' : 'false';
+        roomData.settings.showAnalysis = el('cfg-analysis-tog').checked ? 'true' : 'false';
+        roomData.settings.bombs = el('cfg-bombs-tog').checked ? 'true' : 'false';
+        roomData.settings.speedBonus = el('cfg-speed-tog').checked ? 'true' : 'false';
+        
+        roomData.settings.addonProgress = el('cfg-addon-progress').checked ? 'true' : 'false';
+        roomData.settings.colorSidebar = el('cfg-color-sidebar').checked ? 'true' : 'false';
+        roomData.settings.compactGroup = el('cfg-compact-group').checked ? 'true' : 'false';
+        
+        roomData.settings.addonRace = el('cfg-addon-race').checked ? 'true' : 'false';
+        roomData.settings.colorRace = el('cfg-color-race').checked ? 'true' : 'false';
+        
+        roomData.settings.addonChat = el('cfg-addon-chat').checked ? 'true' : 'false';
+        roomData.settings.addonQtimer = el('cfg-addon-qtimer').checked ? 'true' : 'false';
+        roomData.settings.addonTabs = el('cfg-addon-tabs').checked ? 'true' : 'false';
+        roomData.settings.addonPhoto = el('cfg-addon-photo').checked ? 'true' : 'false';
+        roomData.settings.autoResults = el('cfg-auto-results').checked ? 'true' : 'false';
+        
+        // Show/Hide Dependent Elements based on Toggles
+        el('cfg-ghost-live-row').style.display = el('cfg-ghost-tog').checked ? 'flex' : 'none';
+        el('row-color-sidebar').style.display = el('cfg-addon-progress').checked ? 'flex' : 'none';
+        el('row-color-race').style.display = el('cfg-addon-race').checked ? 'flex' : 'none';
+        el('row-addon-photo').style.display = el('cfg-addon-chat').checked ? 'flex' : 'none';
+
+        const mode = el('cfg-timer-mode').value;
+        if (mode === 'group') {
+            el('dur-col').style.display = 'none';
+            el('timeout-col').style.display = 'block';
+        } else {
+            el('dur-col').style.display = 'block';
+            el('timeout-col').style.display = 'none';
+        }
+
+        if(roomData.settings.sections.includes('ALL')) roomData.totalQuestions = masterQuestions.length;
+        else { let t = 0; roomData.settings.sections.forEach(s => { if(masterSectionMap[s]) t += masterSectionMap[s].length; }); roomData.totalQuestions = t; }
+        
+        broadcastRoomState();
+    };
+
+    el('cfg-timer-mode').addEventListener('change', (e) => {
+        if (e.target.value === 'group') {
+             el('cfg-color-sidebar').checked = true;
+             el('cfg-color-race').checked = true;
+        } else {
+             el('cfg-color-sidebar').checked = false;
+             el('cfg-color-race').checked = false;
+        }
+        window.pushCfg();
+    });
+
+    ['cfg-sections', 'cfg-duration', 'cfg-group-timeout'].forEach(id => { const e = el(id); if(e) e.addEventListener('change', window.pushCfg); });
+    window.pushCfg();
+}
+
+function initPeerAsPlayer() {
+    peer = new Peer();
+    peer.on('open', (id) => {
+        myId = id; el('lobby-status-text').textContent = "Connecting to Host...";
+        hostConn = peer.connect(roomCode);
+        hostConn.on('open', () => { el('lobby-status-text').textContent = "Waiting for host..."; hostConn.send({ type: 'join', name: myName }); });
+        let receiveBuffer = []; let totalSize = 0; let receivedSize = 0;
+        hostConn.on('data', async (data) => {
+            if(data.type === 'room_state') { const oldStatus = roomData.status; roomData = data.state; handleRoomStateUpdatePlayer(oldStatus); }
+            if(data.type === 'kicked') { showToast('error', 'You were kicked.'); setTimeout(() => window.location.reload(), 2000); }
+            if(data.type === 'file_start') { 
+                totalSize = data.totalSize; receiveBuffer = []; receivedSize = 0; 
+                sendLobbyProgress(`[P2P Host] 0 / ${(totalSize/1024/1024).toFixed(2)} MB`, 5); 
+            }
+            if(data.type === 'file_chunk') {
+                receiveBuffer.push(data.chunk); receivedSize += data.chunk.byteLength;
+                if(receivedSize % (1024 * 512) < 130000) {
+                    sendLobbyProgress(`[P2P Host] ${(receivedSize/1024/1024).toFixed(1)} / ${(totalSize/1024/1024).toFixed(1)} MB`, Math.floor((receivedSize/totalSize)*80)+5);
+                }
+            }
+            if(data.type === 'file_end') {
+                sendLobbyProgress(`[P2P Host] Unpacking...`, 90); const blob = new Blob(receiveBuffer); fileBuffer = await blob.arrayBuffer();
+                await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
+            }
+            if(data.type === 'force_submit_trigger') { window.forceSubmit(); }
+            if(data.type === 'chat') { appendChatUI(data.name, data.text); }
+            if(data.type === 'chat_photo') { appendChatUI(data.name, data.dataUrl, true); }
+            
+            if(data.type === 'update_answer_key') {
+                const q = allQuestions.find(x => x.id === data.qId);
+                if(q) { 
+                    q.correctAnswer = data.ans; 
+                    if(allQuestions[currentQIdx] && allQuestions[currentQIdx].id === data.qId) {
+                        renderAnswerArea(q); 
+                        updateGroupUI();
+                    }
+                }
+            }
+        });
+        hostConn.on('close', () => showToast('error', 'Host disconnected!'));
+    });
+    peer.on('error', err => { showToast('error', 'Connection Error'); el('lobby-status-text').textContent = "Connection Failed. Refresh and check the code.";});
+}
+
+async function sendP2PFileChunks(conn) {
+    if (!fileBuffer) return;
+    const CHUNK_SIZE = 256 * 1024;   
+    const MAX_BUFFERED = 4 * 1024 * 1024; 
+    let offset = 0;
+    conn.send({ type: 'file_start', totalSize: fileBuffer.byteLength });
+    while (offset < fileBuffer.byteLength) {
+        while (conn.dataChannel && conn.dataChannel.bufferedAmount > MAX_BUFFERED) {
+            await new Promise(r => setTimeout(r, 30));
+        }
+        conn.send({ type: 'file_chunk', chunk: fileBuffer.slice(offset, offset + CHUNK_SIZE) });
+        offset += CHUNK_SIZE;
+    }
+    conn.send({ type: 'file_end' });
+}
+
+function sendLobbyProgress(text, pct) { if(hostConn && hostConn.open) hostConn.send({ type: 'lobby_progress', text, pct }); }
+function broadcastRoomState() {
+    updateLobbyUI();
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
+        if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard();
+        updateRaceBar();
+    }
+    if(el('final-results-layer').classList.contains('show')) showFinalResults(false); 
+    for(let id in connections) connections[id].send({ type: 'room_state', state: roomData });
+}
+
+async function handleRoomStateUpdatePlayer(oldStatus) {
+    updateLobbyUI();
+    el('view-file').textContent = roomData.testFile; el('view-sections').textContent = roomData.settings.sections.join(', ');
+    el('view-mode').textContent = roomData.settings.timerMode === 'race' ? 'Race' : (roomData.settings.timerMode === 'group' ? 'Group Practice' : 'Countdown'); 
+    el('view-time').textContent = roomData.settings.timerMode === 'group' ? (roomData.settings.groupTimeout ? (roomData.settings.groupTimeout/60) + ' min skip' : 'No Limit') : (roomData.settings.timerDuration/60 + ' mins');
+    
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) {
+        if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard();
+    }
+    
+    if((!oldStatus || oldStatus === 'waiting') && !isFileAcquisitionStarted && roomData.testFile) {
+        isFileAcquisitionStarted = true; 
+        let cached = await loadFromCache(roomData.testFile);
+        if(cached) {
+            sendLobbyProgress('[Cache] Loading...', 50); fileBuffer = cached; await processFilePlayer(fileBuffer);
+        } else {
+            if(roomData.testUrl) {
+                sendLobbyProgress('[Direct Web] Starting...', 10);
+                try {
+                    fileBuffer = await parallelFetch(roomData.testUrl, (loaded, total) => {
+                        if(total) sendLobbyProgress(`[Direct Web] ${(loaded/1024/1024).toFixed(2)} / ${(total/1024/1024).toFixed(2)} MB`, Math.floor((loaded/total)*50));
+                        else sendLobbyProgress(`[Direct Web] ${(loaded/1024/1024).toFixed(2)} MB`, 10);
+                    });
+                    await saveToCache(roomData.testFile, fileBuffer); await processFilePlayer(fileBuffer);
+                } catch(e) {
+                    console.warn("Direct Web Download failed. Falling back to P2P Host Transfer.", e);
+                    sendLobbyProgress('[Fallback P2P] Requesting...', 5);
+                    hostConn.send({ type: 'request_file' });
+                }
+            } else { 
+                sendLobbyProgress('[P2P Host] Requesting...', 5); 
+                hostConn.send({ type: 'request_file' }); 
+            }
+        }
+    }
+    
+    if((!oldStatus || oldStatus === 'waiting') && roomData.status === 'playing') {
+        if(masterQuestions.length > 0) launchGame();
+        else isLaunchPending = true; 
+    }
+
+    if(roomData.status === 'finished' && !hasSubmitted) forceSubmit();
+    
+    if(el('final-results-layer') && el('final-results-layer').classList.contains('show')) showFinalResults(false);
+    
+    if(roomData.status === 'playing' && el('app').style.display === 'flex' && !hasSubmitted) { 
+        updateRaceBar(); 
+        updateGroupUI();
+        
+        // This instantly forces the Answer Area to drop its "Lock Screen" the moment
+        // it receives broadcast that the question has unlocked
+        if(allQuestions[currentQIdx]) {
+            renderAnswerArea(allQuestions[currentQIdx]);
+        }
+    }
+}
+
+async function processFilePlayer(buffer) {
+    try {
+        sendLobbyProgress('Unpacking Zip...', 90);
+        const zip = await JSZip.loadAsync(buffer); const jf = zip.file('data.json'); const data = JSON.parse(await jf.async('string'));
+        buildQuestions(data); 
+        await preloadImages(zip, (curr, tot) => { sendLobbyProgress(`Processing Images ${curr}/${tot}`, 90 + Math.floor((curr/tot)*10)); });
+        sendLobbyProgress('Not Ready', 100); el('btn-ready-up').style.display = 'block'; 
+        showToast('success', 'File Loaded! Click "I\'m Ready".');
+        if(isLaunchPending) launchGame();
+    } catch(err) { sendLobbyProgress('Error', 0); showToast('error', 'Failed processing'); }
+}
+
+window.toggleReady = () => {
+    const p = roomData.players[myId]; if(!p) return; const isNowReady = !p.ready;
+    if(isHost) { p.ready = isNowReady; p.state = isNowReady ? 'ready' : 'downloading'; p.progressText = isNowReady ? 'Ready' : 'Not Ready'; p.progressPct = 100; broadcastRoomState(); } else { if(hostConn && hostConn.open) hostConn.send({ type: 'toggle_ready', ready: isNowReady }); }
+};
+
+function updateLobbyUI() {
+    const list = el('players-list-ui'); list.innerHTML = ''; const players = Object.values(roomData.players); el('player-count').textContent = players.length;
+    let allReady = true; const reqKick = Math.max(1, players.length - 1);
+
+    players.forEach(p => {
+        if(!p.ready) allReady = false;
+        let sHtml = p.state === 'ready' ? `<span style="font-size:12px; font-weight:900; color:var(--text); background:var(--ans); padding:6px 12px; border-radius:8px;">READY</span>` : `<div style="width:160px;"><div class="progress-wrap" style="height:6px;margin:0 0 4px;"><div class="progress-fill" style="width:${p.progressPct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;color:${p.progressPct===100?'var(--unans)':'var(--text2)'};">${p.progressText}</span><span class="dl-detail">${p.progressPct>0&&p.progressPct<100?p.progressPct+'%':''}</span></div></div>`;
+        let kHtml = ''; let pId = Object.keys(roomData.players).find(k => roomData.players[k] === p);
+        if(pId && pId !== myId && pId !== roomData.hostId) { const vc = roomData.kickVotes[pId]?.length || 0; const hv = roomData.kickVotes[pId]?.includes(myId); kHtml = `<button class="kick-btn spring-anim" onclick="window.voteKick('${pId}')" ${hv?'disabled':''}>🥾 ${vc}/${reqKick}</button>`; }
+        list.innerHTML += `<div class="spring-anim" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-radius:10px; border:1px solid var(--border);"><div style="display:flex; align-items:center;"><span style="font-weight:700; font-size:14px;">${p.name}</span>${kHtml}</div>${sHtml}</div>`;
+    });
+    
+    const me = roomData.players[myId]; const btn = el('btn-ready-up');
+    if(me && btn && btn.style.display !== 'none') {
+        if(me.ready) { btn.textContent = "Not Ready"; btn.style.background = "var(--wrong)"; btn.style.borderColor = "var(--wrong)"; btn.style.boxShadow = "0 4px 15px rgba(239, 68, 68, 0.4)"; } 
+        else { btn.textContent = "I'm Ready"; btn.style.background = "var(--ans)"; btn.style.borderColor = "var(--ans)"; btn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.4)"; }
+    }
+    if(isHost) el('btn-start-game').disabled = !allReady;
+
+    const photoBtn = el('btn-chat-photo');
+    const lobbyPhotoBtn = el('btn-lobby-chat-photo');
+    if(photoBtn) photoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
+    if(lobbyPhotoBtn) lobbyPhotoBtn.style.display = roomData.settings.addonPhoto !== 'false' ? '' : 'none';
+}
+
+window.copyJoinLink = () => { navigator.clipboard.writeText(window.location.href.split('?')[0] + '?join=' + roomCode); showToast('success', 'Copied!'); };
+
+window.sendLobbyChat = () => _sendChat('lobby-chat-input');
+window.sendGameChat = () => _sendChat('game-chat-input');
+function _sendChat(id) {
+    const i = el(id); const t = i.value.trim(); if(!t) return; i.value = '';
+    if(isHost) broadcastChat(myName, t); else if(hostConn && hostConn.open) hostConn.send({ type: 'chat', name: myName, text: t });
+}
+function broadcastChat(n, t) { 
+    appendChatUI(n, t); 
+    for(let id in connections) connections[id].send({ type: 'chat', name:n, text:t }); 
+}
+function appendChatUI(n, t, isPhoto = false) {
+    const isMe = n === myName;
+    const content = isPhoto ? `<img src="${t}" style="max-width:180px; max-height:200px; object-fit:contain; border-radius:8px; margin-top:4px; display:block;" loading="lazy">` : t;
+    
+    ['lobby-chat-msgs', 'game-chat-msgs'].forEach(id => {
+        const b = el(id); if(!b) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'msg spring-anim';
+        
+        // Initial setup for the transition
+        msgDiv.style.opacity = '0';
+        msgDiv.style.transform = 'scale(0.85) translateY(8px)';
+        if(isMe) {
+            msgDiv.style.borderColor = 'var(--accent)';
+            msgDiv.style.backgroundColor = 'rgba(99,102,241,0.08)';
+        }
+        
+        msgDiv.innerHTML = `<div class="msg-name" style="${isMe ? 'color:var(--accent);' : ''}">${n}</div>${content}`;
+        b.appendChild(msgDiv); 
+        
+        // Force a synchronous layout reflow so the browser acknowledges the opacity: 0 state
+        void msgDiv.offsetWidth; 
+        
+        // Apply target styles to trigger animation
+        msgDiv.style.opacity = '1';
+        msgDiv.style.transform = 'scale(1) translateY(0)';
+        
+        // Auto scroll
+        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 10);
+    });
+}
+window.sendLobbyChatPhoto = async (input) => window.sendChatPhoto(input);
+window.sendChatPhoto = async (input) => {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const dataUrl = e.target.result;
+        if(isHost) broadcastChatPhoto(myName, dataUrl);
+        else if(hostConn && hostConn.open) hostConn.send({ type: 'chat_photo', name: myName, dataUrl });
+    };
+    reader.readAsDataURL(input.files[0]);
+    input.value = '';
+};
+function broadcastChatPhoto(n, dataUrl) {
+    appendChatUI(n, dataUrl, true);
+    for(let id in connections) connections[id].send({ type: 'chat_photo', name:n, dataUrl });
+}
+
+// ── HELPERS: LIVE GROUP STATS ──
+function getPlayerLiveStats(p) {
+    let correct = 0, wrong = 0, skipped = 0, waiting = 0, attempted = 0;
+    const isGroup = roomData && roomData.settings && roomData.settings.timerMode === 'group';
+    
+    if (isGroup) {
+        allQuestions.forEach(q => {
+            const ansStr = (p.groupAnswers || {})[q.id];
+            const hasAns = ansStr !== undefined && ansStr !== 'null' && ansStr !== 'undefined';
+            
+            const isGameFinished = roomData.status === 'finished';
+            const isResolved = (roomData.groupResolved && roomData.groupResolved[q.id]) || isGameFinished || p.submitted;
+
+            if (hasAns || isResolved) {
+                const finalAns = hasAns ? String(ansStr).trim() : 'skipped';
+                
+                if (isResolved) {
+                    if (finalAns === 'skipped') skipped++;
+                    else if (isCorrect(q, finalAns)) correct++;
+                    else wrong++;
+                } else {
+                    if (finalAns !== 'skipped') waiting++;
+                    else skipped++;
+                }
+            }
+        });
+        attempted = correct + wrong + skipped + waiting;
+    } else {
+        correct = p.liveStats ? p.liveStats.correct : 0;
+        wrong = p.liveStats ? p.liveStats.wrong : 0;
+        attempted = p.attempted || 0;
+        skipped = Math.max(0, attempted - correct - wrong); 
+    }
+    return { correct, wrong, skipped, waiting, attempted };
+}
+
+function generateProgressBarHtml(p, totalQ, useColorSetting) {
+    const stats = getPlayerLiveStats(p);
+    const isGroup = roomData && roomData.settings && roomData.settings.timerMode === 'group';
+    const base = isGroup ? (stats.correct + stats.wrong + stats.waiting + stats.skipped) : stats.attempted;
+    const pct = totalQ ? Math.max(0, Math.min(100, (base / totalQ) * 100)) : 0;
+    
+    if (useColorSetting === 'true' && base > 0) {
+        const cPct = (stats.correct / base) * 100;
+        const wPct = (stats.wrong / base) * 100;
+        const sPct = (stats.skipped / base) * 100;
+        const uPct = (stats.waiting / base) * 100;
+        
+        return `
+            <div style="display:flex; width:${pct}%; height:100%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); overflow:hidden; border-radius:4px;">
+               <div style="height:100%; background:var(--ans); width:${cPct}%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); ${cPct>0?'box-shadow: 0 0 8px var(--ans);':''}"></div>
+               <div style="height:100%; background:var(--wrong); width:${wPct}%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); ${wPct>0?'box-shadow: 0 0 8px var(--wrong);':''}"></div>
+               <div style="height:100%; background:var(--unans); width:${sPct}%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); ${sPct>0?'box-shadow: 0 0 8px var(--unans);':''}"></div>
+               <div style="height:100%; background:var(--waiting); width:${uPct}%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); ${uPct>0?'box-shadow: 0 0 8px var(--accent-glow);':''}"></div>
+            </div>
+        `;
+    } else {
+        return `<div class="progress-fill" style="width:${pct}%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px var(--accent-glow);"></div>`;
+    }
+}
+
+// ── TOP LEGEND RENDERER ──
+function renderTopLegends() {
+    if (!roomData) return;
+    const isGroup = roomData.settings.timerMode === 'group';
+    const desk = el('top-stats-desk');
+    const mob = el('top-stats-mob');
+    
+    let html = '';
+    if (isGroup) {
+        html = `
+          <div class="st-item" title="Correct"><div class="st-dot" style="background:var(--ans);"></div><span id="st-correct-desk">0</span></div>
+          <div class="st-item" title="Wrong"><div class="st-dot" style="background:var(--wrong);"></div><span id="st-wrong-desk">0</span></div>
+          <div class="st-item" title="Waiting"><div class="st-dot" style="background:var(--waiting);"></div><span id="st-wait-desk">0</span></div>
+          <div class="st-item" title="Skipped"><div class="st-dot" style="background:var(--unans);"></div><span id="st-skip-desk">0</span></div>
+          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        `;
+    } else {
+        html = `
+          <div class="st-item" title="Answered"><div class="st-dot" style="background:var(--ans);"></div><span id="st-ans-desk">0</span></div>
+          <div class="st-item" title="Skipped"><div class="st-dot" style="background:var(--unans);"></div><span id="st-skip-desk">0</span></div>
+          <div class="st-item" title="Not Visited"><div class="st-dot" style="background:var(--not-vis);"></div><span id="st-notvis-desk">0</span></div>
+          <div class="st-item" style="border-left:1px solid var(--border); padding-left:5px;"><span id="st-overall-desk" style="color:var(--text2); font-size:11px;">0/0</span></div>
+        `;
+    }
+    
+    if(desk) desk.innerHTML = html.replace(/-desk/g, '-desk');
+    if(mob) mob.innerHTML = html.replace(/-desk/g, '-mob');
+}
+
+// ── 5. GAME ENGINE ──
+function launchGame() {
+    el('lobby-screen').classList.add('hidden'); el('app').style.display = 'flex'; 
+    
+    allQuestions = []; sectionMap = {};
+    if (roomData.settings.sections.includes('ALL')) {
+        allQuestions = [...masterQuestions]; sectionMap = JSON.parse(JSON.stringify(masterSectionMap));
+    } else {
+        let qI = 0;
+        roomData.settings.sections.forEach(k => { 
+            sectionMap[k] = []; 
+            if(masterSectionMap[k]) {
+                masterSectionMap[k].forEach(i => { allQuestions.push(masterQuestions[i]); sectionMap[k].push(qI++); }); 
+            }
+        });
+    }
+
+    allQuestions.forEach(q => answers[q.id] = { status: 'not-vis' });
+    const sel = el('section-select'); sel.innerHTML = '<option value="ALL">All Sections</option>';
+    Object.keys(sectionMap).forEach(k => sel.innerHTML += `<option value="${k}">${k.split(' › ')[1] || k}</option>`);
+    currentSection = 'ALL'; currentQIdx = 0;
+
+    renderTopLegends();
+
+    function buildSectionTabs() {
+        const tabsEl = el('section-tabs'); if(!tabsEl) return;
+        tabsEl.innerHTML = '';
+        el('section-select').style.display = 'none';
+        tabsEl.style.display = 'block';
+        const allKeys = ['ALL', ...Object.keys(sectionMap)];
+        allKeys.forEach(k => {
+            const t = document.createElement('button');
+            t.className = 'spring-anim';
+            t.style.cssText = 'display:inline-block; padding:6px 14px; margin-right:6px; border-radius:8px; font-family:Outfit; font-size:12px; font-weight:800; background:var(--surface2); border:1px solid var(--border); color:var(--text); cursor:pointer; white-space:nowrap;';
+            t.textContent = k === 'ALL' ? 'All' : (k.split(' › ')[1] || k);
+            t.dataset.key = k;
+            t.onclick = () => {
+                if(roomData.settings.timerMode === 'group') return; 
+                el('section-select').value = k; window.changeSection();
+                tabsEl.querySelectorAll('button').forEach(b => { b.style.background='var(--surface2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)'; });
+                t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white';
+            };
+            if(k === 'ALL') { t.style.background='var(--accent)'; t.style.borderColor='var(--accent)'; t.style.color='white'; }
+            tabsEl.appendChild(t);
+        });
+    }
+
+    questionTimes = {}; 
+    correctStreak = 0;
+    
+    // Group Setup
+    if (isHost) {
+        roomData.activeGroupQ = allQuestions[0].id;
+        roomData.activeGroupQStartTime = Date.now();
+        roomData.groupResolved = {};
+    }
+    
+    const isMobile = window.innerWidth <= 850;
+
+    // DEFAULT DOCKING LOGIC
+    if (!isMobile) {
+        const lDock = el('left-dock');
+        lDock.innerHTML = '';
+        const wChat = el('wid-chat-desk');
+        if (wChat && roomData.settings.addonChat !== 'false') lDock.appendChild(wChat);
+        const wGroup = el('wid-group-status');
+        if (wGroup && roomData.settings.timerMode === 'group') lDock.appendChild(wGroup);
+        const wLb = el('wid-lb');
+        if (wLb && roomData.settings.addonProgress !== 'false' && roomData.settings.timerMode !== 'group') lDock.appendChild(wLb);
+        
+        lDock.style.display = lDock.children.length > 0 ? 'flex' : 'none';
+        
+        // Ensure navigator remains in right sidebar
+        const wNav = el('wid-q-nav');
+        if(wNav && !el('main-sidebar').contains(wNav)) el('main-sidebar').insertBefore(wNav, el('main-sidebar').firstChild);
+    }
+    
+    if(roomData.settings.addonChat !== 'false') {
+        el('wid-chat-desk') && (el('wid-chat-desk').style.display = '');
+        if(isMobile) { el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'flex'); }
+    } else {
+        el('wid-chat-desk') && (el('wid-chat-desk').style.display = 'none');
+        el('mob-chat-fab') && (el('mob-chat-fab').style.display = 'none');
+    }
+
+    if(roomData.settings.addonRace === 'true') {
+        el('btm-race-fill').style.display = 'flex';
+        el('race-bar-names').style.display = 'flex';
+    } else {
+        el('btm-race-fill').style.display = 'none';
+        el('race-bar-names').style.display = 'none';
+    }
+
+    if(roomData.settings.addonQtimer === 'true') {
+        el('per-q-timer-wrap').style.display = 'inline-block';
+    }
+
+    if(roomData.settings.addonTabs === 'true') buildSectionTabs();
+
+    // Group Mode Setups
+    if (roomData.settings.timerMode === 'group') {
+        el('btm-bar-standard').style.display = 'none';
+        el('btm-bar-group').style.display = 'flex';
+        
+        el('wid-lb').style.display = 'none'; // hide generic LB
+        
+        if (!isMobile) {
+            el('wid-group-status').style.display = 'flex';
+        } else {
+            // Compact logic is handled in updateGroupUI
+            if(roomData.settings.compactGroup === 'false') {
+                el('mob-group-fab').style.display = 'flex';
+            }
+        }
+        
+    } else {
+        el('btm-bar-standard').style.display = 'flex';
+        el('btm-bar-group').style.display = 'none';
+        el('wid-group-status').style.display = 'none';
+        el('mob-group-fab').style.display = 'none';
+        if(el('compact-group-container')) el('compact-group-container').style.display = 'none';
+    }
+
+    if(roomData.testFile) {
+        const nm = roomData.testFile.split('/').pop().replace('.niso','').replace('.zip','');
+        el('header-paper-name').textContent = nm; el('header-paper-name').style.display = 'block';
+    }
+
+    if(isMobile) {
+        el('top-stats-mob') && (el('top-stats-mob').style.display = 'flex');
+    }
+
+    startTimers(); renderQuestion(); renderSidebar(); 
+    if(roomData.settings.timerMode !== 'group') renderSidebarLeaderboard(); 
+    updateGroupUI();
+    
+    if(roomData.settings.showGhosts === 'true' && roomData.settings.ghostFullLive === 'true') {
+        setInterval(() => { if(!hasSubmitted) renderSidebar(); }, 1000);
+    }
+    setInterval(() => {
+        if(el('final-results-layer').classList.contains('show')) showFinalResults(false);
+    }, 1000);
+    
+    // Faster Sync Interval
+    syncInterval = setInterval(() => { if(!hasSubmitted) pushProgressToHost(); }, 1500);
+}
+
+function startTimers() {
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if(hasSubmitted || !roomData.startTime) return;
+        const elps = Math.floor((Date.now() - roomData.startTime) / 1000);
+        let correctedElps = elps < 0 ? 0 : elps;
+        const t = el('total-timer');
+        
+        if (roomData.settings.timerMode === 'countdown') { 
+            const r = roomData.settings.timerDuration - correctedElps; 
+            if(r <= 0) { t.textContent = "00:00"; forceSubmit(); } 
+            else { t.textContent = formatTime(r); if(r < 300) t.parentElement.classList.add('ending'); }
+        } else if (roomData.settings.timerMode === 'group') {
+            t.textContent = "∞"; // Practice mode hides global timer limit
+        } else { 
+            t.textContent = formatTime(correctedElps); 
+        }
+
+        // Host ONLY: Auto-Skip logic in Group Practice
+        if (isHost && roomData.status === 'playing' && roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+            const timeoutLimit = parseInt(roomData.settings.groupTimeout);
+            if (timeoutLimit > 0) {
+                if (!roomData.activeGroupQStartTime) roomData.activeGroupQStartTime = Date.now();
+                const elapsed = (Date.now() - roomData.activeGroupQStartTime) / 1000;
+                if (elapsed >= timeoutLimit) {
+                    const actQ = roomData.activeGroupQ;
+                    if (!roomData.groupResolved[actQ]) {
+                        roomData.groupResolved[actQ] = true;
+                        
+                        // Force missing active players to skipped
+                        for (let pid in roomData.players) {
+                             if (!roomData.players[pid].submitted) {
+                                 if (!roomData.players[pid].groupAnswers) roomData.players[pid].groupAnswers = {};
+                                 if (!roomData.players[pid].groupAnswers[actQ]) {
+                                     roomData.players[pid].groupAnswers[actQ] = 'skipped';
+                                 }
+                             }
+                        }
+                        
+                        // Advance to next
+                        const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                        const nextIdx = getSeq()[actIdx + 1];
+                        if (nextIdx !== undefined) {
+                            roomData.activeGroupQ = allQuestions[nextIdx].id;
+                            roomData.activeGroupQStartTime = Date.now();
+                        } else {
+                            roomData.activeGroupQ = null;
+                            for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                            window.forceSubmit();
+                        }
+                        broadcastRoomState();
+                    }
+                }
+            }
+        }
+
+        // Precise Per Q Timer Accrual Logic
+        if(roomData && roomData.settings && roomData.settings.addonQtimer === 'true') {
+            const qId = allQuestions[currentQIdx]?.id;
+            const ans = answers[qId];
+            const isGroupMode = roomData.settings.timerMode === 'group';
+            const isFrozen = (isGroupMode && roomData.groupResolved[qId]) || (!isGroupMode && ans && (ans.status === 'ans' || ans.status === 'mark-ans'));
+
+            if (!isFrozen && qId) {
+                questionTimes[qId] = (questionTimes[qId] || 0) + 1;
+            }
+            if (el('per-q-timer')) el('per-q-timer').textContent = (questionTimes[qId] || 0) + 's';
+        }
+        
+        // Fast refresh for Group UI
+        if(roomData.settings.timerMode === 'group') {
+            updateGroupUI();
+        }
+
+    }, 1000);
+}
+function formatTime(s) { if(s<0)s=0; const m = Math.floor(s/60).toString().padStart(2,'0'); const sc = (s%60).toString().padStart(2,'0'); return s>=3600 ? `${Math.floor(s/3600).toString().padStart(2,'0')}:${m}:${sc}` : `${m}:${sc}`; }
+
+function calculateLiveStats() {
+    let correct = 0; let wrong = 0;
+    allQuestions.forEach(q => {
+        const isGroup = roomData.settings.timerMode === 'group';
+        if (isGroup) {
+            const myPlayer = roomData.players[myId];
+            if (myPlayer && myPlayer.groupAnswers) {
+                const ansStr = myPlayer.groupAnswers[q.id];
+                if (ansStr && ansStr !== 'skipped' && ansStr !== 'null' && ansStr !== 'undefined') {
+                    if (roomData.groupResolved && roomData.groupResolved[q.id]) {
+                        if (isCorrect(q, ansStr)) correct++; else wrong++;
+                    }
+                }
+            }
+        } else {
+            const a = answers[q.id];
+            if (a && (a.status === 'ans' || a.status === 'mark-ans')) {
+                if (isCorrect(q, a.selected)) correct++; else wrong++;
+            }
+        }
+    });
+    return { correct, wrong };
+}
+
+function calculateScore() {
+    let net = 0;
+    allQuestions.forEach(q => {
+        let selectedAns = null;
+        if (roomData.settings.timerMode === 'group') {
+            const pAns = (roomData.players[myId].groupAnswers || {})[q.id];
+            if (pAns && pAns !== 'skipped' && pAns !== 'null' && pAns !== 'undefined') selectedAns = pAns;
+        } else {
+            const a = answers[q.id];
+            if (a && a.selected) selectedAns = a.selected;
+        }
+        if (selectedAns) {
+            const { hasAnswer } = getCorrectInfo(q);
+            if (!hasAnswer) return; 
+            if (isCorrect(q, selectedAns)) {
+                let bonus = q.marks.cm || 4;
+                if (roomData.settings.speedBonus === 'true') {
+                    const t = questionTimes[q.id] || 999;
+                    if (t <= 15) bonus += 2; else if (t <= 30) bonus += 1;
+                }
+                net += bonus;
+            } else { net -= Math.abs(q.marks.im || 1); }
+        }
+    });
+    return net;
+}
+
+function pushProgressToHost(isFinal = false) {
+    const att = Object.values(answers).filter(a => a.status === 'ans' || a.status === 'mark-ans').length;
+    const curQ = allQuestions[currentQIdx] ? allQuestions[currentQIdx].id : null;
+    
+    const myGroupAnswers = roomData.players[myId] ? roomData.players[myId].groupAnswers : {};
+
+    const pay = { 
+        attempted: att, submitted: isFinal, score: isFinal ? calculateScore() : 0, timeTaken: isFinal ? Math.floor((Date.now() - roomData.startTime)/1000) : 0, 
+        currentQ: curQ, questionTimes: isFinal ? questionTimes : undefined,
+        groupAnswers: myGroupAnswers,
+        liveStats: calculateLiveStats()
+    };
+    
+    if(isHost) { 
+        const p = roomData.players[myId]; 
+        p.attempted = pay.attempted; p.currentQ = pay.currentQ; p.groupAnswers = pay.groupAnswers;
+        p.liveStats = pay.liveStats;
+        if(isFinal) { p.submitted = true; p.score = pay.score; p.timeTaken = pay.timeTaken; p.questionTimes = pay.questionTimes; } 
+        
+        if (roomData.settings.timerMode === 'group' && roomData.activeGroupQ) {
+            const actQ = roomData.activeGroupQ;
+            let allAnswered = true;
+            const activePlayers = Object.values(roomData.players).filter(pl => !pl.submitted); // Ignoring early quitters
+            if (activePlayers.length === 0) {
+                allAnswered = true;
+            } else {
+                for (let pl of activePlayers) {
+                    if (!pl.groupAnswers || pl.groupAnswers[actQ] === undefined) {
+                        allAnswered = false; break;
+                    }
+                }
+            }
+            if (allAnswered && !roomData.groupResolved[actQ]) {
+                roomData.groupResolved[actQ] = true;
+                
+                // HOST ONLY auto-advance logic instantly unblocks next question
+                const actIdx = getSeq().findIndex(i => allQuestions[i].id === actQ);
+                const nextIdx = getSeq()[actIdx + 1];
+                if (nextIdx !== undefined) {
+                    roomData.activeGroupQ = allQuestions[nextIdx].id;
+                    roomData.activeGroupQStartTime = Date.now();
+                } else {
+                    roomData.activeGroupQ = null; // Finished
+                    for(let pid in connections) connections[pid].send({ type: 'force_submit_trigger' });
+                    window.forceSubmit();
+                }
+            }
+        }
+
+        broadcastRoomState(); checkAllSubmitted(); 
+    } else { 
+        if(hostConn && hostConn.open) hostConn.send({ type: 'sync_progress', ...pay }); 
+    }
+}
+function checkAllSubmitted() { if(roomData.status === 'playing' && Object.values(roomData.players).every(x => x.submitted)) { roomData.status = 'finished'; broadcastRoomState(); showFinalResults(true); } }
+
+// ── GROUP PRACTICE SPECIFIC LOGIC ──
+
+window.groupSkip = () => {
+    answers[allQuestions[currentQIdx].id].status = 'unans';
+    answers[allQuestions[currentQIdx].id].selected = null;
+    window.groupSave(true);
+};
+
+window.groupSave = (isSkip = false) => {
+    const qId = allQuestions[currentQIdx].id;
+    const ans = answers[qId];
+    
+    if(!roomData.players[myId].groupAnswers) roomData.players[myId].groupAnswers = {};
+    
+    if(isSkip || !ans.selected) {
+        ans.status = 'unans';
+        roomData.players[myId].groupAnswers[qId] = 'skipped';
+    } else {
+        ans.status = 'ans';
+        roomData.players[myId].groupAnswers[qId] = ans.selected;
+    }
+    
+    pushProgressToHost();
+    
+    el('btn-group-save').style.display = 'none';
+    el('btn-group-skip').style.display = 'none';
+    el('group-wait-text').style.display = 'block';
+    el('group-wait-text').textContent = 'Waiting for others...';
+    
+    renderAnswerArea(allQuestions[currentQIdx]); 
+    updateGroupUI(); 
+};
+
+function updateGroupUI() {
+    if(roomData.settings.timerMode !== 'group' || hasSubmitted) return;
+    const q = allQuestions[currentQIdx]; if(!q) return;
+    
+    const isGameFinished = roomData.status === 'finished';
+    const isResolved = roomData.groupResolved[q.id] || isGameFinished;
+    
+    const players = Object.values(roomData.players);
+    const { ops: correctOps, label: correctAnsStr } = getCorrectInfo(q);
+    
+    let desktopHtml = '';
+    let mobileCompactHtml = '';
+    let correctAnswerHtml = '';
+
+    players.forEach(p => {
+        const pAns = (p.groupAnswers || {})[q.id];
+        const hasAnswered = pAns !== undefined && pAns !== null;
+        const pIsResolved = isResolved || p.submitted;
+        
+        let cColor = 'var(--text2)';
+        let cIcon = '⏳';
+        let ansText = hasAnswered ? 'Locked' : 'Thinking...';
+        
+        if (hasAnswered && !pIsResolved) {
+             cColor = 'var(--waiting)'; 
+             cIcon = '🟦';
+        }
+
+        if (pIsResolved) {
+            const pAnsStr = hasAnswered ? String(pAns).trim() : 'skipped';
+            const isSkip = pAnsStr === 'skipped' || pAnsStr === 'null' || pAnsStr === 'undefined';
+            const isC = !isSkip && isCorrect(q, pAnsStr);
+            cColor = isSkip ? 'var(--unans)' : (isC ? 'var(--ans)' : 'var(--wrong)');
+            cIcon = isSkip ? '➖' : (isC ? '✅' : '❌');
+            ansText = isSkip ? 'Skipped' : (q.type === 'mcq' ? 'Opt ' + ['A','B','C','D'][parseInt(pAnsStr)-1] : pAnsStr);
+        }
+        
+        if (p.submitted && !pIsResolved) {
+            cColor = 'var(--marked)';
+            cIcon = '🏁';
+            ansText = 'Submitted';
+        }
+        
+        const totalQ = roomData.totalQuestions || 1;
+        const barHtml = generateProgressBarHtml(p, totalQ, roomData.settings.colorSidebar);
+
+        // Standard widget block
+        desktopHtml += `<div class="spring-anim" style="display:flex; flex-direction:column; padding:12px; background:var(--bg); border-radius:12px; border:1px solid var(--border); gap: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-family:'Outfit'; font-size:14px; color: ${p.name===myName?'var(--accent)':'var(--text)'};">${p.name}</span>
+                <span style="font-size:12px; color:${cColor}; font-weight:800; background:var(--surface2); padding:4px 8px; border-radius:6px; border:1px solid ${cColor};">${ansText} ${cIcon}</span>
+            </div>
+            <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
+                ${barHtml}
+            </div>
+        </div>`;
+
+        // Slim Compact mode block (Mobile Only)
+        mobileCompactHtml += `<div class="spring-anim" style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+            <div style="font-family:'Outfit'; font-weight:800; font-size:13px; color:${p.name===myName?'var(--accent)':'var(--text)'}; width:75px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+            <div class="progress-wrap" style="flex:1; height:8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden; border-radius:4px;">
+                ${barHtml}
+            </div>
+            <div style="font-size:14px; width:20px; text-align:right;">${cIcon}</div>
+        </div>`;
+    });
+
+    if (isResolved) {
+        const dispAns = correctAnsStr || '—';
+        correctAnswerHtml = `<div class="spring-anim" style="margin-top:8px; margin-bottom:8px; padding:10px; background:rgba(16, 185, 129, 0.15); border:1px solid var(--ans); border-radius:8px; text-align:center;">
+            <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase;">Correct Answer</div>
+            <div style="font-size:18px; color:var(--ans); font-weight:900; font-family:'Outfit';">${dispAns}</div>
+        </div>`;
+    }
+    
+    // Inject Desktop / General Widgets
+    if(el('group-status-list')) el('group-status-list').innerHTML = desktopHtml + correctAnswerHtml;
+    
+    // Handle Mobile Compact Mode Logic
+    const compactContainer = el('compact-group-container');
+    const mobFab = el('mob-group-fab');
+    const useCompact = window.innerWidth <= 850 && roomData.settings.compactGroup === 'true';
+
+    if (useCompact) {
+        if(compactContainer) {
+            compactContainer.innerHTML = mobileCompactHtml + correctAnswerHtml;
+            compactContainer.style.display = 'flex';
+        }
+        if(el('mob-group-list')) el('mob-group-list').innerHTML = ''; // Clear it to save dom updates
+        if(mobFab) mobFab.style.display = 'none';
+        
+        // Safety close if it was accidentally left open
+        if(el('mob-group-wrapper')) el('mob-group-wrapper').classList.remove('show-mob');
+    } else {
+        if(compactContainer) compactContainer.style.display = 'none';
+        if(el('mob-group-list')) el('mob-group-list').innerHTML = desktopHtml + correctAnswerHtml;
+        if(mobFab) mobFab.style.display = 'flex';
+    }
+
+    if (isResolved && !window.localResolvedTracker[q.id]) {
+        window.localResolvedTracker[q.id] = true;
+        const myAnsStr = (roomData.players[myId].groupAnswers || {})[q.id];
+        if (myAnsStr && myAnsStr !== 'skipped' && myAnsStr !== 'null' && myAnsStr !== 'undefined') {
+            if (isCorrect(q, myAnsStr)) showToast('success', '✅ Correct!');
+            else showToast('error', '❌ Wrong!');
+        } else {
+            showToast('error', '➖ Skipped!');
+        }
+        renderAnswerArea(q);
+        updateCompactStats();
+    }
+    
+    const isViewingActive = q.id === roomData.activeGroupQ;
+    const myAns = (roomData.players[myId].groupAnswers || {})[q.id];
+    
+    if (isResolved) {
+        el('btn-group-save').style.display = 'none';
+        el('btn-group-skip').style.display = 'none';
+        el('group-wait-text').style.display = 'none';
+        el('btn-group-next').style.display = 'block';
+    } else if (isViewingActive) {
+        el('btn-group-next').style.display = 'none';
+        if (myAns !== undefined && myAns !== null) {
+            el('btn-group-save').style.display = 'none';
+            el('btn-group-skip').style.display = 'none';
+            el('group-wait-text').style.display = 'block';
+            el('group-wait-text').textContent = 'Waiting for others...';
+        } else {
+            el('btn-group-save').style.display = 'block';
+            el('btn-group-skip').style.display = 'block';
+            el('btn-group-save').disabled = false;
+            el('btn-group-skip').disabled = false;
+            el('group-wait-text').style.display = 'none';
+        }
+    } else {
+        el('btn-group-save').style.display = 'none';
+        el('btn-group-skip').style.display = 'none';
+        el('group-wait-text').style.display = 'none';
+        el('btn-group-next').style.display = 'none';
+    }
+}
+
+
+// Submit Flow
+window.submitWarningBtn = () => {
+    let a=0, m=0, u=0, n=0;
+    Object.values(answers).forEach(ans => { if(ans.status === 'ans' || ans.status === 'mark-ans') a++; else if(ans.status === 'marked') m++; else if(ans.status === 'unans') u++; else n++; });
+    
+    el('warn-ans').textContent = a; el('warn-skip').textContent = u; el('warn-notvis').textContent = n;
+    el('submit-warning-modal').classList.add('show');
+};
+
+window.forceSubmit = () => {
+    el('submit-warning-modal').classList.remove('show');
+    if(hasSubmitted) return; hasSubmitted = true; clearInterval(timerInterval); clearInterval(syncInterval);
+    
+    pushProgressToHost(true);
+    
+    if(el('btn-top-submit')) { el('btn-top-submit').disabled = true; el('btn-top-submit').textContent = "Submitted"; }
+    if(el('btn-mob-submit')) { el('btn-mob-submit').disabled = true; el('btn-mob-submit').textContent = "Submitted"; }
+    ['btn-mark', 'btn-clear', 'btn-save'].forEach(id => {if(el(id)) el(id).disabled = true;});
+    
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true); document.querySelectorAll('.nat-input').forEach(b => b.disabled = true);
+    
+    showFinalResults(true); 
+}
+
+// ── ANSWER HELPERS ──
+function getCorrectInfo(q) {
+    if (!q || q.correctAnswer === undefined || q.correctAnswer === null) {
+        return { ops: [], label: null, hasAnswer: false };
+    }
+    const lbls = ['A','B','C','D','E'];
+    if (Array.isArray(q.correctAnswer)) {
+        const ops = q.correctAnswer.map(String);
+        const label = q.correctAnswer.map(n => lbls[n-1] || ('Opt '+n)).join(', ');
+        return { ops, label, hasAnswer: true };
+    }
+    const s = String(q.correctAnswer).trim();
+    return { ops: [s], label: s, hasAnswer: s !== '' };
+}
+function isCorrect(q, selectedStr) {
+    if (!selectedStr || selectedStr === 'skipped' || selectedStr === 'null' || selectedStr === 'undefined') return false;
+    const { ops, hasAnswer } = getCorrectInfo(q);
+    if (!hasAnswer) return false;
+    const sel = String(selectedStr).trim();
+    return q.type === 'mcq' ? ops.includes(sel) : ops[0] === sel;
+}
+
+window.hostSetAnswerKey = (qId, ans) => {
+    const q = allQuestions.find(x => x.id === qId);
+    if(q) {
+        q.correctAnswer = ans;
+        if(masterQuestions) {
+             const mq = masterQuestions.find(x => x.id === qId);
+             if(mq) mq.correctAnswer = ans;
+        }
+        for(let id in connections) connections[id].send({ type: 'update_answer_key', qId, ans });
+        renderAnswerArea(q);
+        updateGroupUI();
+        showToast('success', 'Answer key set globally!');
+    }
+};
+
+
+// ── 6. DATA PARSING ──
+function buildQuestions(data) {
+  masterQuestions = []; masterSectionMap = {}; imageCache = {};
+  const pD = data.pdfCropperData || data.questions || {};
+  const aK = data.testAnswerKey || data.answerKey || {};
+  
+  // Flatten Answer Key by global Question Number to avoid Topic naming mismatches
+  const flatAnswers = {};
+  for (const s of Object.keys(aK)) {
+    for (const t of Object.keys(aK[s])) {
+      for (const qKey of Object.keys(aK[s][t])) {
+        flatAnswers[qKey] = aK[s][t][qKey];
+      }
+    }
+  }
+
+  let i = 0;
+  for (const s of Object.keys(pD)) {
+    for (const t of Object.keys(pD[s])) {
+      const tq = pD[s][t] || {};
+      const sk = `${s} › ${t}`;
+      masterSectionMap[sk] = [];
+      for (const q of Object.keys(tq)) {
+        const qd = tq[q] || {};
+        const globalNumStr = String(qd.que || q);
+        
+        const ad = flatAnswers[globalNumStr] || {};
+        const correctAnswer = (ad.correctAnswer !== undefined && ad.correctAnswer !== null) ? ad.correctAnswer : null;
+        const type = ad.type || qd.type || 'mcq';
+        const images = [];
+        for (let j = 1; j <= Math.max((qd.pdfData || []).length || 1, 1); j++) {
+          images.push(`${t}__--__${q}__--__${j}.png`);
+        }
+        masterQuestions.push({
+          id: `${s}__${t}__${q}`,
+          globalNum: parseInt(globalNumStr),
+          type,
+          marks: qd.marks || { cm: 4, im: -1 },
+          answerOptions: parseInt(qd.answerOptions || ad.answerOptions || 4),
+          correctAnswer,
+          images
+        });
+        masterSectionMap[sk].push(i++);
+      }
+    }
+  }
+}
+async function preloadImages(zip, progressCallback) { 
+    const fs = Object.keys(zip.files).filter(f => f.toLowerCase().endsWith('.png')); 
+    for (let i=0; i<fs.length; i++) { 
+        try { const b = await zip.files[fs[i]].async('blob'); imageCache[fs[i]] = URL.createObjectURL(b); } catch(e) {} 
+        if(progressCallback) progressCallback(i+1, fs.length);
+    } 
+}
+
+// ── 7. CBT UI ──
+window.changeSection = () => { 
+    currentSection = el('section-select').value; currentQIdx = getSeq()[0]||0; renderSidebar(); renderQuestion(); 
+};
+const getSeq = () => currentSection === 'ALL' ? allQuestions.map((_, i) => i) : sectionMap[currentSection] || [];
+window.navigate = (dir, isSaveNext = false) => { 
+    if(!hasSubmitted) {
+        const qId = allQuestions[currentQIdx].id;
+        const ans = answers[qId]; 
+        if(ans && ans.status === 'not-vis') ans.status = 'unans';
+    }
+    resetSaveBtn();
+    const ind = getSeq(); const np = ind.indexOf(currentQIdx) + dir; 
+    
+    if(np >= 0 && np < ind.length) { 
+        currentQIdx = ind[np]; renderSidebar(); renderQuestion(); updateGroupUI();
+    } else if (isSaveNext && np >= ind.length && currentSection !== 'ALL') {
+        const sections = Object.keys(sectionMap); const secIdx = sections.indexOf(currentSection);
+        if(secIdx < sections.length - 1) {
+            currentSection = sections[secIdx + 1]; el('section-select').value = currentSection; currentQIdx = getSeq()[0]; renderSidebar(); renderQuestion(); updateGroupUI();
+        }
+    }
+};
+window.goToQ = (idx) => { 
+    if(!hasSubmitted) {
+        const qId = allQuestions[currentQIdx].id;
+        const ans = answers[qId]; 
+        if(ans && ans.status === 'not-vis') ans.status = 'unans';
+    }
+    resetSaveBtn();
+    currentQIdx = idx; renderSidebar(); renderQuestion(); updateGroupUI();
+};
+
+function resetSaveBtn() {
+    const saveBtn = el('btn-save');
+    if (!saveBtn) return;
+    saveBtn.textContent = 'Save & Next →';
+    saveBtn.classList.add('save');
+    saveBtn.style.background = '';
+    saveBtn.style.borderColor = '';
+    saveBtn.style.color = '';
+    saveBtn.style.boxShadow = '';
+    saveBtn.onclick = () => window.saveNext();
+}
+
+window.saveNext = () => { 
+    const q = allQuestions[currentQIdx];
+    const a = answers[q.id]; 
+    if (a.selected) {
+        a.status = 'ans';
+    } else { 
+        a.status = 'unans';
+    }
+    renderSidebar();
+    renderAnswerArea(q);
+    showNextBtn();
+    checkStreakBomb(); 
+};
+
+function showNextBtn() {
+    const saveBtn = el('btn-save');
+    if (!saveBtn) return;
+    saveBtn.textContent = 'Next →';
+    saveBtn.classList.remove('save');
+    saveBtn.style.background = 'var(--accent)';
+    saveBtn.style.borderColor = 'var(--accent)';
+    saveBtn.style.color = 'white';
+    saveBtn.style.boxShadow = '0 4px 15px rgba(99,102,241,0.4)';
+    saveBtn.onclick = () => {
+        saveBtn.textContent = 'Save & Next →';
+        saveBtn.classList.add('save');
+        saveBtn.style.background = '';
+        saveBtn.style.borderColor = '';
+        saveBtn.style.color = '';
+        saveBtn.style.boxShadow = '';
+        saveBtn.onclick = () => window.saveNext();
+        navigate(1, true);
+    };
+}
+function checkStreakBomb() {
+    if(roomData.settings.bombs !== 'true') return;
+    const q = allQuestions[currentQIdx]; const a = answers[q.id];
+    if(!a || !a.selected) { correctStreak = 0; return; }
+    if(isCorrect(q, a.selected)) { correctStreak++; } else { correctStreak = 0; }
+    if(correctStreak > 0 && correctStreak % 5 === 0) {
+        const msgs = ['🔥 5-streak! Youre on fire!','💥 10-streak! Unstoppable!','⚡ 15-streak! LEGENDARY!','🌟 20-streak! GOD MODE!'];
+        const idx = Math.min(Math.floor(correctStreak/5)-1, msgs.length-1);
+        showStreakBomb(msgs[idx]);
+    }
+}
+function showStreakBomb(msg) {
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-family:Syne,sans-serif;font-size:clamp(20px,5vw,28px);font-weight:900;padding:20px 40px;border-radius:24px;z-index:9999;text-align:center;box-shadow:0 20px 60px rgba(99,102,241,0.6);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;pointer-events:none;';
+    d.textContent = msg; document.body.appendChild(d);
+    requestAnimationFrame(() => { d.style.transform = 'translate(-50%,-50%) scale(1)'; });
+    setTimeout(() => { d.style.transform = 'translate(-50%,-50%) scale(0)'; d.style.opacity='0'; setTimeout(()=>d.remove(), 350); }, 2000);
+}
+window.markResponse = () => { const a = answers[allQuestions[currentQIdx].id]; a.status = a.selected ? 'ans' : 'unans'; navigate(1, true); };
+window.clearResponse = () => { answers[allQuestions[currentQIdx].id] = { status: 'not-vis', selected: null }; renderSidebar(); renderQuestion(); };
+
+function updateCompactStats() {
+    if(!roomData) return;
+    const isGroup = roomData.settings.timerMode === 'group';
+    let total = allQuestions.length;
+    
+    if (isGroup) {
+        let c=0, w=0, wait=0, s=0, n=0;
+        allQuestions.forEach(q => {
+            const ans = (roomData.players[myId]?.groupAnswers || {})[q.id];
+            const isGameFinished = roomData.status === 'finished';
+            const isRes = (roomData.groupResolved && roomData.groupResolved[q.id]) || isGameFinished;
+            if (!ans || ans === 'null') { n++; return; }
+            
+            if (!isRes) {
+                if (ans !== 'skipped') wait++;
+                else s++;
+            } else {
+                const finalAns = String(ans).trim();
+                if (finalAns === 'skipped') s++;
+                else if (isCorrect(q, finalAns)) c++;
+                else w++;
+            }
+        });
+        ['desk', 'mob'].forEach(pf => {
+            if(el('st-correct-'+pf)) el('st-correct-'+pf).textContent = c;
+            if(el('st-wrong-'+pf)) el('st-wrong-'+pf).textContent = w;
+            if(el('st-wait-'+pf)) el('st-wait-'+pf).textContent = wait;
+            if(el('st-skip-'+pf)) el('st-skip-'+pf).textContent = s;
+            if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+            if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = `${c+w+s}/${total}`;
+        });
+    } else {
+        let a=0, u=0, n=0;
+        Object.values(answers).forEach(ans => {
+            if(ans.status === 'ans' || ans.status === 'mark-ans') a++;
+            else if(ans.status === 'unans' || ans.status === 'marked') u++;
+            else n++;
+        });
+        ['desk', 'mob'].forEach(pf => {
+            if(el('st-ans-'+pf)) el('st-ans-'+pf).textContent = a;
+            if(el('st-skip-'+pf)) el('st-skip-'+pf).textContent = u;
+            if(el('st-notvis-'+pf)) el('st-notvis-'+pf).textContent = n;
+            if(el('st-overall-'+pf)) el('st-overall-'+pf).textContent = `${a}/${total}`;
+        });
+    }
+}
+
+let imgFitMode = false;
+window.toggleImgFit = () => {
+    imgFitMode = !imgFitMode;
+    const btn = el('btn-img-fit'); if(btn) btn.textContent = imgFitMode ? '⤡ FREE' : '⤢ FIT';
+    document.querySelectorAll('#q-image-container img').forEach(img => {
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 350px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        else { img.style.maxHeight = ''; img.style.objectFit = ''; img.style.width = ''; }
+    });
+};
+
+function renderQuestion() {
+  const q = allQuestions[currentQIdx]; if (!q) return;
+  el('q-num-badge').textContent = `Q${q.globalNum}`; el('q-type-badge').textContent = q.type === 'mcq' ? 'MCQ' : 'NUM';
+  const imgA = el('q-image-container'); imgA.innerHTML = ''; let hasI = false;
+  for (const f of q.images) {
+    if (imageCache[f]) {
+        const img = document.createElement('img'); img.src = imageCache[f];
+        if(imgFitMode) { img.style.maxHeight = 'calc(100dvh - 350px)'; img.style.objectFit = 'contain'; img.style.width = '100%'; }
+        imgA.appendChild(img); hasI = true;
+    }
+  }
+  if (!hasI) imgA.innerHTML = `<div class="spring-anim" style="padding:40px; color:var(--text2); background:var(--surface3); border-radius:12px; text-align:center;">📷 Not found</div>`;
+  renderAnswerArea(q); updateCompactStats();
+}
+
+function renderAnswerArea(q) {
+  const area = el('answer-area'); 
+  const ans = answers[q.id];
+  
+  const isGroupMode = roomData && roomData.settings.timerMode === 'group';
+  const isGameFinished = roomData && roomData.status === 'finished';
+  const isViewingActive = isGroupMode && q.id === roomData.activeGroupQ;
+  const isResolvedInGroup = isGroupMode && (roomData.groupResolved[q.id] || isGameFinished);
+  const shouldPaintColors = hasSubmitted || isResolvedInGroup;
+  
+  const myGroupAns = isGroupMode ? (roomData.players[myId].groupAnswers || {})[q.id] : null;
+  const iAmLockedInGroup = isGroupMode && myGroupAns && myGroupAns !== 'null';
+  
+  const shouldGreyOut = isGroupMode && !isViewingActive && !isResolvedInGroup && !isGameFinished;
+  
+  if (shouldGreyOut) {
+      area.innerHTML = `<div class="spring-anim" style="text-align:center; padding: 40px 20px; font-family:'Outfit';">
+          <div style="font-size:32px; margin-bottom:12px;">🔒</div>
+          <div style="font-size:16px; font-weight:800; color:var(--text2);">Wait for the group to reach this question</div>
+      </div>`;
+      return;
+  }
+
+  const { ops: correctOptions, label: correctAnsLabel, hasAnswer } = getCorrectInfo(q);
+
+  if (q.type === 'mcq') {
+    const grid = document.createElement('div'); grid.className = 'opts-grid'; const lbls = ['A','B','C','D']; const no = q.answerOptions || 4; 
+    for (let i = 1; i <= no; i++) {
+      const b = document.createElement('button'); b.className = 'opt-btn spring-anim'; 
+      b.disabled = hasSubmitted || iAmLockedInGroup || isResolvedInGroup; 
+      
+      const isLocallySelected = ans && ans.selected === i;
+      const isGroupSelected = isGroupMode && parseInt(myGroupAns) === i;
+      if (isLocallySelected || isGroupSelected) b.classList.add('selected');
+      
+      b.innerHTML = `<div class="opt-key">${lbls[i-1]}</div><span>Option ${lbls[i-1]}</span>`;
+
+      if (shouldPaintColors && hasAnswer) {
+          if (correctOptions.includes(String(i))) {
+              b.classList.add('correct-ans');
+              b.innerHTML += `<span style="margin-left:auto; font-weight:900; font-size:12px;">✓ CORRECT</span>`;
+          } else if ((isLocallySelected || isGroupSelected) && !correctOptions.includes(String(i))) {
+              b.classList.add('wrong-ans');
+              b.innerHTML += `<span style="margin-left:auto; font-weight:900; font-size:12px;">❌ WRONG</span>`;
+          }
+      }
+
+      if(!hasSubmitted && !iAmLockedInGroup && !isResolvedInGroup) b.onclick = () => { answers[q.id].selected = i; renderAnswerArea(q); }; grid.appendChild(b);
+    }
+    area.innerHTML = ''; area.appendChild(grid);
+  } else {
+    area.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'nat-input spring-anim'; inp.type = 'text'; inp.placeholder = '0.00';
+    
+    if (isGroupMode && myGroupAns && myGroupAns !== 'skipped') inp.value = myGroupAns;
+    else if (ans && ans.selected) inp.value = ans.selected; 
+    
+    inp.disabled = hasSubmitted || iAmLockedInGroup || isResolvedInGroup;
+    
+    if (shouldPaintColors) {
+        const val = inp.value;
+        const isC = hasAnswer && isCorrect(q, val);
+        inp.classList.add(isC ? 'correct-ans' : 'wrong-ans');
+
+        const corrTxt = document.createElement('div'); 
+        const dispAns = hasAnswer ? correctAnsLabel : '—';
+        corrTxt.innerHTML = `<span style="font-size:12px; color:var(--text2); text-transform:uppercase; font-weight:800;">Correct Answer</span><br><b style="font-size:24px; color:var(--ans); margin-top:4px; display:inline-block;">${dispAns}</b>`;
+        corrTxt.style.cssText = "text-align:center; margin-top:16px; font-family:Outfit;";
+        
+        area.appendChild(inp);
+        area.appendChild(corrTxt);
+    } else {
+        inp.oninput = (e) => { let v = e.target.value.replace(/[^0-9.\-]/g, '').trim(); e.target.value = v; answers[q.id].selected = v || null; };
+        area.appendChild(inp);
+    }
+  }
+
+  // Host: Inject Set Answer Key feature if missing
+  if (!hasAnswer && isHost && !hasSubmitted && !isResolvedInGroup) {
+      const hostDiv = document.createElement('div');
+      hostDiv.className = "spring-anim";
+      hostDiv.style.cssText = "margin-top: 24px; padding: 16px; background: rgba(99,102,241,0.08); border: 2px dashed var(--accent); border-radius: 12px; text-align: center;";
+      hostDiv.innerHTML = `<div style="font-size:13px; font-weight:800; color:var(--accent2); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">👑 Host: Set Correct Answer</div>`;
+
+      if (q.type === 'mcq') {
+          const btns = document.createElement('div');
+          btns.style.display = 'flex'; btns.style.gap = '8px'; btns.style.justifyContent = 'center';
+          const no = q.answerOptions || 4;
+          for(let i=1; i<=no; i++) {
+              const b = document.createElement('button');
+              b.className = 'action-btn spring-anim';
+              b.textContent = 'Opt ' + ['A','B','C','D'][i-1];
+              b.onclick = () => window.hostSetAnswerKey(q.id, [i]);
+              btns.appendChild(b);
+          }
+          hostDiv.appendChild(btns);
+      } else {
+          const wrp = document.createElement('div'); wrp.style.display = 'flex'; wrp.style.gap = '8px'; wrp.style.justifyContent = 'center';
+          wrp.innerHTML = `
+              <input type="text" id="host-ans-inp" class="input-styled" style="width:120px; padding:10px; font-size:16px;" placeholder="0.00">
+              <button class="btn btn-primary spring-anim" style="width:auto; padding:10px 20px;" onclick="window.hostSetAnswerKey('${q.id}', [document.getElementById('host-ans-inp').value.trim()])">Set</button>
+          `;
+          hostDiv.appendChild(wrp);
+      }
+      area.appendChild(hostDiv);
+  }
+}
+
+function renderSidebar() {
+  const g = el('q-grid'); g.innerHTML = '';
+  const isGroup = roomData.settings.timerMode === 'group';
+
+  getSeq().forEach(idx => {
+    const q = allQuestions[idx]; 
+    const d = document.createElement('div'); 
+    d.className = `dot spring-anim`;
+    if (idx === currentQIdx) d.classList.add('active'); d.textContent = q.globalNum;
+    
+    if (isGroup) {
+        const isGameFinished = roomData.status === 'finished';
+        const isResolved = (roomData.groupResolved && roomData.groupResolved[q.id]) || isGameFinished;
+        const myAns = (roomData.players[myId]?.groupAnswers || {})[q.id];
+        const hasAns = myAns !== undefined && myAns !== 'null';
+        
+        if (isResolved) {
+            const finalAns = hasAns ? String(myAns).trim() : 'skipped';
+            if (finalAns === 'skipped') d.classList.add('unans');
+            else if (isCorrect(q, finalAns)) d.classList.add('ans');
+            else d.classList.add('wrong');
+        } else if (hasAns) {
+            if (myAns !== 'skipped') d.classList.add('waiting');
+            else d.classList.add('unans');
+        } else {
+            d.classList.add('not-vis');
+        }
+    } else {
+        const st = answers[q.id].status;
+        if (st === 'ans' || st === 'mark-ans') d.classList.add('ans');
+        else if (st === 'unans' || st === 'marked') d.classList.add('unans');
+        else d.classList.add('not-vis');
+    }
+
+    if (!hasSubmitted && roomData && roomData.settings.showLiveStats === 'true') {
+        const players = Object.values(roomData.players).filter(p => p.name !== myName);
+        const total = players.length;
+        if(total > 0) {
+            const qSeqIdx = getSeq().indexOf(idx);
+            const done = players.filter(p => {
+                const theirQ = allQuestions.findIndex(aq => aq.id === p.currentQ);
+                return theirQ > idx || (answers[q.id] && answers[q.id].status !== 'not-vis');
+            }).length;
+            const skipped = total - done;
+            if(total > 0) {
+                const b = document.createElement('div');
+                b.style.cssText = 'position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 10px 10px; display:flex; overflow:hidden;';
+                b.innerHTML = `<div style="flex:${done}; background:rgba(16,185,129,0.7);"></div><div style="flex:${skipped}; background:rgba(255,255,255,0.1);"></div>`;
+                d.appendChild(b);
+            }
+        }
+    }
+
+    if (!hasSubmitted && roomData && roomData.settings.showGhosts === 'true') {
+        const ghosts = Object.values(roomData.players).filter(p => p.currentQ === q.id && p.name !== myName);
+        if (ghosts.length) {
+            const gWrap = document.createElement('div'); gWrap.className = 'dot-ghosts';
+            ghosts.slice(0,4).forEach(p => {
+                const span = document.createElement('span'); span.className = 'dot-ghost-letter';
+                span.textContent = p.name.charAt(0).toUpperCase(); gWrap.appendChild(span);
+            });
+            d.appendChild(gWrap);
+        }
+    }
+    
+    d.onclick = () => window.goToQ(idx); g.appendChild(d);
+  });
+  updateCompactStats();
+}
+
+function updateRaceBar() {
+    if(!roomData || roomData.settings.addonRace !== 'true') return;
+    const players = Object.values(roomData.players);
+    const total = roomData.totalQuestions || 1;
+    const myPlayer = roomData.players[myId];
+    
+    const stats = getPlayerLiveStats(myPlayer);
+    const myPct = total > 0 ? Math.round(((stats.correct + stats.wrong + stats.waiting + stats.skipped)/total)*100) : 0;
+    
+    const fill = el('btm-race-fill');
+    if (fill) {
+        if (roomData.settings.colorRace === 'true' && (stats.correct + stats.wrong + stats.waiting + stats.skipped) > 0) {
+            const base = stats.correct + stats.wrong + stats.waiting + stats.skipped;
+            const cPct = (stats.correct / base) * 100;
+            const wPct = (stats.wrong / base) * 100;
+            const sPct = (stats.skipped / base) * 100;
+            const uPct = (stats.waiting / base) * 100;
+            fill.style.background = 'transparent';
+            fill.style.width = myPct + '%';
+            fill.innerHTML = `
+                <div style="height:100%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); background:var(--ans); width:${cPct}%; ${cPct>0?'border-right:2px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); background:var(--wrong); width:${wPct}%; ${wPct>0?'border-right:2px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); background:var(--unans); width:${sPct}%; ${sPct>0?'border-right:2px solid rgba(0,0,0,0.3);':''}"></div>
+                <div style="height:100%; transition:width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); background:var(--waiting); width:${uPct}%;"></div>
+            `;
+        } else {
+            fill.style.background = 'rgba(99, 102, 241, 0.15)';
+            fill.style.borderRight = '2px solid var(--accent)';
+            fill.style.width = myPct + '%';
+            fill.innerHTML = '';
+        }
+    }
+    
+    const names = el('race-bar-names');
+    if(names) {
+        names.innerHTML = players.map(p => {
+            const pStats = getPlayerLiveStats(p);
+            const base = pStats.correct + pStats.wrong + pStats.waiting + pStats.skipped;
+            const pct = Math.round((base/total)*100);
+            return `<span style="color:${p.name===myName?'var(--accent)':'var(--text2)'}; font-weight:${p.name===myName?900:600};">${p.name.charAt(0)}:${pct}%</span>`;
+        }).join(' | ');
+    }
+}
+
+function renderSidebarLeaderboard() {
+    const list = el('sidebar-leaderboard'); if(!list) return;
+    const pArr = Object.values(roomData.players).sort((a,b) => b.attempted - a.attempted); list.innerHTML = '';
+    pArr.forEach(p => {
+        const barHtml = generateProgressBarHtml(p, roomData.totalQuestions || 1, roomData.settings.colorSidebar);
+
+        list.innerHTML += `
+            <div class="lb-item spring-anim ${p.name === myName ? 'me' : ''}" style="padding: 16px;">
+                <div class="lb-top" style="margin-bottom: 12px;">
+                  <span class="lb-name" style="font-size: 16px;">${p.name} ${p.submitted?'🏁':''}</span>
+                  <span class="lb-stat" style="font-size: 16px;">${getPlayerLiveStats(p).attempted} / ${roomData.totalQuestions}</span>
+                </div>
+                <div class="progress-wrap" style="height: 8px; margin-top: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display:flex; overflow:hidden;">
+                  ${barHtml}
+                </div>
+            </div>`;
+    });
+}
+
+window.enterReviewMode = () => {
+    el('final-results-layer').classList.remove('show');
+    el('review-banner').classList.add('show');
+    renderQuestion(); 
+    renderSidebar();
+};
+
+window.showFinalResults = (forceShow = false) => {
+    if(forceShow) {
+        el('review-banner').classList.remove('show');
+        el('final-results-layer').classList.add('show');
+    }
+    
+    const isAllDone = Object.values(roomData.players).every(p => p.submitted);
+    el('results-wait-text').style.display = isAllDone ? 'none' : 'block';
+
+    const list = el('final-lb-list'); list.innerHTML = '';
+    
+    const pArr = Object.values(roomData.players).sort((a,b) => {
+        if(a.submitted && b.submitted) return b.score - a.score;
+        return a.submitted ? -1 : 1;
+    });
+
+    const medals = ['🥇', '🥈', '🥉'];
+    let rank = 1;
+
+    pArr.forEach((p, idx) => {
+        if(p.submitted) {
+            const med = rank <= 3 ? `<span class="medal">${medals[rank-1]}</span>` : `<span style="font-size:24px; color:var(--text2); font-weight:900; font-family:'Outfit';">#${rank}</span>`;
+            const speedTag = roomData.settings.speedBonus === 'true' ? `<div style="font-size:11px; color:var(--accent2); font-weight:700;">⚡ Speed Bonus Active</div>` : '';
+            list.innerHTML += `<div class="lb-result-item spring-anim ${p.name === myName ? 'me' : ''}">
+                <div style="display:flex; gap:16px; align-items:center;">${med}<span style="font-size:20px; font-weight:800;">${p.name}</span></div>
+                <div style="text-align:right;"><div style="font-size:24px; color:var(--ans); font-weight:900; font-family:'Outfit';">${p.score} <span style="font-size:12px;color:var(--text2);">marks</span></div><div style="font-size:12px; color:var(--text2); font-weight:600;">Time: ${formatTime(p.timeTaken)}</div>${speedTag}</div>
+            </div>`;
+            rank++;
+        } else {
+            list.innerHTML += `<div class="lb-result-item waiting spring-anim ${p.name === myName ? 'me' : ''}">
+                <div style="display:flex; gap:16px; align-items:center;"><span style="font-size:20px; color:var(--text2); font-weight:900; font-family:'Outfit';">---</span><span style="font-size:18px; font-weight:600; color:var(--text2);">${p.name}</span></div>
+                <div style="text-align:right; font-family:'Outfit'; font-weight:700; color:var(--text2);">Still Playing...</div>
+            </div>`;
+        }
+    });
+
+    const anaBtn = el('btn-open-analysis');
+    if(anaBtn) anaBtn.style.display = ((isAllDone || roomData.status === 'finished') && roomData.settings.showAnalysis === 'true') ? 'flex' : 'none';
+}
+
+// ── ANALYSIS ENGINE ──
+window.openAnalysis = () => {
+    const layer = el('analysis-layer'); layer.classList.add('show');
+    renderAnalysis('time');
+};
+window.closeAnalysis = () => el('analysis-layer').classList.remove('show');
+window.switchAnalysisTab = (tab) => {
+    document.querySelectorAll('.analysis-tab').forEach(t => t.classList.remove('active'));
+    el('atab-'+tab).classList.add('active');
+    renderAnalysis(tab);
+};
+
+function renderAnalysis(mode) {
+    const body = el('analysis-body'); if(!body) return;
+    const players = Object.values(roomData.players).filter(p => p.submitted);
+    if(!players.length) { body.innerHTML = '<p style="color:var(--text2);padding:20px;font-family:Outfit;">No submitted players yet.</p>'; return; }
+
+    if(mode === 'time') {
+        let html = '<div style="overflow-x:auto;"><table class="analysis-table"><thead><tr><th>Question</th>';
+        players.forEach(p => html += `<th>${p.name}</th>`);
+        html += '</tr></thead><tbody>';
+        allQuestions.forEach(q => {
+            const times = players.map(p => (p.questionTimes||{})[q.id]).filter(t => t!=null);
+            const minT = times.length ? Math.min(...times) : null;
+            html += `<tr><td>Q${q.globalNum}</td>`;
+            players.forEach(p => {
+                const t = (p.questionTimes||{})[q.id];
+                if(t == null) { html += `<td class="cell-skip">—</td>`; return; }
+                const isFastest = t === minT && times.length > 1;
+                const cls = t <= 20 ? 'cell-correct' : t >= 120 ? 'cell-wrong' : '';
+                html += `<td class="${cls}" ${isFastest?'title="⚡ Fastest!"':''}>${isFastest?'⚡':''}${t}s</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        body.innerHTML = html;
+    } else if(mode === 'summary') {
+        let html = '<div style="display:flex; flex-direction:column; gap:16px; max-width:700px; margin: 0 auto;">';
+        players.sort((a,b) => b.score - a.score).forEach((p, ri) => {
+            const totalTime = Object.values(p.questionTimes||{}).reduce((a,b)=>a+b,0);
+            const avgTime = Object.keys(p.questionTimes||{}).length ? Math.round(totalTime/Object.keys(p.questionTimes).length) : 0;
+            const fastest = Object.entries(p.questionTimes||{}).sort((a,b)=>a[1]-b[1])[0];
+            const slowest = Object.entries(p.questionTimes||{}).sort((a,b)=>b[1]-a[1])[0];
+            const medals = ['🥇','🥈','🥉'];
+            html += `<div class="spring-anim" style="background:var(--surface2);border-radius:16px;border:2px solid ${p.name===myName?'var(--accent)':'var(--border)'};padding:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="font-family:'Outfit';font-size:18px;font-weight:800;">${ri<3?medals[ri]:'#'+(ri+1)} ${p.name}</div>
+                    <div style="font-family:'Outfit';font-size:20px;font-weight:900;color:var(--ans);">${p.score} marks</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-family:'Outfit';">
+                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Avg Time/Q</div>
+                        <div style="font-size:18px;font-weight:900;">${avgTime}s</div>
+                    </div>
+                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚡ Fastest Q</div>
+                        <div style="font-size:18px;font-weight:900;color:var(--ans);">${fastest?fastest[1]+'s':'—'}</div>
+                    </div>
+                    <div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🐢 Slowest Q</div>
+                        <div style="font-size:18px;font-weight:900;color:var(--wrong);">${slowest?slowest[1]+'s':'—'}</div>
+                    </div>
+                </div>
+                <div style="margin-top:10px;font-size:12px;color:var(--text2);font-weight:600;font-family:'Outfit';">Total time tracked: ${formatTime(totalTime)} | Questions attempted: ${p.attempted}</div>
+            </div>`;
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    }
+}
+</script>
+</body>
+</html>

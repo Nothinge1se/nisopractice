@@ -777,6 +777,103 @@
   
   .q-img-placeholder { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 48px; text-align: center; color: var(--text2); font-size: 15px; width: 100%; }
 
+  /* ══ FLOATING IMAGE AREA OVERLAYS ══ */
+  .q-image-area { position: relative; }
+
+  /* Floating fit button — bottom-right corner of image area */
+  .float-img-btn {
+    position: absolute; z-index: 20; border: 1.5px solid var(--border);
+    background: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: var(--text2); cursor: pointer; border-radius: 10px;
+    font-family: var(--font-num); font-size: 13px; font-weight: 700;
+    padding: 7px 12px; transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .float-img-btn:hover { border-color: var(--accent); color: var(--text); background: rgba(108,99,255,0.15); transform: scale(1.05) !important; }
+  .fit-float-btn { bottom: 14px; right: 14px; }
+
+  /* Floating tag area — bottom-left, bubbles stack upward */
+  #float-tag-area {
+    position: absolute; z-index: 20; bottom: 14px; left: 14px;
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+    max-width: 240px;
+  }
+  #float-tag-bubbles {
+    display: flex; flex-direction: column-reverse; gap: 6px; align-items: flex-start;
+    max-height: 160px; overflow: hidden;
+  }
+  .float-tag-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--font-num); font-size: 12px; font-weight: 700;
+    padding: 5px 12px; border-radius: 20px;
+    background: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid var(--accent2); color: var(--accent2);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    animation: bubbleUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  .float-tag-chip .tag-remove { cursor: pointer; opacity: 0.5; font-size: 14px; margin-left: 1px; }
+  .float-tag-chip .tag-remove:hover { opacity: 1; color: var(--wrong); }
+  @keyframes bubbleUp { from { opacity:0; transform: translateY(10px) scale(0.85); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+  #float-tag-input-row .tag-input-wrap {
+    background: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35); min-width: 110px; max-width: 200px;
+    padding: 5px 10px; border-radius: 20px; border: 1.5px solid var(--border);
+    display: flex; align-items: center;
+  }
+  #float-tag-input-row .tag-input-wrap:focus-within { border-color: var(--accent); }
+  #float-tag-input-row .tag-text-input { font-size: 12px; min-width: 60px; }
+
+  /* Progress bar toggle button state */
+  .hdr-btn.bar-off { color: var(--text2); opacity: 0.55; }
+
+  /* Hide old carousel/colorize CSS that's no longer used */
+  .track-controls, .carousel-toggle, .colorize-btn { display: none !important; }
+  .star-rating { display: flex; align-items: center; gap: 4px; }
+  .star-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 2px; line-height: 1; transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s; filter: grayscale(1) opacity(0.4); box-shadow: none !important; }
+  .star-btn:hover, .star-btn.lit { filter: none; }
+  .star-btn:hover { transform: scale(1.3) rotate(-5deg) !important; }
+  .star-btn.lit { filter: drop-shadow(0 0 4px rgba(245,158,11,0.7)); }
+
+  /* ══ TAGS ══ */
+  .tag-chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-num); font-size: 12px; font-weight: 700; padding: 3px 10px 3px 10px; border-radius: 20px; border: 1.5px solid var(--accent2); color: var(--accent2); background: rgba(167,139,250,0.1); cursor: default; white-space: nowrap; }
+  .tag-chip .tag-remove { cursor: pointer; font-size: 14px; line-height: 1; margin-left: 1px; opacity: 0.6; }
+  .tag-chip .tag-remove:hover { opacity: 1; color: var(--wrong); }
+  .tag-input-wrap { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface2); cursor: text; min-height: 38px; }
+  .tag-input-wrap:focus-within { border-color: var(--accent); }
+  .tag-text-input { background: none; border: none; outline: none; font-family: var(--font-num); font-size: 13px; font-weight: 600; color: var(--text); min-width: 80px; flex: 1; }
+  .tag-suggestions { position: absolute; z-index: 9999; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); max-height: 160px; overflow-y: auto; min-width: 160px; }
+  .tag-suggestion-item { padding: 8px 14px; font-family: var(--font-num); font-size: 13px; cursor: pointer; }
+  .tag-suggestion-item:hover { background: var(--surface2); color: var(--accent); }
+
+  /* ══ TAG FILTER IN SIDEBAR ══ */
+  .sidebar-tag-filter { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .sidebar-tag-filter-label { font-family: var(--font-num); font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; width: 100%; }
+  .filter-tag-chip { display: inline-flex; align-items: center; font-family: var(--font-num); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; border: 1.5px solid var(--border); color: var(--text2); background: var(--surface2); cursor: pointer; transition: all 0.15s; }
+  .filter-tag-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.12); }
+  .filter-tag-chip:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ══ ANSWER IMAGE MODAL ══ */
+  #answer-img-modal { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+  #answer-img-modal.show { display: flex; }
+  .answer-img-modal-box { position: relative; max-width: 90%; max-height: 90%; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .answer-img-modal-box img { max-width: 100%; max-height: 80vh; border-radius: 12px; border: 2px solid var(--accent); box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+  .answer-img-modal-close { position: absolute; top: -14px; right: -14px; background: var(--wrong); border: 2px solid #fff; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 1; }
+  .answer-img-label { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--text2); text-align: center; }
+
+  /* ══ PNG BG TOGGLE ══ */
+  .png-bg-btn { font-family: var(--font-num); font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; white-space: nowrap; }
+  .png-bg-btn:hover { border-color: var(--accent); color: var(--text); }
+  .question-img.png-bg-white { background: #ffffff; border-radius: 12px; }
+  .question-img.png-bg-black { background: #000000; border-radius: 12px; }
+  .answer-img-modal-box img.png-bg-white { background: #ffffff; }
+  .answer-img-modal-box img.png-bg-black { background: #000000; }
+
+  /* ══ SAVE NISO BTN ══ */
+  .save-niso-btn { font-family: var(--font-num); font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: 1.5px solid rgba(34,197,94,0.4); background: rgba(34,197,94,0.1); color: var(--correct); cursor: pointer; white-space: nowrap; }
+  .save-niso-btn:hover { background: rgba(34,197,94,0.2); border-color: var(--correct); }
+  .save-niso-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   /* ANSWER AREA */
   .answer-area { padding: 20px 24px; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--surface); z-index: 5; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .answer-label { font-family: var(--font-num); font-size: 14px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
@@ -1303,6 +1400,8 @@
           <option value="summer">☁️ Summer Monsoon</option>
         </select>
         
+        <button class="tb-btn png-bg-btn" id="png-bg-btn" onclick="cyclePngBg()" title="Toggle PNG background" style="display:none;">⬜ PNG Bg</button>
+        <button class="tb-btn save-niso-btn" id="save-niso-btn" onclick="saveNisoFile()" title="Save updated data.json back into the .niso file and download">💾 Save NISO</button>
         <button class="tb-btn" onclick="resetApp()">↑ New ZIP</button>
         <button class="mob-nav-btn" onclick="openMobDrawer()" title="Question Navigator">☰</button>
       </div>
@@ -1317,22 +1416,15 @@
             <div class="q-type-badge mcq" id="q-type-badge">MCQ</div>
             <div class="marks-info" id="marks-info">+4 / −1</div>
             <div class="timer-pill q-time" title="Time spent on this question">⏱ <span id="q-timer">00:00</span></div>
+            <!-- Star Rating -->
+            <div class="star-rating" id="star-rating" title="Rate this question"></div>
+            <!-- Answer Image button -->
+            <button id="show-answer-img-btn" class="hdr-btn" style="font-size:13px;padding:0 12px;opacity:0.35;pointer-events:none;" title="View answer image (not available)">📷 Answer</button>
           </div>
 
           <div class="header-right">
-            <div class="track-controls">
-              <div class="carousel-toggle">
-                <button onclick="cycleMode(-1)">&#9664;</button>
-                <span id="mode-label">Total</span>
-                <button onclick="cycleMode(1)">&#9654;</button>
-              </div>
-              <div class="dash-sep"></div>
-              <button class="colorize-btn active" id="colorize-btn" onclick="toggleColorize()">🎨 Colorize</button>
-            </div>
+            <button class="hdr-btn" id="progress-toggle-btn" onclick="toggleProgressBar()" title="Toggle progress bar on/off" style="min-width:120px;">📊 Bar: On</button>
 
-            <button class="hdr-btn fit-btn" id="img-fit-btn" onclick="toggleImageFit()">
-              🔍 Fit Screen
-            </button>
             <button class="hdr-btn ai-btn" onclick="generateAIPrompt()">
               🤖 Ask AI Prompt
             </button>
@@ -1356,6 +1448,21 @@
 
         <div class="q-image-area" id="main-img-area">
           <div class="q-image-container" id="q-image-container"></div>
+
+          <!-- Floating fit button — bottom right of image area -->
+          <button class="float-img-btn fit-float-btn" id="img-fit-btn" onclick="toggleImageFit()" title="Fit to screen">🔍</button>
+
+          <!-- Floating tag input — bottom left of image area, bubbles upward -->
+          <div id="float-tag-area">
+            <div id="float-tag-bubbles"></div>
+            <div id="float-tag-input-row">
+              <div class="tag-input-wrap" id="tag-input-wrap" style="position:relative;" title="Type tag and press Enter">
+                <div id="tag-chips-display" style="display:contents;"></div>
+                <input class="tag-text-input" id="tag-text-input" placeholder="＋ tag…" autocomplete="off">
+                <div class="tag-suggestions" id="tag-suggestions" style="display:none;bottom:calc(100% + 4px);top:auto;left:0;position:absolute;"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="answer-area" id="answer-area">
@@ -1389,6 +1496,21 @@
           </select>
           
           <div class="section-stats-box" id="section-stats-box"></div>
+        </div>
+
+        <!-- Tag filter -->
+        <div class="sidebar-tag-filter" id="sidebar-tag-filter" style="display:none;">
+          <div class="sidebar-tag-filter-label">Filter by tag</div>
+          <div id="filter-tag-chips" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+          <div class="sidebar-tag-filter-label" style="margin-top:6px;">Filter by stars</div>
+          <div id="filter-star-chips" style="display:flex;flex-wrap:wrap;gap:5px;">
+            <div class="filter-tag-chip active" id="filter-star-all" onclick="setStarFilter(null)">All ⭐</div>
+            <div class="filter-tag-chip" onclick="setStarFilter(1)">⭐×1</div>
+            <div class="filter-tag-chip" onclick="setStarFilter(2)">⭐×2</div>
+            <div class="filter-tag-chip" onclick="setStarFilter(3)">⭐×3</div>
+            <div class="filter-tag-chip" onclick="setStarFilter(4)">⭐×4</div>
+            <div class="filter-tag-chip" onclick="setStarFilter(5)">⭐×5</div>
+          </div>
         </div>
 
         <div class="sidebar-title">Question Navigator</div>
@@ -1447,6 +1569,15 @@
       </div>
     </div>
   </div>
+
+<!-- ══ ANSWER IMAGE MODAL ══ -->
+<div id="answer-img-modal" onclick="if(event.target===this)closeAnswerImgModal()">
+  <div class="answer-img-modal-box">
+    <button class="answer-img-modal-close" onclick="closeAnswerImgModal()">✕</button>
+    <div class="answer-img-label" id="answer-img-label">Answer Image</div>
+    <img id="answer-img-el" src="" alt="Answer">
+  </div>
+</div>
 
 </div>
 
@@ -1562,6 +1693,8 @@ function toggleMode() {
 async function loadOnlineTest(fileName) {
   document.getElementById('upload-screen').style.display = 'flex';
   document.getElementById('error-msg').style.display = 'none';
+  isLocalFile = false;
+  loadedZipFile = null;
 
   let safeUrl = encodeURI(fileName);
   showProgress(10, `Checking local cache for ${fileName}...`);
@@ -1688,9 +1821,32 @@ let pendingZipFile  = null;
 let autoSaveTimer   = null;
 let isImageFit      = false;
 
-const MODES = ['Checked', 'Correct Only', 'Total'];
-let modeIdx = 2; // Default to Total
-let isColorize = true; // Default ON
+// ── NEW STATE ──────────────────────────────────────────
+let qConfig        = {};   // { [qid]: { stars: 0-5, tags: [] } }
+let globalTags     = [];   // all unique tags across all questions
+let activeTagFilter = null; // null = no filter, 'tagname' = filter by tag
+let activeStarFilter = null; // null = no filter, 1-5 = filter by stars
+let pngBgMode      = 'none'; // 'none' | 'white' | 'black'
+let isLocalFile    = false;  // true if loaded from local file (can write)
+let loadedZipFile  = null;   // the original File object, for save NISO
+
+// removed: MODES, modeIdx, isColorize, cycleMode, toggleColorize — simplified to always Total+Colorize
+let isProgressBarOn = true;
+
+function toggleProgressBar() {
+  isProgressBarOn = !isProgressBarOn;
+  const btn = document.getElementById('progress-toggle-btn');
+  if (btn) {
+    btn.textContent = isProgressBarOn ? '📊 Bar: On' : '📊 Bar: Off';
+    btn.classList.toggle('bar-off', !isProgressBarOn);
+  }
+  // Hide/show the actual bar segments
+  const navBg = document.getElementById('fluid-nav-bg');
+  const chipBg = document.getElementById('chip-progress-bg');
+  if (navBg) navBg.style.opacity = isProgressBarOn ? '1' : '0';
+  if (chipBg) chipBg.style.opacity = isProgressBarOn ? '1' : '0';
+  if (isProgressBarOn) updateFluidBars();
+}
 
 let sessionSeconds = 0;
 let qTimers = {}; 
@@ -1873,6 +2029,8 @@ multiFileInput.addEventListener('change', () => {
 
 function handleZipFile(file) {
 const name = file.name.replace(/\.(zip|niso)$/i, '');
+  isLocalFile = true;
+  loadedZipFile = file;
   const existing = getSessions()[name];
   
   if (existing && existing.list && existing.list.length > 0) {
@@ -1941,6 +2099,7 @@ async function loadZip(file, session, yearTag, accumulate) {
   try {
     const zip = await JSZip.loadAsync(file); 
     if (!accumulate) zipData = zip; else zipData = zip; // always keep last zip ref; images cached by prefix
+    if (!accumulate && file && file.name) loadedZipFile = file;
     showProgress(30, 'Parsing data.json…');
     const jf = zip.file('data.json');
     if (!jf) throw new Error('No data.json found in ZIP.');
@@ -1968,6 +2127,13 @@ async function loadZip(file, session, yearTag, accumulate) {
 
 function buildQuestions(data, yearTag, accumulate) {
   if (!accumulate) { allQuestions = []; sectionMap = {}; imageCache = {}; }
+  // Load nisoConfig (stars, tags) from data.json
+  if (!accumulate && data.nisoConfig) {
+    qConfig = data.nisoConfig.qConfig || {};
+    globalTags = data.nisoConfig.tags || [];
+  } else if (!accumulate) {
+    qConfig = {}; globalTags = [];
+  }
   const startIdx = allQuestions.length;
   const pdfData = data.pdfCropperData || data.questions || {}; 
   const ansKey = data.testAnswerKey || data.answerKey || {}; 
@@ -2024,6 +2190,20 @@ function launchApp() {
   document.getElementById('file-name-display').textContent = isMergedMode ? '🔀 ' + currentFileName : currentFileName;
   document.getElementById('topbar-section-wrap').title = currentFileName;
   
+  // Show/hide save NISO button — only for local files
+  const saveBtn = document.getElementById('save-niso-btn');
+  if (saveBtn) saveBtn.style.display = isLocalFile ? '' : 'none';
+
+  // Always show PNG bg button once a file is loaded
+  const pngBtn = document.getElementById('png-bg-btn');
+  if (pngBtn) pngBtn.style.display = '';
+
+  // Always show sidebar filter (star filter always available)
+  const sidebarFilter = document.getElementById('sidebar-tag-filter');
+  if (sidebarFilter) sidebarFilter.style.display = '';
+
+  updateTagFilterUI();
+  
   currentSection = 'ALL'; document.getElementById('topbar-section').textContent = 'All Sections';
   
   if(!allQuestions[currentQIdx]) currentQIdx = 0;
@@ -2038,23 +2218,21 @@ function resetApp() {
   for (const url of Object.values(imageCache)) { URL.revokeObjectURL(url); }
   
   imageCache = {}; zipData = null; allQuestions = []; sectionMap = {}; answers = {}; marked = {}; currentFileName = ''; pendingZipFile = null; sessionSeconds = 0; qTimers = {}; currentSessionId = null; isMergedMode = false;
+  qConfig = {}; globalTags = []; activeTagFilter = null; activeStarFilter = null; loadedZipFile = null; isLocalFile = false;
   document.getElementById('file-input').value = '';
   document.getElementById('upload-screen').style.display = 'flex'; document.getElementById('app').style.display = 'none'; document.getElementById('progress-wrap').style.display = 'none'; document.getElementById('loading-text').style.display = 'none'; document.getElementById('progress-bar').style.width = '0%'; document.getElementById('error-msg').style.display = 'none';
   renderRecentSessions();
 }
 
 function toggleImageFit() {
-  isImageFit = !isImageFit; document.getElementById('img-fit-btn').textContent = isImageFit ? '⇕ Scroll Image' : '🔍 Fit Screen';
+  isImageFit = !isImageFit;
+  const btn = document.getElementById('img-fit-btn');
+  if (btn) btn.textContent = isImageFit ? '⇕' : '🔍';
   const area = document.getElementById('main-img-area');
   if (isImageFit) { area.classList.add('fit-mode'); } else { area.classList.remove('fit-mode'); }
 }
 
-function toggleColorize() {
-    isColorize = !isColorize;
-    const btn = document.getElementById('colorize-btn');
-    if(isColorize) btn.classList.add('active'); else btn.classList.remove('active');
-    updateFluidBars();
-}
+// toggleColorize removed
 
 // ── AI PROMPT GENERATOR WITH CLIPBOARD API ──
 async function generateAIPrompt() {
@@ -2092,22 +2270,14 @@ async function generateAIPrompt() {
 }
 
 // ── FLUID PROGRESS BARS ───────────────────────────
-function cycleMode(dir) {
-  modeIdx = (modeIdx + dir + MODES.length) % MODES.length;
-  document.getElementById('mode-label').textContent = MODES[modeIdx];
-  updateFluidBars();
-}
-
 function updateFluidBars() {
   if (document.getElementById('app').style.display === 'none') return;
-  const mode = MODES[modeIdx];
-  
   const sectionQuestions = getSectionQuestions().map(i => allQuestions[i]);
-  applyFluidLogic(sectionQuestions, 'chip-seg-1', 'chip-seg-2', 'chip-seg-3', 'chip-progress-bg', mode, isColorize);
-  applyFluidLogic(allQuestions, 'nav-seg-1', 'nav-seg-2', 'nav-seg-3', 'fluid-nav-bg', mode, isColorize);
+  applyFluidLogic(sectionQuestions, 'chip-seg-1', 'chip-seg-2', 'chip-seg-3', 'chip-progress-bg');
+  applyFluidLogic(allQuestions, 'nav-seg-1', 'nav-seg-2', 'nav-seg-3', 'fluid-nav-bg');
 }
 
-function applyFluidLogic(targetQuestions, id1, id2, id3, parentId, mode, colorize) {
+function applyFluidLogic(targetQuestions, id1, id2, id3, parentId) {
     let total = targetQuestions.length;
     if (total === 0) {
         document.getElementById(id1).style.width = '0%'; document.getElementById(id2).style.width = '0%'; document.getElementById(id3).style.width = '0%';
@@ -2127,29 +2297,11 @@ function applyFluidLogic(targetQuestions, id1, id2, id3, parentId, mode, coloriz
     });
 
     let w1 = 0; let w2 = 0; let w3 = 0;
-    let bg1 = ''; let bg2 = ''; let bg3 = '';
-
-    if (mode === 'Correct Only') {
-        w1 = (correct / total) * 100;
-        bg1 = 'linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.4))';
-    } else if (mode === 'Checked') {
-        if (colorize) {
-            w1 = (correct / total) * 100; w2 = (wrong / total) * 100;
-            bg1 = 'linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.45))';
-            bg2 = 'linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.45))';
-        } else {
-            w1 = (checked / total) * 100; bg1 = 'linear-gradient(90deg, rgba(108,99,255,0.15), rgba(167,139,250,0.3))';
-        }
-    } else if (mode === 'Total') {
-        if (colorize) {
-            w1 = (correct / total) * 100; w2 = (wrong / total) * 100; w3 = ((attempted - checked) / total) * 100;
-            bg1 = 'linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.45))';
-            bg2 = 'linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.45))';
-            bg3 = 'linear-gradient(90deg, rgba(167,139,250,0.2), rgba(167,139,250,0.4))';
-        } else {
-            w1 = (attempted / total) * 100; bg1 = 'linear-gradient(90deg, rgba(108,99,255,0.15), rgba(167,139,250,0.3))';
-        }
-    }
+    // Always Total + Colorize mode
+    w1 = (correct / total) * 100; w2 = (wrong / total) * 100; w3 = ((attempted - checked) / total) * 100;
+    const bg1 = 'linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.45))';
+    const bg2 = 'linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.45))';
+    const bg3 = 'linear-gradient(90deg, rgba(167,139,250,0.2), rgba(167,139,250,0.4))';
 
     document.getElementById(parentId).style.backgroundColor = 'transparent'; 
 
@@ -2244,8 +2396,12 @@ function renderQuestion() {
   void imgArea.offsetWidth; 
   imgArea.classList.add('animate-slide');
 
-  for (const fname of q.images) { if (imageCache[fname]) { const img = document.createElement('img'); img.src = imageCache[fname]; img.className = 'question-img'; imgArea.appendChild(img); hasImg = true; } }
+  for (const fname of q.images) { if (imageCache[fname]) { const img = document.createElement('img'); img.src = imageCache[fname]; img.className = 'question-img'; applyPngBgClass(img); imgArea.appendChild(img); hasImg = true; } }
   if (!hasImg) { imgArea.innerHTML = `<div class="q-img-placeholder">📷 Image not found: <code>${q.images[0]}</code></div>`; }
+
+  renderStars(q);
+  renderAnswerImgBtn(q);
+  renderQTags(q);
 
   renderAnswerArea(q, true); updateScores(); updateFluidBars();
   if(typeof updateMobStats==='function') updateMobStats();
@@ -2327,7 +2483,7 @@ function checkCurrentAnswer() {
 
 // ── SIDEBAR ────────────────────────────────────────────
 function renderSidebar() {
-  const grid = document.getElementById('q-grid'); grid.innerHTML = ''; const indices = getSectionQuestions();
+  const grid = document.getElementById('q-grid'); grid.innerHTML = ''; const indices = getFilteredSectionQuestions();
   let sc = 0; let sw = 0; let sa = 0; let ss = 0; let sm = 0;
 
   if (isMergedMode) {
@@ -2357,7 +2513,11 @@ function renderSidebar() {
           else { dot.classList.add('attempted'); sa++; } 
         } else { ss++; }
         if (marked[q.id]) { dot.classList.add('marked'); sm++; }
-        dot.textContent = q.globalNum; dot.title = `Q${q.globalNum} · ${year} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}`;
+        dot.textContent = q.globalNum; 
+        const cfg = qConfig[q.id] || {};
+        const stars = cfg.stars ? ' · ' + '⭐'.repeat(cfg.stars) : '';
+        const tags = (cfg.tags || []).length ? ' · [' + cfg.tags.join(', ') + ']' : '';
+        dot.title = `Q${q.globalNum} · ${year} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}${stars}${tags}`;
         dot.addEventListener('click', () => goToQuestion(idx)); grid.appendChild(dot);
       }
     }
@@ -2371,7 +2531,11 @@ function renderSidebar() {
         else { dot.classList.add('attempted'); sa++; } 
       } else { ss++; }
       if (marked[q.id]) { dot.classList.add('marked'); sm++; }
-      dot.textContent = q.globalNum; dot.title = `Q${q.globalNum} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}`;
+      dot.textContent = q.globalNum;
+      const dcfg = qConfig[q.id] || {};
+      const dstars = dcfg.stars ? ' · ' + '⭐'.repeat(dcfg.stars) : '';
+      const dtags = (dcfg.tags || []).length ? ' · [' + dcfg.tags.join(', ') + ']' : '';
+      dot.title = `Q${q.globalNum} · ${q.topic} · ${q.type.toUpperCase()}${marked[q.id] ? ' · 🔖 Marked' : ''}${dstars}${dtags}`;
       dot.addEventListener('click', () => goToQuestion(idx)); grid.appendChild(dot);
     }
   }
@@ -2408,6 +2572,287 @@ function updateScores() {
     <span class="stat-hl m" title="Marked">🔖${m}</span>
   `;
   if(typeof updateMobStats==='function') updateMobStats();
+}
+
+// ── STAR RATING ────────────────────────────────────────
+function renderStars(q) {
+  const wrap = document.getElementById('star-rating');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const cfg = qConfig[q.id] || {};
+  const curStars = cfg.stars || 0;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'star-btn' + (i <= curStars ? ' lit' : '');
+    btn.textContent = '⭐';
+    btn.title = `Rate ${i} star${i > 1 ? 's' : ''}`;
+    btn.addEventListener('click', () => setStars(q, i));
+    btn.addEventListener('mouseover', () => {
+      wrap.querySelectorAll('.star-btn').forEach((b, idx) => {
+        b.style.filter = idx < i ? 'none' : 'grayscale(1) opacity(0.4)';
+      });
+    });
+    btn.addEventListener('mouseout', () => renderStars(allQuestions[currentQIdx]));
+    wrap.appendChild(btn);
+  }
+}
+
+function setStars(q, n) {
+  if (!qConfig[q.id]) qConfig[q.id] = {};
+  // toggle off if same
+  qConfig[q.id].stars = (qConfig[q.id].stars === n) ? 0 : n;
+  renderStars(q);
+}
+
+// ── ANSWER IMAGE ───────────────────────────────────────
+function buildAnswerImageNames(q) {
+  const prefix = q.year ? `${q.year}__` : '';
+  return [`${prefix}ANSWER__${q.topic}__--__${q.globalNum}__--__1.png`];
+}
+
+function renderAnswerImgBtn(q) {
+  const btn = document.getElementById('show-answer-img-btn');
+  if (!btn) return;
+  const ansImgs = buildAnswerImageNames(q);
+  const hasAnswer = ansImgs.some(n => imageCache[n]);
+  if (hasAnswer) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = '';
+    btn.onclick = () => showAnswerImg(q);
+  } else {
+    btn.style.opacity = '0.3';
+    btn.style.pointerEvents = 'none';
+    btn.onclick = null;
+  }
+}
+
+function showAnswerImg(q) {
+  const modal = document.getElementById('answer-img-modal');
+  const img = document.getElementById('answer-img-el');
+  const label = document.getElementById('answer-img-label');
+  const ansImgs = buildAnswerImageNames(q);
+  const src = ansImgs.map(n => imageCache[n]).find(Boolean);
+  if (!src) return;
+  img.src = src;
+  img.className = '';
+  applyPngBgClass(img);
+  label.textContent = `Q${q.globalNum} — Answer`;
+  modal.classList.add('show');
+}
+
+function closeAnswerImgModal() {
+  document.getElementById('answer-img-modal').classList.remove('show');
+}
+
+// ── PNG BACKGROUND TOGGLE ─────────────────────────────
+const PNG_BG_MODES = ['none', 'white', 'black'];
+const PNG_BG_LABELS = { none: '⬜ PNG Bg: None', white: '☀️ PNG Bg: White', black: '🌑 PNG Bg: Black' };
+
+function cyclePngBg() {
+  const idx = PNG_BG_MODES.indexOf(pngBgMode);
+  pngBgMode = PNG_BG_MODES[(idx + 1) % PNG_BG_MODES.length];
+  const btn = document.getElementById('png-bg-btn');
+  if (btn) btn.textContent = PNG_BG_LABELS[pngBgMode];
+  // Re-apply to all question images
+  document.querySelectorAll('.question-img').forEach(applyPngBgClass);
+  // Also update answer modal image if open
+  const modalImg = document.getElementById('answer-img-el');
+  if (modalImg) applyPngBgClass(modalImg);
+}
+
+function applyPngBgClass(img) {
+  img.classList.remove('png-bg-white', 'png-bg-black');
+  if (pngBgMode === 'white') img.classList.add('png-bg-white');
+  else if (pngBgMode === 'black') img.classList.add('png-bg-black');
+}
+
+// ── TAGS ───────────────────────────────────────────────
+function renderQTags(q) {
+  const bubblesEl = document.getElementById('float-tag-bubbles');
+  if (!bubblesEl) return;
+  bubblesEl.innerHTML = '';
+  const cfg = qConfig[q.id] || {};
+  const tags = cfg.tags || [];
+  for (const tag of tags) {
+    const chip = document.createElement('span');
+    chip.className = 'float-tag-chip';
+    chip.innerHTML = `${tag}<span class="tag-remove" title="Remove tag">×</span>`;
+    chip.querySelector('.tag-remove').addEventListener('click', () => removeTag(q, tag));
+    bubblesEl.appendChild(chip);
+  }
+}
+
+function addTag(q, tagName) {
+  tagName = tagName.trim();
+  if (!tagName) return;
+  if (!qConfig[q.id]) qConfig[q.id] = {};
+  if (!qConfig[q.id].tags) qConfig[q.id].tags = [];
+  if (qConfig[q.id].tags.includes(tagName)) return;
+  qConfig[q.id].tags.push(tagName);
+  if (!globalTags.includes(tagName)) { globalTags.push(tagName); }
+  renderQTags(q);
+  updateTagFilterUI();
+  saveSession();
+}
+
+function removeTag(q, tagName) {
+  if (!qConfig[q.id] || !qConfig[q.id].tags) return;
+  qConfig[q.id].tags = qConfig[q.id].tags.filter(t => t !== tagName);
+  // Prune from globalTags if no question has it anymore
+  const stillUsed = allQuestions.some(qq => (qConfig[qq.id]?.tags || []).includes(tagName));
+  if (!stillUsed) {
+    globalTags = globalTags.filter(t => t !== tagName);
+    if (activeTagFilter === tagName) activeTagFilter = null;
+  }
+  renderQTags(q);
+  updateTagFilterUI();
+  renderSidebar();
+  saveSession();
+}
+
+function setupTagInput() {
+  const input = document.getElementById('tag-text-input');
+  const sugg = document.getElementById('tag-suggestions');
+  if (!input || !sugg) return;
+
+  input.addEventListener('keydown', e => {
+    const q = allQuestions[currentQIdx]; if (!q) return;
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(q, input.value);
+      input.value = '';
+      sugg.style.display = 'none';
+    } else if (e.key === 'Escape') {
+      sugg.style.display = 'none';
+    }
+  });
+
+  input.addEventListener('input', () => {
+    const q = allQuestions[currentQIdx]; if (!q) return;
+    const val = input.value.trim().toLowerCase();
+    if (!val) { sugg.style.display = 'none'; return; }
+    const cfg = qConfig[q.id] || {};
+    const existing = cfg.tags || [];
+    const matches = globalTags.filter(t => t.toLowerCase().includes(val) && !existing.includes(t));
+    if (!matches.length) { sugg.style.display = 'none'; return; }
+    sugg.innerHTML = '';
+    for (const m of matches.slice(0, 8)) {
+      const div = document.createElement('div');
+      div.className = 'tag-suggestion-item';
+      div.textContent = m;
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        addTag(allQuestions[currentQIdx], m);
+        input.value = '';
+        sugg.style.display = 'none';
+      });
+      sugg.appendChild(div);
+    }
+    sugg.style.display = 'block';
+  });
+
+  input.addEventListener('blur', () => setTimeout(() => { sugg.style.display = 'none'; }, 150));
+  
+  // Click on wrap focuses input
+  document.getElementById('tag-input-wrap')?.addEventListener('click', () => input.focus());
+}
+
+function setStarFilter(n) {
+  activeStarFilter = n;
+  // Update chip active states
+  document.getElementById('filter-star-all')?.classList.toggle('active', n === null);
+  document.querySelectorAll('#filter-star-chips .filter-tag-chip:not(#filter-star-all)').forEach((chip, i) => {
+    chip.classList.toggle('active', n === i + 1);
+  });
+  renderSidebar();
+}
+
+// ── TAG FILTER IN SIDEBAR ─────────────────────────────
+function updateTagFilterUI() {
+  const container = document.getElementById('sidebar-tag-filter');
+  const chipsEl = document.getElementById('filter-tag-chips');
+  if (!container || !chipsEl) return;
+
+  // Always show (for star filter), hide tag section if no tags
+  container.style.display = '';
+  chipsEl.innerHTML = '';
+
+  if (globalTags.length > 0) {
+    // "All" chip
+    const allChip = document.createElement('div');
+    allChip.className = 'filter-tag-chip' + (!activeTagFilter ? ' active' : '');
+    allChip.textContent = 'All';
+    allChip.addEventListener('click', () => { activeTagFilter = null; updateTagFilterUI(); renderSidebar(); });
+    chipsEl.appendChild(allChip);
+
+    for (const tag of globalTags) {
+      const chip = document.createElement('div');
+      chip.className = 'filter-tag-chip' + (activeTagFilter === tag ? ' active' : '');
+      chip.textContent = tag;
+      chip.addEventListener('click', () => {
+        activeTagFilter = (activeTagFilter === tag) ? null : tag;
+        updateTagFilterUI(); renderSidebar();
+      });
+      chipsEl.appendChild(chip);
+    }
+  } else {
+    chipsEl.innerHTML = '<span style="font-family:var(--font-num);font-size:11px;color:var(--text2);">No tags yet</span>';
+  }
+}
+
+function getFilteredSectionQuestions() {
+  const base = getSectionQuestions();
+  return base.filter(idx => {
+    const q = allQuestions[idx];
+    const cfg = qConfig[q.id] || {};
+    if (activeTagFilter && !(cfg.tags || []).includes(activeTagFilter)) return false;
+    if (activeStarFilter !== null && (cfg.stars || 0) !== activeStarFilter) return false;
+    return true;
+  });
+}
+
+// ── SAVE NISO FILE ─────────────────────────────────────
+async function saveNisoFile() {
+  if (!loadedZipFile || !zipData) { showToast('wrong', '❌ No local file loaded'); return; }
+  const btn = document.getElementById('save-niso-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving…';
+  try {
+    // Read original zip
+    const origZip = await JSZip.loadAsync(loadedZipFile);
+    // Read data.json
+    const jf = origZip.file('data.json');
+    if (!jf) throw new Error('No data.json in zip');
+    const data = JSON.parse(await jf.async('string'));
+
+    // Inject nisoConfig
+    data.nisoConfig = { tags: globalTags, qConfig: qConfig };
+
+    // Write updated data.json back
+    origZip.file('data.json', JSON.stringify(data, null, 2));
+
+    // Generate blob
+    const blob = await origZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }, meta => {
+      btn.textContent = `⏳ ${meta.percent.toFixed(0)}%`;
+    });
+
+    // Download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentFileName + '.niso';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('correct', '💾 NISO saved & downloaded!');
+  } catch(err) {
+    showToast('wrong', '❌ Save failed: ' + err.message);
+    console.error(err);
+  }
+  btn.disabled = false;
+  btn.textContent = '💾 Save NISO';
 }
 
 // ── TOAST ──────────────────────────────────────────────
@@ -2556,6 +3001,7 @@ function updateMobStats() {
 
 // ── INIT ───────────────────────────────────────────────
 renderRecentSessions();
+setupTagInput();
 
 </script>
 </body>
