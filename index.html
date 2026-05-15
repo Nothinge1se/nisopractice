@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NISOPRACTICE – JEE CBT Practice</title>
+<title>NPRAQ – JEE CBT Practice</title>
 <link rel="icon" type="image/ico" href="favicon.ico">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
@@ -796,11 +796,21 @@
     position: absolute; z-index: 20; bottom: 14px; left: 14px;
     display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
     max-width: 240px;
+    /* grow upward from bottom, limited by the image area itself */
+    max-height: calc(100% - 28px);
+    overflow: visible;
+    pointer-events: none; /* let clicks pass through empty space */
   }
+  #float-tag-area > * { pointer-events: auto; }
   #float-tag-bubbles {
     display: flex; flex-direction: column-reverse; gap: 6px; align-items: flex-start;
-    max-height: 160px; overflow: hidden;
+    overflow-y: auto; overflow-x: hidden;
+    /* no max-height cap — fills all available space upward */
+    flex: 1 1 auto; min-height: 0;
+    padding-right: 2px;
   }
+  #float-tag-bubbles::-webkit-scrollbar { width: 4px; }
+  #float-tag-bubbles::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   .float-tag-chip {
     display: inline-flex; align-items: center; gap: 5px;
     font-family: var(--font-num); font-size: 12px; font-weight: 700;
@@ -1239,7 +1249,7 @@
     <div class="upload-content-wrapper">
       
       <div class="upload-header">
-        <div class="logo">NISOPRACTICE</div>
+        <div class="logo">NPRAQ</div>
         <div class="tagline" id="dynamic-tagline">// Shinchanzz, get some bitches</div>
       </div>
 
@@ -1339,7 +1349,7 @@
   <div id="app">
 
     <div class="topbar">
-      <div class="topbar-logo">NISOPRACTICE</div>
+      <div class="topbar-logo">NPRAQ</div>
       
       <div class="topbar-section-wrap" id="topbar-section-wrap" title="Current File">
         <div class="chip-progress-bg" id="chip-progress-bg">
@@ -1400,7 +1410,6 @@
           <option value="summer">☁️ Summer Monsoon</option>
         </select>
         
-        <button class="tb-btn png-bg-btn" id="png-bg-btn" onclick="cyclePngBg()" title="Toggle PNG background" style="display:none;">⬜ PNG Bg</button>
         <button class="tb-btn save-niso-btn" id="save-niso-btn" onclick="saveNisoFile()" title="Save updated data.json back into the .niso file and download">💾 Save NISO</button>
         <button class="tb-btn" onclick="resetApp()">↑ New ZIP</button>
         <button class="mob-nav-btn" onclick="openMobDrawer()" title="Question Navigator">☰</button>
@@ -1424,6 +1433,7 @@
 
           <div class="header-right">
             <button class="hdr-btn" id="progress-toggle-btn" onclick="toggleProgressBar()" title="Toggle progress bar on/off" style="min-width:120px;">📊 Bar: On</button>
+            <button class="hdr-btn png-bg-btn" id="png-bg-btn" onclick="cyclePngBg()" title="Toggle question image background" style="display:none;">☀️ Que Bg: White</button>
 
             <button class="hdr-btn ai-btn" onclick="generateAIPrompt()">
               🤖 Ask AI Prompt
@@ -1700,7 +1710,7 @@ async function loadOnlineTest(fileName) {
   showProgress(10, `Checking local cache for ${fileName}...`);
   
   try {
-    // 1. Open our dedicated NISOPRACTICE storage vault
+    // 1. Open our dedicated NPRAQ storage vault
     const cache = await caches.open('nisopractice-tests-v1');
     
     // 2. Check if we already downloaded this exact file before
@@ -1826,7 +1836,7 @@ let qConfig        = {};   // { [qid]: { stars: 0-5, tags: [] } }
 let globalTags     = [];   // all unique tags across all questions
 let activeTagFilter = null; // null = no filter, 'tagname' = filter by tag
 let activeStarFilter = null; // null = no filter, 1-5 = filter by stars
-let pngBgMode      = 'none'; // 'none' | 'white' | 'black'
+let pngBgMode      = 'white'; // 'none' | 'white' | 'black'
 let isLocalFile    = false;  // true if loaded from local file (can write)
 let loadedZipFile  = null;   // the original File object, for save NISO
 
@@ -2196,7 +2206,7 @@ function launchApp() {
 
   // Always show PNG bg button once a file is loaded
   const pngBtn = document.getElementById('png-bg-btn');
-  if (pngBtn) pngBtn.style.display = '';
+  if (pngBtn) { pngBtn.style.display = ''; pngBtn.textContent = PNG_BG_LABELS[pngBgMode]; }
 
   // Always show sidebar filter (star filter always available)
   const sidebarFilter = document.getElementById('sidebar-tag-filter');
@@ -2646,7 +2656,7 @@ function closeAnswerImgModal() {
 
 // ── PNG BACKGROUND TOGGLE ─────────────────────────────
 const PNG_BG_MODES = ['none', 'white', 'black'];
-const PNG_BG_LABELS = { none: '⬜ PNG Bg: None', white: '☀️ PNG Bg: White', black: '🌑 PNG Bg: Black' };
+const PNG_BG_LABELS = { none: '🔲 Que Bg: None', white: '☀️ Que Bg: White', black: '🌑 Que Bg: Black' };
 
 function cyclePngBg() {
   const idx = PNG_BG_MODES.indexOf(pngBgMode);
